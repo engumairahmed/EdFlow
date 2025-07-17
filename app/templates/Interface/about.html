@@ -1,0 +1,112 @@
+{% extends "Interface/base.html" %} {% block title %}EdFlow - About{% endblock
+%} {% block head %}
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap"
+  rel="stylesheet"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/about.css') }}"
+/>
+{% endblock %} {% block content %}
+
+<section class="about-hero py-5">
+  <div class="container">
+    <div class="row text-center mb-5">
+      <div class="col-12">
+        <h2 class="section-title">About EdFlow</h2>
+      </div>
+    </div>
+
+    <div class="row gy-3 gy-md-4 gy-lg-0 align-items-lg-center">
+      <div class="col-12 col-lg-6">
+        <img
+          src="{{ url_for('static', filename='Images/Aboutus.png') }}"
+          alt="About EdFlow"
+          class="img-fluid"
+        />
+      </div>
+      <div class="col-12 col-lg-6">
+        <p class="lead">
+          EdFlow was founded with a mission to help educational institutions
+          <span class="highlight">harness the power of big data</span> and
+          <span class="highlight">AI-powered predictive analytics</span>
+          to solve real-world challenges — from improving
+          <span class="highlight">student retention</span> and engagement, to
+          optimizing resources, automating reporting, and delivering truly
+          <span class="highlight">personalized learning experiences</span>.
+          EdFlow empowers teachers and administrators with
+          <span class="highlight">real-time dashboards</span>, smart alerts, and
+          secure access, enabling data-driven decisions that maximize student
+          success.
+        </p>
+        <ul class="list-unstyled">
+          <li class="d-flex align-items-start mb-3">
+            <i class="fas fa-check-circle text-theme me-3 fs-4"></i>
+            <span
+              >Empowering decision-making through real-time data insights</span
+            >
+          </li>
+          <li class="d-flex align-items-start mb-3">
+            <i class="fas fa-chart-line text-theme me-3 fs-4"></i>
+            <span
+              >Predictive models to identify trends, risks, and
+              opportunities</span
+            >
+          </li>
+          <li class="d-flex align-items-start mb-3">
+            <i class="fas fa-users-cog text-theme me-3 fs-4"></i>
+            <span
+              >Secure, role-based access for students, teachers & admins</span
+            >
+          </li>
+          <li class="d-flex align-items-start mb-3">
+            <i class="fas fa-database text-theme me-3 fs-4"></i>
+            <span>Scalable storage for massive education data</span>
+          </li>
+          <li class="d-flex align-items-start mb-3">
+            <i class="fas fa-bell text-theme me-3 fs-4"></i>
+            <span>Real-time alerts to improve retention & success</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 mission-vision-values">
+  <div class="container">
+    <div class="row text-center">
+      <!-- Mission -->
+      <div class="col-md-4 mb-4 mb-md-0">
+        <i class="fas fa-bullseye fa-3x icon-theme mb-3"></i>
+        <h4 class="fw-bold text-theme">Our Mission</h4>
+        <p>
+          Empower institutions to use big data & AI to solve real challenges and
+          boost student success.
+        </p>
+      </div>
+
+      <div class="col-md-4 mb-4 mb-md-0">
+        <i class="fas fa-lightbulb fa-3x icon-theme mb-3"></i>
+        <h4 class="fw-bold text-theme">Our Vision</h4>
+        <p>
+          Become the trusted partner for predictive learning solutions
+          worldwide.
+        </p>
+      </div>
+
+      <div class="col-md-4">
+        <i class="fas fa-hand-holding-heart fa-3x icon-theme mb-3"></i>
+        <h4 class="fw-bold text-theme">Our Values</h4>
+        <p>
+          Innovation, integrity, and impact drive everything we build for the
+          future of education.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

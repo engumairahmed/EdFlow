@@ -1,0 +1,166 @@
+{% extends "Interface/base.html" %} {% block title %}EdFlow - Home{% endblock %}
+{% block head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/home.css') }}"
+/>
+{% endblock %} {% block content %}
+<section class="hero">
+  <div class="hero-icons">
+    <i class="fas fa-chart-line"></i>
+    <i class="fas fa-book"></i>
+    <i class="fas fa-chart-pie"></i>
+    <i class="fas fa-graduation-cap"></i>
+    <i class="fas fa-lightbulb"></i>
+  </div>
+
+  <div class="hero-content">
+    <h1>Unlock Tomorrow’s Education Today</h1>
+    <p>
+      Experience the future of learning with AI-powered insights, real-time
+      student analytics, and smart predictions. EdFlow helps institutions unlock
+      hidden patterns, boost student success, and deliver truly personalized
+      education at scale — all in one secure, intelligent platform.
+    </p>
+    <div class="hero-buttons">
+      <a
+        href="{{ url_for('auth.login') }}"
+        class="btn btn-light px-4 py-2 me-2 border border-2"
+        >Get Started</a
+      >
+      <a
+        href="{{ url_for('interface.about') }}"
+        class="btn btn-outline-light px-4 py-2 me-2 border border-2"
+        >Learn More</a
+      >
+    </div>
+  </div>
+</section>
+
+<!-- Feature Card -->
+<section id="features" class="py-5 features-section bg-white">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-12 col-md-10 col-lg-8 col-xl-7 text-center">
+        <h2 class="mb-4 display-5 text-theme">Features</h2>
+        <p class="text-secondary mb-0">
+          Explore how EdFlow empowers institutions with smart, data-driven tools
+          to transform education and maximize student success.
+        </p>
+      </div>
+    </div>
+    <div class="row gy-4 justify-content-center">
+      <div class="col-11 col-sm-6 col-lg-3">
+        <div class="feature-card p-4 text-center h-100">
+          <i class="fas fa-chart-line fa-2x icon-purple mb-3"></i>
+          <h5 class="fw-bold mb-2 text-black">Smart Analytics</h5>
+          <p class="text-muted mb-0">
+            Powerful dashboards that deliver real-time insights for better
+            academic decisions.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-11 col-sm-6 col-lg-3">
+        <div class="feature-card p-4 text-center h-100">
+          <i class="fas fa-brain fa-2x icon-purple mb-3"></i>
+          <h5 class="fw-bold mb-2 text-black">AI Predictions</h5>
+          <p class="text-muted mb-0">
+            Predict student performance and outcomes to improve retention and
+            engagement.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-11 col-sm-6 col-lg-3">
+        <div class="feature-card p-4 text-center h-100">
+          <i class="fas fa-user-shield fa-2x icon-purple mb-3"></i>
+          <h5 class="fw-bold mb-2 text-black">Secure Access</h5>
+          <p class="text-muted mb-0">
+            Role-based controls keep data safe while ensuring the right people
+            get the right insights.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-11 col-sm-6 col-lg-3">
+        <div class="feature-card p-4 text-center h-100">
+          <i class="fas fa-bell fa-2x icon-purple mb-3"></i>
+          <h5 class="fw-bold mb-2 text-black">Smart Alerts</h5>
+          <p class="text-muted mb-0">
+            Get instant notifications about trends, risks, and student success
+            factors.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Services Section -->
+<section id="services" class="py-5 service-section">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-12 col-md-10 col-lg-8 text-center">
+        <h2 class="display-5 fw-bold text-theme mb-4">Our Services</h2>
+        <p class="text-secondary mb-0">
+          We empower institutions with trusted services to unlock the full
+          potential of big data and predictive analytics in education.
+        </p>
+      </div>
+    </div>
+
+    <div class="row gy-4">
+      <div class="col-12 col-md-6">
+        <div class="d-flex align-items-start p-3 rounded shadow-sm bg-white">
+          <i class="fas fa-database fa-2x text-theme me-3"></i>
+          <div>
+            <h5 class="fw-bold mb-1 text-black">Data Integration</h5>
+            <p class="text-muted mb-0">
+              Seamlessly collect, store & process education data at scale.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <div class="d-flex align-items-start p-3 rounded shadow-sm bg-white">
+          <i class="fas fa-chart-line fa-2x text-theme me-3"></i>
+          <div>
+            <h5 class="fw-bold mb-1 text-black">Predictive Insights</h5>
+            <p class="text-muted mb-0">
+              Get clear, actionable forecasts for student retention &
+              performance.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <div class="d-flex align-items-start p-3 rounded shadow-sm bg-white">
+          <i class="fas fa-tachometer-alt fa-2x text-theme me-3"></i>
+          <div>
+            <h5 class="fw-bold mb-1 text-black">Custom Dashboards</h5>
+            <p class="text-muted mb-0">
+              Role-based dashboards for teachers, admins & students.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <div class="d-flex align-items-start p-3 rounded shadow-sm bg-white">
+          <i class="fas fa-headset fa-2x text-theme me-3"></i>
+          <div>
+            <h5 class="fw-bold mb-1 text-black">Dedicated Support</h5>
+            <p class="text-muted mb-0">
+              Expert help, training & on-demand assistance.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,262 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Predict-EdFlow{% endblock %}
+
+{% block page_heading %}Predict Student Outcome{% endblock %}
+
+{% block content %}
+<div class="prediction-container">
+    <div class="prediction-input-card dashboard-card animated-slide-in-up">
+        <h2><i class="fas fa-edit icon-purple"></i> Enter Student Details</h2>
+        <p>Input the student's academic and personal information to get a prediction of their future outcome. Please fill in all the required fields accurately.</p>
+
+        <form id="predictionForm" class="prediction-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="studentName">Student Name:</label>
+                    <input type="text" id="studentName" name="studentName" placeholder="e.g., Ali Khan" required>
+                </div>
+                <div class="form-group">
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" name="age" min="15" max="30" placeholder="e.g., 18" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="gender">Gender:</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="gradeLevel">Grade Level:</label>
+                    <input type="text" id="gradeLevel" name="gradeLevel" placeholder="e.g., 10th Grade / Senior" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="gpa">Current GPA (0.0-4.0):</label>
+                    <input type="number" id="gpa" name="gpa" step="0.01" min="0" max="4" placeholder="e.g., 3.5" required>
+                </div>
+                <div class="form-group">
+                    <label for="attendance">Attendance Rate (%):</label>
+                    <input type="number" id="attendance" name="attendance" min="0" max="100" placeholder="e.g., 95" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="extracurriculars">Extracurricular Activities:</label>
+                    <select id="extracurriculars" name="extracurriculars" required>
+                        <option value="">Select Option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+                 <div class="form-group">
+                    <label for="supportNeeded">Support Needed:</label>
+                    <select id="supportNeeded" name="supportNeeded" required>
+                        <option value="">Select Option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="familySupport">Family Support Level:</label>
+                    <select id="familySupport" name="familySupport" required>
+                        <option value="">Select Level</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="studyHours">Weekly Study Hours:</label>
+                    <input type="number" id="studyHours" name="studyHours" min="0" placeholder="e.g., 15" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary predict-btn"><i class="fas fa-flask"></i> Predict Outcome</button>
+        </form>
+    </div>
+
+    <div id="predictionResults" class="prediction-results-card dashboard-card animated-slide-in-up delay-1" style="display: none;">
+        <h2><i class="fas fa-chart-pie icon-purple"></i> Prediction Results</h2>
+        <div class="result-details">
+            <p><strong>Predicted Outcome:</strong> <span id="predictedOutcome" class="outcome-label"></span></p>
+            <p><strong>Confidence Level:</strong> <span id="confidenceLevel"></span></p>
+        </div>
+        
+        <div class="prediction-chart-container">
+            <canvas id="predictionChart"></canvas>
+        </div>
+
+        <div class="recommendations-section">
+            <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
+            <p id="recommendationsText">Based on the prediction, personalized recommendations will appear here to help improve student outcomes.</p>
+        </div>
+    </div>
+
+    <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+        <i class="fas fa-spinner fa-spin"></i> Predicting...
+    </div>
+
+    <div id="messageArea" class="message-area"></div>
+
+</div>
+
+
+                    <!-- JavaScript for Prediction Page Logic  -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const predictionForm = document.getElementById('predictionForm');
+    const predictionResults = document.getElementById('predictionResults');
+    const predictedOutcomeSpan = document.getElementById('predictedOutcome');
+    const confidenceLevelSpan = document.getElementById('confidenceLevel');
+    const recommendationsText = document.getElementById('recommendationsText');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const messageArea = document.getElementById('messageArea');
+    let predictionChartInstance = null; // To store Chart.js instance
+
+    // Function to display messages (success/error)
+    function displayMessage(message, type) {
+        messageArea.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        setTimeout(() => {
+            messageArea.innerHTML = ''; // Clear message after some time
+        }, 5000);
+    }
+
+    // Function to render/update the Chart.js pie chart
+    function updatePredictionChart(data) {
+        const ctx = document.getElementById('predictionChart').getContext('2d');
+
+        // Destroy existing chart if it exists
+        if (predictionChartInstance) {
+            predictionChartInstance.destroy();
+        }
+
+        const labels = Object.keys(data);
+        const values = Object.values(data);
+        const backgroundColors = [
+            'rgba(75, 192, 192, 0.7)', // Success/High
+            'rgba(255, 99, 132, 0.7)', // Failure/Low
+            'rgba(255, 205, 86, 0.7)'  // Medium/Neutral
+        ];
+        const borderColors = [
+            'rgba(75, 192, 192, 1)',
+            'rgba(255, 99, 132, 1)',
+            'rgba(255, 205, 86, 1)'
+        ];
+
+        predictionChartInstance = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: backgroundColors.slice(0, labels.length),
+                    borderColor: borderColors.slice(0, labels.length),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: '#4c4c4c', // Match text-color
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed + '%'; // Assuming values are percentages
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+                                // Handle form submission
+                                
+
+    predictionForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Prevent default form submission
+
+        loadingIndicator.style.display = 'block';
+        messageArea.innerHTML = ''; // Clear previous messages
+        predictionResults.style.display = 'none'; // Hide results until new prediction
+
+        const formData = new FormData(predictionForm);
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        try {
+            // Replace with your actual Flask prediction API endpoint
+            const response = await fetch('/api/predict', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                predictedOutcomeSpan.textContent = result.predicted_outcome;
+                confidenceLevelSpan.textContent = `${(result.confidence * 100).toFixed(2)}%`; // Format as percentage
+                recommendationsText.textContent = result.recommendations || 'No specific recommendations at this time.';
+
+                // Assign class based on outcome for styling
+                predictedOutcomeSpan.className = 'outcome-label ' + 
+                    (result.predicted_outcome === 'Success' ? 'outcome-success' : 
+                    (result.predicted_outcome === 'At Risk' ? 'outcome-at-risk' : 'outcome-neutral'));
+
+                // Example chart data structure (replace with actual model output)
+                // This assumes your API returns probabilities for different outcomes
+                const chartData = {
+                    'Success': (result.probabilities && result.probabilities.Success) ? (result.probabilities.Success * 100).toFixed(2) : 0,
+                    'At Risk': (result.probabilities && result.probabilities['At Risk']) ? (result.probabilities['At Risk'] * 100).toFixed(2) : 0,
+                    'Neutral': (result.probabilities && result.probabilities.Neutral) ? (result.probabilities.Neutral * 100).toFixed(2) : 0
+                };
+                updatePredictionChart(chartData);
+
+                predictionResults.style.display = 'block';
+                displayMessage('Prediction successful!', 'success');
+            } else {
+                displayMessage(result.message || 'An error occurred during prediction.', 'danger');
+            }
+        } catch (error) {
+            console.error('Prediction request failed:', error);
+            displayMessage('Network error or server issue. Please try again.', 'danger');
+        } finally {
+            loadingIndicator.style.display = 'none';
+        }
+    });
+
+    // Initial load animations
+    document.addEventListener('DOMContentLoaded', () => {
+        // Trigger animations for cards
+        document.querySelector('.prediction-input-card').classList.add('animated-slide-in-up');
+        // predictionResults will be shown on successful prediction
+    });
+</script>
+{% endblock %}

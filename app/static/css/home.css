@@ -1,0 +1,129 @@
+body {
+  background: linear-gradient(135deg, #1a012e, #3c0560);
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+.hero {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.hero-icons i {
+  position: absolute;
+  font-size: 110px;
+  color: rgba(255, 255, 255, 0.115);
+}
+
+.hero-icons i:nth-child(1) {
+  top: 20%;
+  left: 5%;
+}
+.hero-icons i:nth-child(2) {
+  top: 20%;
+  right: 5%;
+}
+.hero-icons i:nth-child(3) {
+  bottom: 15%;
+  left: 10%;
+}
+.hero-icons i:nth-child(4) {
+  bottom: 10%;
+  right: 15%;
+}
+.hero-icons i:nth-child(5) {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.hero-content p {
+  font-size: 1.4rem;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto 30px auto;
+}
+
+.hero-buttons .btn-light {
+  color: #8004d9;
+  font-weight: bolder;
+}
+
+.hero-buttons .btn-outline-light {
+  font-weight: bolder;
+}
+
+.hero-buttons .btn-light:hover {
+  background: #8004d9;
+  color: #fff;
+  transition: 0.6s all ease;
+}
+
+.hero-buttons .btn-outline-light:hover {
+  background: #fff;
+  transition: 0.6s all ease;
+}
+
+.text-theme {
+  color: #280342;
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.text-secondary {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.feature-card {
+  background-color: #fff; 
+  border-radius: 12px;
+  border: 2px solid #eee;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.26);
+  border: 2px solid #a363d9;
+}
+
+.feature-card p {
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+.icon-purple {
+  color: #470079;
+}
+.service-section h2 {
+  color: #fff;
+}
+
+:target::before {
+  content: "";
+  display: block;
+  height: 42px;
+  margin-top: -45px;
+}

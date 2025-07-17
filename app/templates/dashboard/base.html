@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EdFlow-Dashboard{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Montserrat:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Dashboard Logo"
+                    class="dashboard-logo">
+                <h3>EdFlow</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('dashboard.dashboard_view') }}"
+                        class="{% if request.endpoint == 'dashboard.dashboard_view' %}active{% endif %}"><i class="fas fa-home"></i> Home</a>
+                </li>
+                <li><a href="{{ url_for('dashboard.upload_data') }}"
+                        class="{% if request.endpoint == 'dashboard.upload_data' %}active{% endif %}"><i
+                            class="fas fa-cloud-upload-alt"></i> Upload Data</a></li>
+                <li><a href="{{ url_for('dashboard.predict_form') }}"
+                        class="{% if request.endpoint == 'dashboard.predict_form' %}active{% endif %}"><i class="fas fa-brain"></i>
+                        Prediction</a></li>
+                <li><a href="{{ url_for('dashboard.analytics') }}"
+                        class="{% if request.endpoint == 'dashboard.analytics' %}active{% endif %}"><i
+                            class="fas fa-chart-line"></i> Analytics</a></li>
+                <li><a href="{{ url_for('dashboard.dataset') }}"
+                        class="{% if request.endpoint == 'dashboard.dataset' %}active{% endif %}"><i class="fas fa-database"></i>
+                        Dataset</a></li>
+                <!-- <li><a href="{{ url_for('dashboard.upload_data') }}" class="{% if request.endpoint == 'about_project' %}active{% endif %}"><i class="fas fa-info-circle"></i> About Project</a></li> -->
+                <li><a href="{{ url_for('auth.logout') }}"
+                        class="{% if request.endpoint == 'logout' %}active{% endif %}"><i
+                            class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <header class="main-header">
+                <div class="hamburger-menu" id="hamburger">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <h1>{% block page_heading %}{% endblock %}</h1>
+                <div class="header-right">
+                    <span class="header-icon-wrapper"><i class="fas fa-bell"></i><span class="badge">3</span></span>
+                    <span class="header-icon-wrapper"><i class="fas fa-user-circle"></i></span>
+                </div>
+            </header>
+            <div class="content-area">
+                <h1>{{request.endpoint}}</h1>
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="toast {{ category }}">
+            <span>{{ message }}</span>
+            <button class="toast-close">&times;</button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <script>
+
+        // JavaScript for sidebar toggle
+
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content');  // Get main content area
+
+        hamburger.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+
+        });
+
+        // Close sidebar when a menu item is clicked (on mobile)
+        sidebar.querySelectorAll('.sidebar-menu a').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
+
+        // Optional: Close sidebar if clicked outside (for mobile overlay)
+        mainContent.addEventListener('click', (event) => {
+            if (sidebar.classList.contains('active') && !sidebar.contains(event.target) && !hamburger.contains(event.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const closeButtons = document.querySelectorAll('.toast-close');
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    this.parentElement.style.display = 'none';
+                });
+            });
+
+            // Auto-hide after 5 seconds (optional)
+            setTimeout(() => {
+                document.querySelectorAll('.toast').forEach(toast => {
+                    toast.style.display = 'none';
+                });
+            }, 36000);
+        });
+    </script>
+</body>
+
+</html>

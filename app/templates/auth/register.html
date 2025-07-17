@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Register | EdFlow</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+
+<body
+  style="margin: 0; font-family: 'Segoe UI', sans-serif; background: linear-gradient(to right, #40006B, #1f9ba5); color: white;">
+
+  <div class="container-fluid min-vh-100 d-flex align-items-center" style="padding: 0;">
+    <div class="row w-100 flex-column flex-lg-row justify-content-center align-items-center">
+
+      <!-- Image Section -->
+      <div class="col-lg-6 order-1 order-lg-2 d-flex justify-content-center align-items-center p-4"
+        style="text-align: center;">
+        <img src="/static/signup-image.png" alt="Education Image" class="img-fluid"
+          style="max-height: 665px; border-radius: 20px; width: 100%; max-width: 90%;">
+      </div>
+
+      <!-- Form Section -->
+      <div class="col-lg-5 order-2 order-lg-1 d-flex flex-column justify-content-center p-4 text-white"
+        style="text-align: center;">
+        <h1 class="fw-bold mb-2" style="font-size: 3rem; ">Create Account</h1>
+        <p class="mb-4" style="font-size: 1.2rem;">Smart choices. Bright future.<br>Create your account today.</p>
+
+        <div class="mx-auto shadow"
+          style="width: 100%; max-width: 400px; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(12px); border-radius: 20px; padding: 30px;">
+
+          <!-- Flash Messages -->
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+          {% endfor %}
+          {% endif %}
+          {% endwith %}
+
+          <!-- Register Form -->
+          <form method="POST" action="/auth/register">
+            <div class="mb-3 text-start">
+              <label for="username" class="form-label text-white">Username</label>
+              <input type="text" name="username" id="username" class="form-control"
+                style="background-color: transparent; border: none; border-bottom: 1px solid #ccc; border-radius: 0; color: white;"
+                required>
+            </div>
+
+            <div class="mb-3 text-start">
+              <label for="email" class="form-label text-white">Email</label>
+              <input type="email" name="email" id="email" class="form-control"
+                style="background-color: transparent; border: none; border-bottom: 1px solid #ccc; border-radius: 0; color: white;"
+                required>
+            </div>
+
+            <div class="mb-3 text-start">
+              <label for="password" class="form-label text-white">Password</label>
+              <div class="input-group">
+                <input type="password" name="password" id="password" class="form-control"
+                  style="background-color: transparent; border: none; border-bottom: 1px solid #ccc; border-radius: 0; color: white;"
+                  required>
+                <span class="input-group-text bg-transparent border-0 text-white" style="cursor: pointer;"
+                  onclick="togglePassword()">
+                  <i class="bi bi-eye" id="toggleIcon"></i>
+                </span>
+              </div>
+            </div>
+
+            <div class="mb-3 text-start">
+              <label for="role" class="form-label text-white">Role</label>
+              <select name="role" id="role" class="form-select"
+                style="background-color: transparent; border: none; border-bottom: 1px solid #ffffff; border-radius: 0; color: white;">
+                <option value="analyst" selected style="background-color: #40006B; color: white;">Analyst</option>
+                <option value="admin" style="background-color: #40006B; color: white;">Admin</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn w-100 fw-bold mt-3"
+              style="background-color: #1f9ba5; color: white; border-radius: 10px;">Register</button>
+          </form>
+
+          <div class="text-center mt-3">
+            <small>Already have an account?
+              <a href="/auth/login" class="text-white" style="font-size: 0.9rem; text-decoration: none;">Login here</a>
+            </small>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    function togglePassword() {
+      const passwordField = document.getElementById("password");
+      const toggleIcon = document.getElementById("toggleIcon");
+      if (passwordField.type === "password") {
+        passwordField.type = "text";
+        toggleIcon.classList.remove("bi-eye");
+        toggleIcon.classList.add("bi-eye-slash");
+      } else {
+        passwordField.type = "password";
+        toggleIcon.classList.remove("bi-eye-slash");
+        toggleIcon.classList.add("bi-eye");
+      }
+    }
+  </script>
+</body>
+
+</html>

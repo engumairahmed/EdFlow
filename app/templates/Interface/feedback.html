@@ -1,0 +1,89 @@
+{% extends "Interface/base.html" %} {% block title %}EdFlow - Support &
+Feedback{% endblock %} {% block head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/feedback.css') }}"
+/>
+{% endblock %} {% block content %}
+<section class="support-wrapper">
+  <div class="container">
+    <div class="support-header">
+      <h1>Share Your Feedback</h1>
+      <p>Your opinions help us improve EdFlow continuously!</p>
+    </div>
+
+    <div class="row align-items-center justify-content-center">
+      <div class="col-lg-5 text-center order-1 order-lg-2 mb-4 mb-lg-0">
+        <img
+          src="{{ url_for('static', filename='Images/Feedback.gif') }}"
+          alt="Feedback Illustration"
+          class="feedback-image"
+        />
+      </div>
+
+      <div class="col-lg-6 order-2 order-lg-1">
+        <div class="card support-card p-4">
+          <h4 class="mb-3 text-theme">Rate Your Experience</h4>
+          <div class="rating-stars" id="rating">
+            <i class="fas fa-star star" data-value="1"></i>
+            <i class="fas fa-star star" data-value="2"></i>
+            <i class="fas fa-star star" data-value="3"></i>
+            <i class="fas fa-star star" data-value="4"></i>
+            <i class="fas fa-star star" data-value="5"></i>
+          </div>
+
+          <form method="post" action="">
+            <input type="hidden" id="ratingInput" name="rating" value="0" />
+            <div class="mb-3">
+              <label for="name" class="form-label">Your Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                placeholder="John Doe"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">Your Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                placeholder="john@example.com"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="message" class="form-label">Your Feedback</label>
+              <textarea
+                class="form-control"
+                id="message"
+                rows="5"
+                placeholder="Share your experience..."
+                required
+              ></textarea>
+            </div>
+            <button type="submit" class="btn btn-theme">Submit Feedback</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const stars = document.querySelectorAll(".star");
+  const ratingInput = document.getElementById("ratingInput");
+
+  stars.forEach((star) => {
+    star.addEventListener("click", () => {
+      ratingInput.value = star.dataset.value;
+      stars.forEach((s) => s.classList.remove("active"));
+      for (let i = 0; i < star.dataset.value; i++) {
+        stars[i].classList.add("active");
+      }
+    });
+  });
+</script>
+{% endblock %}

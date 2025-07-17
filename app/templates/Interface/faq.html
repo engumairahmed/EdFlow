@@ -1,0 +1,204 @@
+{% extends "Interface/base.html" %} {% block title %}EdFlow - FAQ{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/faq.css') }}" />
+{% endblock %} {% block content %}
+<section class="faq-section p-5">
+  <div class="container">
+    <div class="row gy-5 gy-lg-0">
+      <div class="col-12 col-lg-6">
+        <h1 class="faq-heading mb-4">Frequently Asked Questions</h1>
+        <img
+          src="{{ url_for('static', filename='Images/FAQs-unscreen.gif') }}"
+          alt="Faq EdFlow"
+          class="img-fluid mb-4"
+        />
+        <p class="lead faq-subtext mb-4">
+          Need help with EdFlow prediction tools or personalized learning
+          dashboards? Here are some quick answers to our most common questions.
+        </p>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="row justify-content-xl-end">
+          <div class="col-12 col-xl-11">
+            <div class="accordion accordion-flush" id="accordionEdFlow">
+              <div class="accordion-item mb-4">
+                <h2 class="accordion-header" id="headingOne">
+                  <button
+                    class="accordion-button fw-bold"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseOne"
+                  >
+                    <i class="fas fa-question-circle me-2 text-purple"></i>
+                    How does EdFlow’s prediction system work?
+                  </button>
+                </h2>
+                <div
+                  id="collapseOne"
+                  class="accordion-collapse collapse show"
+                  data-bs-parent="#accordionEdFlow"
+                >
+                  <div class="accordion-body">
+                    EdFlow uses advanced AI algorithms to analyze student data
+                    and learning patterns, helping predict outcomes and design
+                    personalized study plans.
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item mb-4">
+                <h2 class="accordion-header" id="headingTwo">
+                  <button
+                    class="accordion-button collapsed fw-bold"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseTwo"
+                  >
+                    <i class="fas fa-question-circle me-2 text-purple"></i>
+                    Can EdFlow help teachers monitor progress?
+                  </button>
+                </h2>
+                <div
+                  id="collapseTwo"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#accordionEdFlow"
+                >
+                  <div class="accordion-body">
+                    Yes — teachers get dashboards, prediction reports, and live
+                    tracking tools to support every learner’s progress
+                    effectively.
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item mb-4">
+                <h2 class="accordion-header" id="headingThree">
+                  <button
+                    class="accordion-button collapsed fw-bold"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseThree"
+                  >
+                    <i class="fas fa-question-circle me-2 text-purple"></i>
+                    Is EdFlow secure?
+                  </button>
+                </h2>
+                <div
+                  id="collapseThree"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#accordionEdFlow"
+                >
+                  <div class="accordion-body">
+                    Absolutely! We protect your data with industry-grade
+                    encryption, secure servers, and strict privacy measures.
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item mb-4">
+                <h2 class="accordion-header" id="headingFour">
+                  <button
+                    class="accordion-button collapsed fw-bold"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseFour"
+                  >
+                    How do I sign up and start?
+                  </button>
+                </h2>
+                <div
+                  id="collapseFour"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#accordionEdFlow"
+                >
+                  <div class="accordion-body">
+                    Just sign up, complete your student or teacher profile, and
+                    explore your dashboard — our AI does the rest for you!
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item mb-4">
+                <h2 class="accordion-header" id="headingFive">
+                  <button
+                    class="accordion-button collapsed fw-bold"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseFive"
+                  >
+                    <i class="fas fa-question-circle me-2 text-purple"></i>
+                    Who do I contact for support?
+                  </button>
+                </h2>
+                <div
+                  id="collapseFive"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#accordionEdFlow"
+                >
+                  <div class="accordion-body">
+                    Our support team is always ready!
+                    <a href="/contact">Contact us</a> or email us directly at
+                    support@EdFlow.com.
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item mb-4">
+                <h2 class="accordion-header" id="headingSix">
+                  <button
+                    class="accordion-button collapsed fw-bold"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseSix"
+                  >
+                    <i class="fas fa-question-circle me-2 text-purple"></i>
+                    Can EdFlow integrate with my school’s LMS?
+                  </button>
+                </h2>
+                <div
+                  id="collapseSix"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#accordionEdFlow"
+                >
+                  <div class="accordion-body">
+                    Yes — EdFlow can be integrated with popular Learning
+                    Management Systems to synchronize grades, attendance, and
+                    prediction data in real-time.
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingSeven">
+                  <button
+                    class="accordion-button collapsed fw-bold"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseSeven"
+                  >
+                    <i class="fas fa-question-circle me-2 text-purple"></i>
+                    What predictive models does EdFlow use?
+                  </button>
+                </h2>
+                <div
+                  id="collapseSeven"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#accordionEdFlow"
+                >
+                  <div class="accordion-body">
+                    EdFlow combines various AI models including machine learning
+                    regression, decision trees, and neural networks to generate
+                    accurate academic predictions.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

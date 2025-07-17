@@ -1,0 +1,124 @@
+{% extends "Interface/base.html" %} {% block title %}EdFlow - Privacy{% endblock
+%} {% block head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/privacy.css') }}"
+/>
+
+{% endblock %} {% block content %}
+<section class="policy-wrapper">
+  <div class="container">
+    <div class="row text-center mb-4">
+      <div class="col-12">
+        <h1 class="policy-title">Privacy Policy</h1>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-3 mb-4">
+        <div class="card sticky-top" style="top: 2rem">
+          <div class="card-body">
+            <h5 class="card-title mb-3">Contents</h5>
+            <nav class="nav flex-column">
+              <a class="toc-link py-2" href="#overview">Overview</a>
+              <a class="toc-link py-2" href="#collection">Data We Collect</a>
+              <a class="toc-link py-2" href="#use">How We Use Data</a>
+              <a class="toc-link py-2" href="#sharing">When We Share</a>
+              <a class="toc-link py-2" href="#security">How We Protect Data</a>
+              <a class="toc-link py-2" href="#rights">Your Rights</a>
+              <a class="toc-link py-2" href="#updates">Updates</a>
+              <a class="toc-link py-2" href="#contact">Contact</a>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-lg-9">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <p class="text-muted mb-4">Last updated: August 2025</p>
+
+            <div id="overview" class="policy-section py-4">
+              <h2>Overview</h2>
+              <p>
+                This policy explains how EdFlow collects, uses, and protects
+                your personal data.
+              </p>
+            </div>
+
+            <div id="collection" class="policy-section py-4">
+              <h2>Data We Collect</h2>
+              <h5 class="mt-3">Information you provide</h5>
+              <ul>
+                <li>Account & profile details</li>
+                <li>Contact & payment information</li>
+              </ul>
+              <h5 class="mt-3">Automatically collected</h5>
+              <ul>
+                <li>Device & usage data</li>
+                <li>Log files & cookies</li>
+              </ul>
+            </div>
+
+            <div id="use" class="policy-section py-4">
+              <h2>How We Use Data</h2>
+              <ul>
+                <li>To deliver and improve our services</li>
+                <li>To personalize your experience</li>
+                <li>To communicate important updates</li>
+              </ul>
+            </div>
+
+            <div id="sharing" class="policy-section py-4">
+              <h2>When We Share</h2>
+              <ul>
+                <li>Trusted vendors & partners</li>
+                <li>Legal authorities if required</li>
+                <li>With consent, for specific purposes</li>
+              </ul>
+            </div>
+
+            <div id="security" class="policy-section py-4">
+              <h2>How We Protect Data</h2>
+              <ul>
+                <li>Encryption & secure storage</li>
+                <li>Regular security audits</li>
+                <li>Access controls</li>
+              </ul>
+            </div>
+
+            <div id="rights" class="policy-section py-4">
+              <h2>Your Rights</h2>
+              <ul>
+                <li>Access, update, or delete your data</li>
+                <li>Withdraw consent anytime</li>
+                <li>Contact us for data queries</li>
+              </ul>
+            </div>
+
+            <div id="updates" class="policy-section py-4">
+              <h2>Updates</h2>
+              <p>
+                We may update this policy. Material changes will be communicated
+                clearly.
+              </p>
+            </div>
+
+            <div id="contact" class="policy-section py-4">
+              <h2>Contact</h2>
+              <div class="card bg-light mt-3">
+                <div class="card-body">
+                  <p class="mb-1">Email: privacy@edflow.com</p>
+                  <p class="mb-1">Address: 456 Learning Lane, EdFlow HQ</p>
+                  <p class="mb-0">Phone: (123) 456-7890</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,238 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Dataset - EdFlow{% endblock %}
+
+{% block page_heading %}Dataset Management & Overview{% endblock %}
+
+{% block content %}
+<div class="dataset-grid-container">
+
+    <!-- Card 1: Dataset Summary & Statistics -->
+    <div class="dashboard-card dataset-summary-card animated-fade-in">
+        <h3 class="card-title"><i class="fas fa-database icon-purple"></i> Dataset Overview</h3>
+        <div class="summary-stats-grid">
+            <div class="stat-box">
+                <span class="stat-value">5,000+</span>
+                <span class="stat-label">Total Records</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value">25</span>
+                <span class="stat-label">Total Features</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value">July 14, 2025</span>
+                <span class="stat-label">Last Updated</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value">98.5<small>%</small></span>
+                <span class="stat-label">Data Completeness</span>
+            </div>
+        </div>
+        <p class="card-description">A quick summary of your loaded student dataset.</p>
+    </div>
+
+    <!-- Card 2: Data Table Preview -->
+    <div class="dashboard-card dataset-table-card animated-fade-in delay-1">
+        <h3 class="card-title"><i class="fas fa-table icon-purple"></i> Data Sample Preview</h3>
+        <div class="table-controls">
+            <input type="text" id="tableSearch" placeholder="Search in table..." class="form-control">
+            <select id="rowsPerPage" class="form-control">
+                <option value="10">10 Rows</option>
+                <option value="20">20 Rows</option>
+                <option value="50">50 Rows</option>
+            </select>
+        </div>
+        <div class="responsive-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Grade</th>
+                        <th>Attendance (%)</th>
+                        <th>Math Score</th>
+                        <th>Science Score</th>
+                        <th>English Score</th>
+                        <th>Study Time (hrs/wk)</th>
+                        <th>Absences</th>
+                        <th>Predicted Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>S001</td>
+                        <td>Ali Khan</td>
+                        <td>16</td>
+                        <td>Male</td>
+                        <td>10</td>
+                        <td>95</td>
+                        <td>88</td>
+                        <td>82</td>
+                        <td>90</td>
+                        <td>10</td>
+                        <td>5</td>
+                        <td>A-</td>
+                    </tr>
+                    <tr>
+                        <td>S002</td>
+                        <td>Fatima B.</td>
+                        <td>15</td>
+                        <td>Female</td>
+                        <td>9</td>
+                        <td>98</td>
+                        <td>92</td>
+                        <td>90</td>
+                        <td>95</td>
+                        <td>12</td>
+                        <td>2</td>
+                        <td>A+</td>
+                    </tr>
+                    <tr>
+                        <td>S003</td>
+                        <td>Usman R.</td>
+                        <td>17</td>
+                        <td>Male</td>
+                        <td>11</td>
+                        <td>88</td>
+                        <td>75</td>
+                        <td>70</td>
+                        <td>78</td>
+                        <td>7</td>
+                        <td>15</td>
+                        <td>C+</td>
+                    </tr>
+                    <tr>
+                        <td>S004</td>
+                        <td>Aisha K.</td>
+                        <td>16</td>
+                        <td>Female</td>
+                        <td>10</td>
+                        <td>92</td>
+                        <td>80</td>
+                        <td>85</td>
+                        <td>82</td>
+                        <td>9</td>
+                        <td>8</td>
+                        <td>B</td>
+                    </tr>
+                    <tr>
+                        <td>S005</td>
+                        <td>Bilal H.</td>
+                        <td>15</td>
+                        <td>Male</td>
+                        <td>9</td>
+                        <td>90</td>
+                        <td>70</td>
+                        <td>75</td>
+                        <td>68</td>
+                        <td>6</td>
+                        <td>10</td>
+                        <td>C</td>
+                    </tr>
+                    <tr>
+                        <td>S006</td>
+                        <td>Sara Z.</td>
+                        <td>17</td>
+                        <td>Female</td>
+                        <td>11</td>
+                        <td>96</td>
+                        <td>95</td>
+                        <td>92</td>
+                        <td>98</td>
+                        <td>14</td>
+                        <td>1</td>
+                        <td>A+</td>
+                    </tr>
+                    <tr>
+                        <td>S007</td>
+                        <td>Hassan M.</td>
+                        <td>16</td>
+                        <td>Male</td>
+                        <td>10</td>
+                        <td>85</td>
+                        <td>65</td>
+                        <td>60</td>
+                        <td>70</td>
+                        <td>5</td>
+                        <td>20</td>
+                        <td>D</td>
+                    </tr>
+                    <tr>
+                        <td>S008</td>
+                        <td>Zainab N.</td>
+                        <td>15</td>
+                        <td>Female</td>
+                        <td>9</td>
+                        <td>99</td>
+                        <td>90</td>
+                        <td>93</td>
+                        <td>91</td>
+                        <td>11</td>
+                        <td>0</td>
+                        <td>A</td>
+                    </tr>
+                    <tr>
+                        <td>S009</td>
+                        <td>Imran A.</td>
+                        <td>17</td>
+                        <td>Male</td>
+                        <td>11</td>
+                        <td>91</td>
+                        <td>78</td>
+                        <td>80</td>
+                        <td>75</td>
+                        <td>8</td>
+                        <td>12</td>
+                        <td>B-</td>
+                    </tr>
+                    <tr>
+                        <td>S010</td>
+                        <td>Noor F.</td>
+                        <td>16</td>
+                        <td>Female</td>
+                        <td>10</td>
+                        <td>94</td>
+                        <td>85</td>
+                        <td>88</td>
+                        <td>87</td>
+                        <td>10</td>
+                        <td>6</td>
+                        <td>B+</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="table-pagination">
+            <button class="btn btn-secondary disabled">Previous</button>
+            <span>Page 1 of 5</span>
+            <button class="btn btn-secondary">Next</button>
+        </div>
+    </div>
+
+    <!-- Card 3: Data Management Actions -->
+    <div class="dashboard-card dataset-actions-card animated-fade-in delay-2">
+        <h3 class="card-title"><i class="fas fa-cogs icon-purple"></i> Data Actions</h3>
+        <div class="action-buttons-grid">
+            <button class="btn btn-primary"><i class="fas fa-cloud-upload-alt"></i> Upload New Data</button>
+            <button class="btn btn-secondary"><i class="fas fa-download"></i> Export Data (CSV)</button>
+            <button class="btn btn-secondary"><i class="fas fa-file-excel"></i> Export Data (Excel)</button>
+            <button class="btn btn-secondary"><i class="fas fa-trash-alt"></i> Clear All Data</button>
+        </div>
+    </div>
+
+    <!-- Card 4: Data Quality Insights -->
+    <div class="dashboard-card dataset-quality-card animated-fade-in delay-3">
+        <h3 class="card-title"><i class="fas fa-check-circle icon-purple"></i> Data Quality</h3>
+        <ul class="quality-insights-list">
+            <li><i class="fas fa-info-circle text-blue"></i> **Missing Values:** 1.5% in 'Study Time'</li>
+            <li><i class="fas fa-exclamation-triangle text-yellow"></i> **Outliers:** Detected in 'Absences' column</li>
+            <li><i class="fas fa-chart-pie text-purple"></i> **Data Types:** All columns correctly inferred</li>
+            <li><i class="fas fa-shield-alt text-green"></i> **Consistency:** High consistency across records</li>
+        </ul>
+        <button class="btn btn-secondary mt-auto"><i class="fas fa-chart-bar"></i> View Data Distribution</button>
+    </div>
+
+</div>
+{% endblock %}

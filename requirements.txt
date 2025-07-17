@@ -1,0 +1,11 @@
+Flask
+flask-cors
+flask-pymongo
+flask-jwt-extended
+python-dotenv
+flask_mail
+pandas
+numpy
+scikit-learn
+joblib
+hdfs

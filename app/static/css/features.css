@@ -1,0 +1,18 @@
+.text-purple {
+  color: #6a0dad;
+}
+
+.card {
+  background: #fff;
+  border-radius: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(106, 13, 173, 0.2);
+}
+
+.card-title {
+  color: #6a0dad;
+}

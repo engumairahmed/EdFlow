@@ -1,0 +1,75 @@
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px; 
+  }
+
+  body {
+    font-weight: 500;
+    color: #333;
+  }
+
+  .policy-wrapper {
+    background: linear-gradient(135deg, #f8f9fac3 0%, #e9ecefa3 100%);
+    padding-top: 50px;
+    padding-bottom: 60px;
+  }
+
+  .policy-section:not(:last-child) {
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .toc-link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .toc-link:hover {
+    color: #8004d9;
+  }
+
+  .policy-title {
+    color: #470079;
+    font-size: 2.5rem;
+    font-weight: bold;
+    position: relative;
+  }
+
+  .policy-title::after {
+    content: "";
+    display: block;
+    width: 50px;
+    height: 3px;
+    background-color: #8004d9;
+    margin: 20px auto 0;
+  }
+
+  .policy-section h2,
+  .policy-section h5 {
+    color: #470079;
+    font-weight: 600;
+  }
+
+  .policy-section p,
+  .policy-section li {
+    color: #444;
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+
+  .card-title {
+    color: #8004d9;
+    font-weight: 600;
+  }
+
+  .toc-link {
+    font-weight: 500;
+  }
+
+  .policy-section:target {
+    border: 2px solid #8004d9;
+    background: #f3e8fb;
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.3s ease;
+  }

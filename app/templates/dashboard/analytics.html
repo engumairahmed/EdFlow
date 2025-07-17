@@ -1,0 +1,81 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Analytics-EdFlow{% endblock %}
+
+{% block page_heading %}Detailed Analytics & Insights{% endblock %}
+
+{% block content %}
+<div class="analytics-grid-container">
+
+    <div class="dashboard-card">
+        <h3 class="card-title"><i class="fas fa-chart-line icon-purple"></i> Overall Performance Trends</h3>
+        <p class="chart-description">Track average academic scores and attendance over selected periods.</p>
+        <div class="filter-controls">
+            <label for="timeframe">Timeframe:</label>
+            <select id="timeframe">
+                <option value="monthly">Last 12 Months</option>
+                <option value="quarterly">Last 4 Quarters</option>
+                <option value="yearly">Last 5 Years</option>
+            </select>
+            <label for="grade-filter">Grade Level:</label>
+            <select id="grade-filter">
+                <option value="all">All Grades</option>
+                <option value="9">Grade 9</option>
+                <option value="10">Grade 10</option>
+                <option value="11">Grade 11</option>
+                <option value="12">Grade 12</option>
+            </select>
+        </div>
+        <div class="chart-container-lg">
+            <div class="chart-placeholder">Overall Performance Chart Placeholder</div>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <h3 class="card-title"><i class="fas fa-chart-bar icon-purple"></i> Subject Performance Comparison</h3>
+        <p class="chart-description">Average scores across different subjects for selected grade levels.</p>
+        <div class="chart-container-md">
+            <div class="chart-placeholder">Subject Comparison Chart Placeholder</div>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <h3 class="card-title"><i class="fas fa-exclamation-triangle icon-purple"></i> Student Risk Distribution</h3>
+        <p class="chart-description">Breakdown of students based on their predicted academic risk levels.</p>
+        <div class="chart-container-sm">
+            <div class="chart-placeholder">Risk Distribution Chart Placeholder</div>
+        </div>
+        
+    </div>
+
+    <div class="dashboard-card">
+        <h3 class="card-title"><i class="fas fa-chart-scatter icon-purple"></i> Attendance vs. Performance</h3>
+        <p class="chart-description">Correlation between attendance rates and academic scores.</p>
+        <div class="chart-container-md">
+            <div class="chart-placeholder">Attendance Scatter Chart Placeholder</div>
+        </div>
+    </div>
+
+    <div class="dashboard-card" id="Generate">
+        <h3 class="card-title"><i class="fas fa-file-export icon-purple"></i> Generate Custom Reports</h3>
+        <div class="form-group">
+            <label for="reportType">Report Type:</label>
+            <select id="reportType">
+                <option value="overall">Overall Performance Report</option>
+                <option value="student">Individual Student Report</option>
+                <option value="grade">Grade Level Summary</option>
+                <option value="risk">Risk Analysis Report</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="reportDateRange">Date Range:</label>
+            <input type="text" id="reportDateRange" placeholder="e.g., 2024-01-01">
+        </div>
+        <button id="btn_1" class="btn btn-primary"  ><i class="fas fa-download"></i> Download Report</button>
+        <button class="btn btn-secondary"><i class="fas fa-envelope"></i> Email Report</button>
+    </div>
+
+    
+
+</div>
+{% endblock %}
