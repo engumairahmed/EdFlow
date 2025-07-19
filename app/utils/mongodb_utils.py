@@ -1,10 +1,8 @@
 from datetime import datetime
 import pandas as pd
-from pymongo import MongoClient
 from bson.objectid import ObjectId
-import os
 
-from app.utils.db import get_database
+from app import mongo
 
 # Load from env or use default
 # MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
@@ -12,8 +10,9 @@ from app.utils.db import get_database
 
 # client = MongoClient(MONGO_URI)
 # db = client[DB_NAME]
-db = get_database()
+db = mongo.db
 datasets_collection = db["uploaded_datasets"]
+model_collection = db["training_runs"]
 
 # === General CRUD Utilities ===
 
@@ -65,7 +64,6 @@ def save_dataset_to_mongodb(df, dataset_name, user_id, is_paid):
             "record_count": len(records),
             "data": records
         }
-        print(doc)
         datasets_collection.insert_one(doc)
         print(f"📁 Dataset '{dataset_name}' inserted into MongoDB.")
     except Exception as e:

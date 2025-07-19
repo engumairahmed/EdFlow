@@ -1,21 +1,20 @@
 from flask import Blueprint, redirect, render_template, request, jsonify, session, flash, url_for
-from app import mongo
-from flask_jwt_extended import create_access_token
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
-from app import mongo  # make sure mongo is imported from your app.py
 import random
 from flask_mail import Message
 from app import mail  # import mail from app.py
-import uuid  # for generating token (optional)
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-from flask import current_app as app
+from flask import current_app
+from app import mongo
 
 
 auth_bp = Blueprint("auth", __name__, url_prefix='/auth')
 
 # Dummy email verification storage (in-memory for now)
 verification_codes = {}
+
+users=mongo.db['users']
 
 @auth_bp.route('/register', methods=['POST','GET'])
 def register():
@@ -29,11 +28,11 @@ def register():
             session['email_to_verify'] = email  # ✅ email directly from form input
              # or whatever your user's email is
 
-            if mongo.db.users.find_one({"email": email}):
+            if users.find_one({"email": email}):
                 return jsonify({"error": "User already exists"}), 400
 
             hashed = generate_password_hash(password)
-            mongo.db.users.insert_one({"username": username, "email":email, "password": hashed, "role": role})
+            users.insert_one({"username": username, "email":email, "password": hashed, "role": role})
             # return jsonify({"message": "Registered successfully"}), 201
             flash("Registration successful. Please login.","success")
             return render_template('auth/login.html')
@@ -44,7 +43,7 @@ def register():
 def login():
     if session.get('user_id'):
         # Check that the user still exists in DB
-        user = mongo.db.users.find_one({'_id': session['user_id']})
+        user = users.find_one({'_id': session['user_id']})
         if user:
             return redirect(url_for('dashboard.dashboard_view'))
         else:
@@ -57,7 +56,7 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-        user = mongo.db.users.find_one({'email': email})
+        user = users.find_one({'email': email})
 
         if user and check_password_hash(user['password'], password):
             remember_me = True if request.form.get("remember_me") else False
@@ -80,7 +79,7 @@ def login():
 
 # Token serializer
 def get_serializer():
-    return URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
 
 # =============================
 # FORGOT PASSWORD
@@ -94,7 +93,7 @@ def forgot_password():
             flash('Please enter a valid email address.', 'danger')
             return redirect(url_for('auth.forgot_password'))
 
-        user = mongo.db.users.find_one({"email": {"$regex": f"^{email}$", "$options": "i"}})
+        user = users.find_one({"email": {"$regex": f"^{email}$", "$options": "i"}})
 
         if user:
             serializer = get_serializer()
@@ -140,7 +139,7 @@ def reset_password(token):
             return redirect(request.url)
 
         hashed_password = generate_password_hash(password)
-        mongo.db.users.update_one({'email': email}, {'$set': {'password': hashed_password}})
+        users.update_one({'email': email}, {'$set': {'password': hashed_password}})
 
         flash("Password reset successfully. Please login.", "success")
         return redirect(url_for('auth.login'))

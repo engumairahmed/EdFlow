@@ -2,17 +2,19 @@ from flask import Blueprint, flash, render_template, request, jsonify, current_a
 import pandas as pd
 from werkzeug.utils import secure_filename
 import os
-from app import mongo
 from app.ml.model_utils import save_model
 from app.ml.predictors import train_predictor
 from app.utils.auth_decorators import login_required
 import time
 from datetime import datetime
+from app import mongo
 
 ingestion_bp = Blueprint("ingestion", __name__)
 
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {'csv', 'json'}
+
+db = mongo.db
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -62,7 +64,7 @@ def upload_file():
                 "trained_on": datetime.utcnow().isoformat()
             }
 
-            mongo.db.users.update_one(
+            db['users'].update_one(
                 {"username": username},
                 {"$addToSet": {"models": model_metadata}}
             )

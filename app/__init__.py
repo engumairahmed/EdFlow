@@ -1,33 +1,29 @@
 from flask import Flask
-from flask_pymongo import PyMongo
 from flask_jwt_extended import JWTManager
-from dotenv import load_dotenv
 from flask_mail import Mail
+from app.utils.db import Mongo, get_database
 
-mongo = PyMongo()
 jwt = JWTManager()
 mail = Mail()
+mongo = Mongo()
 
 def create_app():
-    load_dotenv()
     app = Flask(__name__)
     app.config.from_object("config.Config")
 
-    mongo.init_app(app)
-
     with app.app_context():
-        db = mongo.db
-
+        db = get_database()
         if db is None:
-            raise Exception("MongoDB connection failed. Is DB name in MONGO_URI?")
-        
-        # Optional: force collection creation if needed
+            raise Exception("MongoDB connection failed.")
+
         if "users" not in db.list_collection_names():
             db.create_collection("users")
 
     jwt.init_app(app)
     mail.init_app(app)
+    mongo.init_app(app)
     
+    print(mongo.db)
 
     from app.routes.home import home_bp
     from app.routes.auth import auth_bp

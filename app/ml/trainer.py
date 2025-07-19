@@ -8,10 +8,10 @@ from pymongo import MongoClient
 from datetime import datetime
 import numpy as np
 
-from app.utils.db import get_database
+from app import mongo
 
 # MongoDB setup
-db = get_database()
+db = mongo.db
 metrics_collection = db['model_metrics']
 runs_collection = db['training_runs']
 datasets_collection = db['uploaded_datasets']  # NEW: collection for uploaded dataset

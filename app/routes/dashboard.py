@@ -97,7 +97,6 @@ def my_models():
 @login_required
 @role_required(["admin"])
 def predict_form():
-    db = get_mongo_client()
     available_models = list(db.trained_models.find())
 
     if request.method == "POST":
