@@ -1,167 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>{% block title %}{% endblock %}</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/navbar.css') }}"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    {% block head %}{% endblock %}
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-      <div class="container">
-        <a class="navbar-brand" href="{{ url_for('interface.home') }}"
-          >EdFlow</a
-        >
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div
-          class="collapse navbar-collapse justify-content-center"
-          id="navbarNav"
-        >
-          <ul class="navbar-nav mx-auto">
-            <li class="nav-item">
-              <a
-                class="nav-link active"
-                aria-current="page"
-                href="{{ url_for('interface.home') }}"
-                >Home</a
-              >
+
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  {% block head %}{% endblock %}
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('interface.home') }}">EdFlow</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+        <ul class="navbar-nav mx-auto">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{{ url_for('interface.home') }}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('interface.about') }}">About</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('interface.team') }}">Team</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('interface.contact') }}">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('interface.faq') }}">Faq</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('interface.feedback') }}">Feedback</a>
+          </li>
+        </ul>
+        <div class="ms-3 d-flex">
+          {% if session.user_id %}
+          <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light me-2">Dashboard</a>
+          {% else %}
+          <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light me-2">Login / Signup</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main>{% block content %}{% endblock %}</main>
+
+  <footer class="modern-footer pt-5">
+    <div class="container footer-content">
+      <div class="row g-4 mb-5 align-items-start">
+        <div class="col-lg-4 col-md-6">
+          <a href="#" class="footer-logo d-block mb-4">
+            EdFlow<span class="text-decoration-none"></span>
+          </a>
+          <p class="text-white mb-4">
+            Empowering businesses with innovative digital solutions. We create
+            meaningful experiences that drive success.
+          </p>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="col-lg-4 col-md-6">
+          <h3 class="footer-title">Quick Links</h3>
+          <ul class="quick-links">
+            <li>
+              <a href="{{ url_for('interface.about') }}">About EdFlow</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('interface.about') }}"
-                >About</a
-              >
+            <li>
+              <a href="{{ url_for('interface.home') }}#features">EdFlow Features</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('interface.team') }}"
-                >Team</a
-              >
+            <li>
+              <a href="{{ url_for('interface.home') }}#services">EdFlow Services</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('interface.contact') }}"
-                >Contact</a
-              >
+            <li>
+              <a href="{{ url_for('interface.team') }}">EdFlow Team</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('interface.faq') }}">Faq</a>
+            <li><a href="{{ url_for('interface.faq') }}">FAQ</a></li>
+            <li>
+              <a href="{{ url_for('interface.contact') }}">Contact Us</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('interface.feedback') }}"
-                >Feedback</a
-              >
+            <li>
+              <a href="{{ url_for('interface.privacy') }}">Privacy Policy</a>
             </li>
           </ul>
-          <div class="ms-3 d-flex">
-            <a
-              href="{{ url_for('auth.login') }}"
-              class="btn btn-outline-light me-2"
-              >Login / Signup</a
-            >
-          </div>
         </div>
-      </div>
-    </nav>
 
-    <main>{% block content %}{% endblock %}</main>
-
-    <footer class="modern-footer pt-5">
-      <div class="container footer-content">
-        <div class="row g-4 mb-5 align-items-start">
-          <div class="col-lg-4 col-md-6">
-            <a href="#" class="footer-logo d-block mb-4">
-              EdFlow<span class="text-decoration-none"></span>
-            </a>
-            <p class="text-white mb-4">
-              Empowering businesses with innovative digital solutions. We create
-              meaningful experiences that drive success.
-            </p>
-          </div>
-
-          <!-- Quick Links -->
-          <div class="col-lg-4 col-md-6">
-            <h3 class="footer-title">Quick Links</h3>
-            <ul class="quick-links">
-              <li>
-                <a href="{{ url_for('interface.about') }}">About EdFlow</a>
-              </li>
-              <li>
-                <a href="{{ url_for('interface.home') }}#features"
-                  >EdFlow Features</a
-                >
-              </li>
-              <li>
-                <a href="{{ url_for('interface.home') }}#services"
-                  >EdFlow Services</a
-                >
-              </li>
-              <li>
-                <a href="{{ url_for('interface.team') }}">EdFlow Team</a>
-              </li>
-              <li><a href="{{ url_for('interface.faq') }}">FAQ</a></li>
-              <li>
-                <a href="{{ url_for('interface.contact') }}">Contact Us</a>
-              </li>
-              <li>
-                <a href="{{ url_for('interface.privacy') }}">Privacy Policy</a>
-              </li>
-            </ul>
-          </div>
-
-          <div class="col-lg-4 col-md-12 p-1">
-            <h3 class="footer-title mb-4">Stay Connected</h3>
-            <p class="text-white mb-4">
-              stay updated with the latest Education related news and insights.
-            </p>
-            <form class="mb-4">
-              <div class="mb-3">
-                <input
-                  type="email"
-                  class="form-control newsletter-input"
-                  placeholder="Your email address"
-                />
-              </div>
-              <button type="submit" class="btn btn-subscribe text-white w-100">
-                Subscribe Now
-              </button>
-            </form>
-            <div class="social-links">
-              <a href="#" class="social-icon"
-                ><i class="fab fa-facebook-f"></i
-              ></a>
-              <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-              <a href="#" class="social-icon"
-                ><i class="fab fa-instagram"></i
-              ></a>
-              <a href="#" class="social-icon"
-                ><i class="fab fa-linkedin-in"></i
-              ></a>
-              <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+        <div class="col-lg-4 col-md-12 p-1">
+          <h3 class="footer-title mb-4">Stay Connected</h3>
+          <p class="text-white mb-4">
+            stay updated with the latest Education related news and insights.
+          </p>
+          <form class="mb-4">
+            <div class="mb-3">
+              <input type="email" class="form-control newsletter-input" placeholder="Your email address" />
             </div>
+            <button type="submit" class="btn btn-subscribe text-white w-100">
+              Subscribe Now
+            </button>
+          </form>
+          <div class="social-links">
+            <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
           </div>
         </div>
       </div>
-    </footer>
+    </div>
+  </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
 </html>
