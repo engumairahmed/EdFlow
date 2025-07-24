@@ -22,8 +22,6 @@ def create_app():
     jwt.init_app(app)
     mail.init_app(app)
     mongo.init_app(app)
-    
-    print(mongo.db)
 
     from app.routes.home import home_bp
     from app.routes.auth import auth_bp
@@ -33,6 +31,7 @@ def create_app():
     # from app.routes.teacher import teacher_bp
     
     from app.routes.interface import interface_bp
+    from app.routes.notifications import notifications_bp
 
 
     app.register_blueprint(home_bp)
@@ -42,6 +41,7 @@ def create_app():
     # app.register_blueprint(student_bp, url_prefix="/student")
     # app.register_blueprint(teacher_bp, url_prefix="/teacher")
     app.register_blueprint(interface_bp) 
+    app.register_blueprint(notifications_bp)
 
 
     return app
