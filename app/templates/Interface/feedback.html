@@ -1,5 +1,4 @@
-{% extends "Interface/base.html" %} {% block title %}EdFlow - Support &
-Feedback{% endblock %} {% block head %}
+{% extends "Interface/base.html" %} {% block title %}EdFlow - Feedback{% endblock %} {% block head %}
 <link
   rel="stylesheet"
   href="{{ url_for('static', filename='css/feedback.css') }}"
@@ -22,6 +21,15 @@ Feedback{% endblock %} {% block head %}
       </div>
 
       <div class="col-lg-6 order-2 order-lg-1">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div
+          class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} show mb-3"
+          role="alert"
+        >
+          {{ message }}
+        </div>
+        {% endfor %} {% endif %} {% endwith %}
         <div class="card support-card p-4">
           <h4 class="mb-3 text-theme">Rate Your Experience</h4>
           <div class="rating-stars" id="rating">
@@ -31,39 +39,54 @@ Feedback{% endblock %} {% block head %}
             <i class="fas fa-star star" data-value="4"></i>
             <i class="fas fa-star star" data-value="5"></i>
           </div>
+          {% if errors.rating %}
+          <div class="text-danger">{{ errors.rating }}</div>
+          {% endif %}
 
-          <form method="post" action="">
+          <form method="POST" action="{{ url_for('interface.feedback') }}">
             <input type="hidden" id="ratingInput" name="rating" value="0" />
             <div class="mb-3">
               <label for="name" class="form-label">Your Name</label>
               <input
                 type="text"
                 class="form-control"
-                id="name"
-                placeholder="John Doe"
-                required
+                name="name"
+                placeholder="Enter Your Name"
+                value="{{ form_data.name if form_data else '' }}"
               />
+              {% if errors.name %}
+              <div class="text-danger">{{ errors.name }}</div>
+              {% endif %}
             </div>
             <div class="mb-3">
               <label for="email" class="form-label">Your Email</label>
               <input
                 type="email"
                 class="form-control"
-                id="email"
-                placeholder="john@example.com"
-                required
+                name="email"
+                placeholder="Enter Your Email"
+                value="{{ form_data.email if form_data else '' }}"
               />
+              {% if errors.email %}
+              <div class="text-danger">{{ errors.email }}</div>
+              {% endif %}
             </div>
             <div class="mb-3">
               <label for="message" class="form-label">Your Feedback</label>
               <textarea
                 class="form-control"
-                id="message"
-                rows="5"
+                name="message"
+                rows="4"
                 placeholder="Share your experience..."
-                required
-              ></textarea>
+                {{ form_data.message if form_data else '' }}
+              >
+              </textarea>
+                   {% if errors.message %}
+            <div class="text-danger">{{ errors.message }}</div>
+            {% endif %}
             </div>
+          
+         
             <button type="submit" class="btn btn-theme">Submit Feedback</button>
           </form>
         </div>
@@ -85,5 +108,13 @@ Feedback{% endblock %} {% block head %}
       }
     });
   });
+
+  window.setTimeout(function () {
+    const alert = document.querySelector(".alert");
+    if (alert) {
+      alert.classList.add("fade-out");
+      setTimeout(() => alert.remove(), 500);
+    }
+  }, 2000);
 </script>
 {% endblock %}

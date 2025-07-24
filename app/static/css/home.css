@@ -127,3 +127,17 @@ body {
   height: 42px;
   margin-top: -45px;
 }
+
+
+.btn-theme {
+  background: linear-gradient(45deg, #6c5ce7, #8004d9);
+  color: #fff;
+  border: 2px;
+  transition: all 0.3s ease; 
+}
+
+.btn-theme:hover {
+  background: linear-gradient(135deg, #3c0560);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}

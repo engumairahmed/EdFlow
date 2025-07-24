@@ -2,6 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='Images/EdFlow_icon.png') }}"
+    />
     <title>{% block title %}{% endblock %}</title>
     <link
       rel="stylesheet"
@@ -19,21 +24,21 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
-      <div class="container">
-        <a class="navbar-brand" href="{{ url_for('interface.home') }}"
-          >EdFlow</a
-        >
+      <div class="container-fluid d-flex justify-content-between align-items-center flex-nowrap">
+        <a class="navbar-brand mb-0" href="{{ url_for('interface.home') }}">
+          <img
+            src="{{ url_for('static', filename='Images/EdFlow Logo.png') }}"
+            alt="EdFlow Logo"
+        /></a>
         <button
-          class="navbar-toggler"
+          class="navbar-toggler ms-auto"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
         >
-          <span class="navbar-toggler-icon"></span>
+          <i class="fas fa-bars" style="color: #a363d9; font-size: 1.5rem"></i>
         </button>
+
         <div
           class="collapse navbar-collapse justify-content-center"
           id="navbarNav"
@@ -71,12 +76,21 @@
               >
             </li>
           </ul>
-          <div class="ms-3 d-flex">
+          <div class="ms-2 d-flex align-items-center">
+            {% if session.username %}
+            <span class="text-light me-2">Hi, {{ session.username }}</span>
+            <a
+              href="{{ url_for('auth.logout') }}"
+              class="btn btn-outline-light me-2"
+              >Logout</a
+            >
+            {% else %}
             <a
               href="{{ url_for('auth.login') }}"
               class="btn btn-outline-light me-2"
               >Login / Signup</a
             >
+            {% endif %}
           </div>
         </div>
       </div>
@@ -112,6 +126,11 @@
               <li>
                 <a href="{{ url_for('interface.home') }}#services"
                   >EdFlow Services</a
+                >
+              </li>
+              <li>
+                <a href="{{ url_for('interface.home') }}#testimonials"
+                  >EdFlow Testimonials</a
                 >
               </li>
               <li>
