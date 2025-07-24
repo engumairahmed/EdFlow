@@ -1,7 +1,7 @@
  body {
-    background: linear-gradient(135deg, #f8f9fac3 0%, #e9ecefa3 100%);
+    background: linear-gradient(135deg, #1a012e, #3c0560);
     font-family: 'Open Sans', sans-serif;
-    color: #333;
+    color: #fff;
   }
 
   .support-wrapper {
@@ -14,7 +14,7 @@
   }
 
   .support-header h1 {
-    color: #470079;
+    color: #fff;
     font-weight: 700;
   }
 

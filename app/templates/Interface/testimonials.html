@@ -1,0 +1,71 @@
+{% extends "Interface/base.html" %} {% block title %}EdFlow - Testimonials{%
+endblock %} {% block head %}
+<style>
+  .all-testimonials {
+    background: linear-gradient(135deg, #1a012e, #3c0560);
+    min-height: 37.9vh; 
+  }
+
+  .all-testimonials h2 {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .all-testimonials .testimonial-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 30px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .all-testimonials .testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .all-testimonials .testimonial-card h6 {
+    margin: 0 0 10px 0;
+    font-weight: 600;
+    color: #222;
+  }
+
+  .all-testimonials .testimonial-card .stars {
+    margin-bottom: 15px;
+  }
+
+  .all-testimonials .testimonial-card p {
+    font-style: italic;
+    color: #555;
+    margin: 0;
+  }
+</style>
+{% endblock %} {% block content %}
+<section class="all-testimonials py-5 bg-white">
+  <div class="container">
+    <h2 class="text-center fw-bold mb-5">EdFlow Testimonials</h2>
+    <div class="row gy-4 ">
+      {% if testimonials|length == 0 %}
+      <div class="col-12 text-center text-light">
+        <p>No reviews yet. Be the first to share your feedback!</p>
+      </div>
+      {% else %} {% for feedback in testimonials %}
+      <div class="col-12 col-md-4">
+        <div class="testimonial-card">
+          <h6>{{ feedback.name }}</h6>
+          <div class="stars mb-2">
+            {% for i in range(feedback.rating) %}
+            <i class="fas fa-star text-warning"></i>
+            {% endfor %} {% for i in range(5 - feedback.rating) %}
+            <i class="far fa-star text-muted"></i>
+            {% endfor %}
+          </div>
+          <p>“{{ feedback.message | truncate(200) }}”</p>
+        </div>
+      </div>
+      {% endfor %} {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
