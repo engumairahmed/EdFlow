@@ -23,19 +23,22 @@
             </div>
             <ul class="sidebar-menu">
                 <li><a href="{{ url_for('dashboard.dashboard_view') }}"
-                        class="{% if request.endpoint == 'dashboard.dashboard_view' %}active{% endif %}"><i class="fas fa-home"></i> Home</a>
+                        class="{% if request.endpoint == 'dashboard.dashboard_view' %}active{% endif %}"><i
+                            class="fas fa-home"></i> Home</a>
                 </li>
                 <li><a href="{{ url_for('dashboard.upload_data') }}"
                         class="{% if request.endpoint == 'dashboard.upload_data' %}active{% endif %}"><i
                             class="fas fa-cloud-upload-alt"></i> Upload Data</a></li>
                 <li><a href="{{ url_for('dashboard.predict_form') }}"
-                        class="{% if request.endpoint == 'dashboard.predict_form' %}active{% endif %}"><i class="fas fa-brain"></i>
+                        class="{% if request.endpoint == 'dashboard.predict_form' %}active{% endif %}"><i
+                            class="fas fa-brain"></i>
                         Prediction</a></li>
                 <li><a href="{{ url_for('dashboard.analytics') }}"
                         class="{% if request.endpoint == 'dashboard.analytics' %}active{% endif %}"><i
                             class="fas fa-chart-line"></i> Analytics</a></li>
                 <li><a href="{{ url_for('dashboard.dataset') }}"
-                        class="{% if request.endpoint == 'dashboard.dataset' %}active{% endif %}"><i class="fas fa-database"></i>
+                        class="{% if request.endpoint == 'dashboard.dataset' %}active{% endif %}"><i
+                            class="fas fa-database"></i>
                         Dataset</a></li>
                 <!-- <li><a href="{{ url_for('dashboard.upload_data') }}" class="{% if request.endpoint == 'about_project' %}active{% endif %}"><i class="fas fa-info-circle"></i> About Project</a></li> -->
                 <li><a href="{{ url_for('auth.logout') }}"
@@ -56,7 +59,6 @@
                 </div>
             </header>
             <div class="content-area">
-                <h1>{{request.endpoint}}</h1>
                 {% block content %}{% endblock %}
             </div>
         </div>
@@ -77,6 +79,31 @@
     </div>
 
     <script>
+
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            navigator.serviceWorker.register('/static/service-worker.js')
+                .then(function (registration) {
+                    console.log('Service Worker registered:', registration);
+
+                    return registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: '<YOUR_PUBLIC_VAPID_KEY_BASE64>'
+                    });
+                })
+                .then(function (subscription) {
+                    console.log('Push Subscription:', JSON.stringify(subscription));
+                    // Send this subscription to your Flask server
+                    fetch('/subscribe', {
+                        method: 'POST',
+                        body: JSON.stringify(subscription),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                })
+                .catch(console.error);
+        }
+
 
         // JavaScript for sidebar toggle
 

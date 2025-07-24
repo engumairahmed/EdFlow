@@ -12,7 +12,7 @@ from app import mongo
 # db = client[DB_NAME]
 db = mongo.db
 datasets_collection = db["uploaded_datasets"]
-model_collection = db["training_runs"]
+model_collection = db["trained_models"]
 
 # === General CRUD Utilities ===
 

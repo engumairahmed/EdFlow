@@ -10,7 +10,6 @@ def get_mongo_client():
     return _client
 
 def get_database():
-    print('Database Loaded')
     return _client[db_name]
 
 

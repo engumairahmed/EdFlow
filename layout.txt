@@ -1,0 +1,140 @@
+Folder PATH listing
+Volume serial number is C8B7-5FB9
+D:.
+|   .env
+|   .gitattributes
+|   .gitignore
+|   config.py
+|   layout.txt
+|   README.md
+|   requirements.txt
+|   run.py
+|   vapid_keys.py
+|   
++---app
+|   |   __init__.py
+|   |   
+|   +---ml
+|   |   |   dataset_manager.py
+|   |   |   model_utils.py
+|   |   |   predictors.py
+|   |   |   trainer.py
+|   |   |   __init__.py
+|   |   |   
+|   |   +---models
+|   |   \---__pycache__
+|   |           dataset_manager.cpython-313.pyc
+|   |           model_utils.cpython-313.pyc
+|   |           predictors.cpython-313.pyc
+|   |           trainer.cpython-313.pyc
+|   |           train_model.cpython-313.pyc
+|   |           __init__.cpython-313.pyc
+|   |           
+|   +---models
+|   |       user.py
+|   |       __init__.py
+|   |       
+|   +---routes
+|   |   |   auth.py
+|   |   |   dashboard.py
+|   |   |   home.py
+|   |   |   ingestion.py
+|   |   |   interface.py
+|   |   |   notifications.py
+|   |   |   student.py
+|   |   |   teacher.py
+|   |   |   __init__.py
+|   |   |   
+|   |   \---__pycache__
+|   |           auth.cpython-313.pyc
+|   |           dashboard.cpython-313.pyc
+|   |           home.cpython-313.pyc
+|   |           ingestion.cpython-313.pyc
+|   |           interface.cpython-313.pyc
+|   |           notifications.cpython-313.pyc
+|   |           __init__.cpython-313.pyc
+|   |           
+|   +---static
+|   |   |   3805758.webp
+|   |   |   forgot-password-Image .png
+|   |   |   login-image.png
+|   |   |   signup-image.png
+|   |   |   style.css
+|   |   |   transparent_image.png
+|   |   |   verify-email.png
+|   |   |   
+|   |   +---css
+|   |   |       about.css
+|   |   |       faq.css
+|   |   |       features.css
+|   |   |       feedback.css
+|   |   |       home.css
+|   |   |       navbar.css
+|   |   |       privacy.css
+|   |   |       team.css
+|   |   |       
+|   |   +---Images
+|   |   |       Aboutus.png
+|   |   |       FAQs-unscreen.gif
+|   |   |       Feedback.gif
+|   |   |       
+|   |   \---js
+|   |           datatables-demo.js
+|   |           datatables-simple-demo.js
+|   |           service-worker.js
+|   |           
+|   +---templates
+|   |   +---auth
+|   |   |       forgot.html
+|   |   |       login.html
+|   |   |       register.html
+|   |   |       reset_password.html
+|   |   |       verify-email.html
+|   |   |       
+|   |   +---dashboard
+|   |   |       analytics.html
+|   |   |       base.html
+|   |   |       dataSet.html
+|   |   |       home.html
+|   |   |       predict.html
+|   |   |       upload.html
+|   |   |       
+|   |   \---Interface
+|   |           about.html
+|   |           base.html
+|   |           contact.html
+|   |           faq.html
+|   |           feedback.html
+|   |           home.html
+|   |           privacy.html
+|   |           team.html
+|   |           
+|   +---utils
+|   |   |   auth_decorators.py
+|   |   |   db.py
+|   |   |   hdfs.py
+|   |   |   mongodb_utils.py
+|   |   |   notifications.py
+|   |   |   role_required.py
+|   |   |   
+|   |   \---__pycache__
+|   |           auth_decorators.cpython-313.pyc
+|   |           db.cpython-313.pyc
+|   |           hdfs.cpython-313.pyc
+|   |           mongodb_utils.cpython-313.pyc
+|   |           notifications.cpython-313.pyc
+|   |           role_required.cpython-313.pyc
+|   |           
+|   \---__pycache__
+|           __init__.cpython-313.pyc
+|           
++---data
++---uploads
+|       merged_dataset_2.csv
+|       merged_dataset_4.csv
+|       perofmrance_v1.csv
+|       version_1.csv
+|       
+\---__pycache__
+        config.cpython-313.pyc
+        

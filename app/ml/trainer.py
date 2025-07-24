@@ -13,7 +13,7 @@ from app import mongo
 # MongoDB setup
 db = mongo.db
 metrics_collection = db['model_metrics']
-runs_collection = db['training_runs']
+runs_collection = db['trained_models']
 datasets_collection = db['uploaded_datasets']  # NEW: collection for uploaded dataset
 
 # Folder to store models
@@ -129,6 +129,7 @@ def train_models_and_save_metrics(df: pd.DataFrame, dataset_name: str):
     # ✅ Save the raw dataset in MongoDB (max 5000 rows)
     df_sample = df.head(5000)
     dataset_dicts = df_sample.to_dict(orient='records')
+    print(dataset_dicts)
     if dataset_dicts:
         datasets_collection.insert_one({
             'dataset_name': dataset_name,
