@@ -2215,12 +2215,13 @@ technologies-card .tech-item .fa-python { color: #306998; } /* Python Blue */
   padding: 12px 20px;
   margin-bottom: 10px;
   border-radius: 4px;
-  min-width: 250px;
+  min-width: 50px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   display: flex;
   justify-content: space-between;
   align-items: center;
   opacity: 0.95;
+  font-size: larger;
 }
 
 .toast.success {

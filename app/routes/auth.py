@@ -81,14 +81,17 @@ def login():
         user = users.find_one({'email': email})
 
         if user and check_password_hash(user['password'], password):
+            if not user.get('is_verified', False):
+                session['email_to_verify'] = email
+                flash("Please verify your email before logging in.", "warning")
+                return redirect(url_for('auth.verify_email'))
+                
             remember_me = True if request.form.get("remember_me") else False
 
             session['user_id'] = str(user['_id'])
             session['username'] = user['username']
             session['role'] = user['role']
             session['plan'] = user.get('plan', 'free')
-
-            print("Logged in user ID:", session['user_id'])
 
             session.permanent = remember_me
 
@@ -209,30 +212,31 @@ def reset_password(token):
 @auth_bp.route('/verify-email', methods=['GET', 'POST'])
 def verify_email():
     if request.method == 'POST':
-        code = request.form.get('code')
-        email = request.form.get('email')
-
-        if not email:
+        code = request.form['code']
+        email = session['email_to_verify']
+        user = users.find_one({'email': email})
+        if not user:
             flash('Session expired or no email provided.', 'danger')
             return redirect(url_for('auth.login'))
-
-        correct_code = verification_codes.get(email)
+        correct_code = verification_codes[email]
         if code == correct_code:
-            flash('Email verified successfully!', 'success')
+            mongo.db.users.update_one({'email': email}, {'$set': {'is_verified': True}})
+
             verification_codes.pop(email, None)
+            session.pop('email_to_verify', None)
+            flash('Email verified successfully!', 'success')
             return redirect(url_for('auth.login'))
         else:
             flash('Invalid verification code.', 'danger')
-
     return render_template('auth/verify-email.html')
 
 
 # =============================
 # RESEND CODE
 # =============================
-@auth_bp.route('/resend-code', methods=['GET'])
+@auth_bp.route('/resend-code', methods=['GET','POST'])
 def resend_code():
-    email = request.args.get('email')
+    email = session['email_to_verify']
     if not email:
         flash('Email is required to resend code.', 'danger')
         return redirect(url_for('auth.login'))
@@ -240,7 +244,27 @@ def resend_code():
     code = str(random.randint(100000, 999999))
     verification_codes[email] = code
 
-    print(f"[DEBUG] Sending verification code {code} to {email}")  # Replace with email logic
+    # Send code via email
+    msg = Message(
+        subject="EdFlow: Verification Code",
+        sender=current_app.config['MAIL_DEFAULT_SENDER'],
+        recipients=[email]
+    )
+    msg.body = f"""
+
+    To verify your email use the code below:
+
+    {code}
+    
+    This code will expires in 1 hour.
+
+    If you did not submit this request, you can ignore this email.
+
+    Best regards,
+    The EdFlow Team
+    """
+    mail.send(msg)
+
     flash('A new verification code has been sent to your email.', 'info')
     return redirect(url_for('auth.verify_email'))
 
