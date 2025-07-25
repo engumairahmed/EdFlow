@@ -5,6 +5,7 @@ D:.
 |   .gitattributes
 |   .gitignore
 |   config.py
+|   CONTRIBUTING.md
 |   layout.txt
 |   README.md
 |   requirements.txt
@@ -31,9 +32,16 @@ D:.
 |   |           __init__.cpython-313.pyc
 |   |           
 |   +---models
-|   |       user.py
-|   |       __init__.py
-|   |       
+|   |   |   contact.py
+|   |   |   feedback.py
+|   |   |   user.py
+|   |   |   __init__.py
+|   |   |   
+|   |   \---__pycache__
+|   |           contact.cpython-313.pyc
+|   |           feedback.cpython-313.pyc
+|   |           __init__.cpython-313.pyc
+|   |           
 |   +---routes
 |   |   |   auth.py
 |   |   |   dashboard.py
@@ -75,7 +83,10 @@ D:.
 |   |   |       
 |   |   +---Images
 |   |   |       Aboutus.png
+|   |   |       EdFlow Logo.png
+|   |   |       EdFlow_icon.png
 |   |   |       FAQs-unscreen.gif
+|   |   |       FAQs.gif
 |   |   |       Feedback.gif
 |   |   |       
 |   |   \---js
@@ -108,6 +119,7 @@ D:.
 |   |           home.html
 |   |           privacy.html
 |   |           team.html
+|   |           testimonials.html
 |   |           
 |   +---utils
 |   |   |   auth_decorators.py
@@ -130,10 +142,7 @@ D:.
 |           
 +---data
 +---uploads
-|       merged_dataset_2.csv
 |       merged_dataset_4.csv
-|       perofmrance_v1.csv
-|       version_1.csv
 |       
 \---__pycache__
         config.cpython-313.pyc
