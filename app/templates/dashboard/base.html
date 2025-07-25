@@ -40,6 +40,9 @@
                         class="{% if request.endpoint == 'dashboard.dataset' %}active{% endif %}"><i
                             class="fas fa-database"></i>
                         Dataset</a></li>
+
+
+                        
                 <!-- <li><a href="{{ url_for('dashboard.upload_data') }}" class="{% if request.endpoint == 'about_project' %}active{% endif %}"><i class="fas fa-info-circle"></i> About Project</a></li> -->
                 <li><a href="{{ url_for('auth.logout') }}"
                         class="{% if request.endpoint == 'logout' %}active{% endif %}"><i
@@ -53,9 +56,53 @@
                     <i class="fas fa-bars"></i>
                 </div>
                 <h1>{% block page_heading %}{% endblock %}</h1>
-                <div class="header-right">
-                    <span class="header-icon-wrapper"><i class="fas fa-bell"></i><span class="badge">3</span></span>
-                    <span class="header-icon-wrapper"><i class="fas fa-user-circle"></i></span>
+                 <div class="header-right">
+                    {# Notification Dropdown #}
+                    <div class="notification-dropdown-container">
+                        <span class="header-icon-wrapper notification-icon" id="notificationDropdownToggle">
+                            <i class="fas fa-bell"></i>
+                            {# <span class="badge">3</span> -- Make sure this is removed if not needed #}
+                        </span>
+
+                        <div class="notification-dropdown-menu" id="notificationDropdownMenu">
+                            <div class="dropdown-header">
+                                <h4>Notifications</h4>
+                            </div>
+
+                            <hr>
+                            <a href="{{ url_for('dashboard.all_notifications') }}">
+                                <i class="fas fa-list"></i> View All Notifications
+                            </a>
+                            <a href="{{ url_for('dashboard.notification_settings') }}">
+                                <i class="fas fa-cog"></i> Notification Settings
+                            </a>
+                        </div>
+                    </div>
+
+                    {# User Dropdown #}
+                    <div class="user-dropdown-container">
+                        <span class="header-icon-wrapper user-icon" id="userDropdownToggle">
+                            <i class="fas fa-user-circle"></i>
+                        </span>
+
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <a href="{{ url_for('dashboard.my_profile') }}">
+                                <i class="fas fa-user"></i> My Profile
+                            </a>
+                       
+                            <a href="{{ url_for('dashboard.update_profile') }}">
+                                <i class="fas fa-edit"></i> Update Profile
+                            </a>
+                            <a href="{{ url_for('dashboard.change_password') }}">
+                                <i class="fas fa-key"></i> Change Password
+                            </a>
+                            <a href="{{ url_for('dashboard.login_history') }}">
+                                <i class="fas fa-history"></i> My Logins History
+                            </a>
+                            <hr> <a href="{{ url_for('auth.logout') }}"> <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </header>
             <div class="content-area">
@@ -106,31 +153,83 @@
 
 
         // JavaScript for sidebar toggle
+  document.addEventListener('DOMContentLoaded', function () { // Added DOMContentLoaded wrapper
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('.main-content');
 
-        const hamburger = document.getElementById('hamburger');
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.querySelector('.main-content');  // Get main content area
+            // Ensure elements exist before adding event listeners
+            if (hamburger && sidebar) {
+                hamburger.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                });
+            }
 
-        hamburger.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
+            if (sidebar) {
+                sidebar.querySelectorAll('.sidebar-menu a').forEach(item => {
+                    item.addEventListener('click', () => {
+                        if (window.innerWidth <= 768) {
+                            sidebar.classList.remove('active');
+                        }
+                    });
+                });
+            }
 
-        });
+            if (mainContent && sidebar && hamburger) {
+                mainContent.addEventListener('click', (event) => {
+                    if (sidebar.classList.contains('active') && !sidebar.contains(event.target) && !hamburger.contains(event.target)) {
+                        sidebar.classList.remove('active');
+                    }
+                });
+            }
 
-        // Close sidebar when a menu item is clicked (on mobile)
-        sidebar.querySelectorAll('.sidebar-menu a').forEach(item => {
-            item.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
-                    sidebar.classList.remove('active');
+            // --- UPDATED JavaScript code for User AND Notification Dropdowns ---
+            const userDropdownToggle = document.getElementById('userDropdownToggle');
+            const userDropdownMenu = document.getElementById('userDropdownMenu');
+
+            // NEW: Notification Dropdown elements
+            const notificationDropdownToggle = document.getElementById('notificationDropdownToggle');
+            const notificationDropdownMenu = document.getElementById('notificationDropdownMenu');
+
+            // Function to close all dropdowns
+            function closeAllDropdowns() {
+                if (userDropdownMenu) {
+                    userDropdownMenu.classList.remove('show');
+                }
+                if (notificationDropdownMenu) {
+                    notificationDropdownMenu.classList.remove('show');
+                }
+            }
+
+            // Toggle User Dropdown
+            if (userDropdownToggle && userDropdownMenu) { // Check if elements exist
+                userDropdownToggle.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent document click from immediately closing
+                    closeAllDropdowns(); // Close other dropdowns first
+                    userDropdownMenu.classList.toggle('show');
+                });
+            }
+
+            // Toggle Notification Dropdown (NEW)
+            if (notificationDropdownToggle && notificationDropdownMenu) { // Check if elements exist
+                notificationDropdownToggle.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    closeAllDropdowns(); // Close other dropdowns first
+                    notificationDropdownMenu.classList.toggle('show');
+                });
+            }
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (event) => {
+                if (userDropdownMenu && !userDropdownMenu.contains(event.target) && !userDropdownToggle.contains(event.target)) {
+                    userDropdownMenu.classList.remove('show');
+                }
+                if (notificationDropdownMenu && !notificationDropdownMenu.contains(event.target) && !notificationDropdownToggle.contains(event.target)) {
+                    notificationDropdownMenu.classList.remove('show');
                 }
             });
-        });
+        }); 
 
-        // Optional: Close sidebar if clicked outside (for mobile overlay)
-        mainContent.addEventListener('click', (event) => {
-            if (sidebar.classList.contains('active') && !sidebar.contains(event.target) && !hamburger.contains(event.target)) {
-                sidebar.classList.remove('active');
-            }
-        });
 
         document.addEventListener('DOMContentLoaded', function () {
             const closeButtons = document.querySelectorAll('.toast-close');
