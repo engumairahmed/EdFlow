@@ -1,0 +1,40 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Login History-EdFlow{% endblock %}
+
+{% block page_heading %}My Login History{% endblock %}
+
+{% block content %}
+<div class="dashboard-card content-section">
+    <h3 class="section-title">Recent Login Activities</h3>
+    <p>Below is a log of your recent successful login attempts.</p>
+    <table class="data-table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Device</th>
+            <th>Location</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td data-label="Date">2023-10-26</td>
+            <td datdta-label="Time">10:30 AM</td>
+            <td data-label="Device">Desktop Chrome</td>
+            <td data-label="Location">New York, USA</td>
+            <td data-label="Status">Success</td>
+        </tr>
+        <tr>
+            <td data-label="Date">2023-10-25</td>
+            < data-label="Time">02:15 PM</td>
+            <td data-label="Device">Mobile Safari</td>
+            <td data-label="Location">London, UK</td>
+            <td data-label="Status">Failed</td>
+        </tr>
+        </tbody>
+</table>
+    <p class="mt-3 text-muted">If you notice any suspicious activity, please change your password immediately.</p>
+</div>
+{% endblock %}

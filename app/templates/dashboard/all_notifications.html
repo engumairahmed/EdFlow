@@ -1,0 +1,77 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}All Notifications-EdFlow{% endblock %}
+
+{% block page_heading %}All Notifications{% endblock %}
+
+{% block content %}
+<div class="dashboard-card content-section">
+    <h3 class="section-title">Your Notification History</h3>
+    <p>Here you can find all your past and current notifications from EduPredict.</p>
+
+    <div class="notification-controls">
+        <button class="btn btn-secondary"><i class="fas fa-check-double"></i> Mark All As Read</button>
+        <button class="btn btn-secondary"><i class="fas fa-trash-alt"></i> Clear All</button>
+        <select class="form-control notification-filter">
+            <option value="all">Show All</option>
+            <option value="unread">Show Unread</option>
+            <option value="read">Show Read</option>
+        </select>
+    </div>
+
+    <div class="notifications-list">
+        {# Example Notification Item #}
+        <div class="notification-item unread">
+            <div class="notification-icon-wrapper">
+                <i class="fas fa-exclamation-circle icon-purple"></i>
+            </div>
+            <div class="notification-content">
+                <p class="notification-message"><strong>New Assignment Due:</strong> "Algebra II Homework" is due tomorrow!</p>
+                <span class="notification-time">2 hours ago</span>
+            </div>
+            <div class="notification-actions">
+                <button class="btn-icon mark-read-btn" title="Mark as Read"><i class="fas fa-envelope-open"></i></button>
+                <button class="btn-icon delete-btn" title="Delete"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+
+        <div class="notification-item read">
+            <div class="notification-icon-wrapper">
+                <i class="fas fa-check-circle icon-green"></i>
+            </div>
+            <div class="notification-content">
+                <p class="notification-message"><strong>Course Update:</strong> Your "Calculus I" course has been completed.</p>
+                <span class="notification-time">Yesterday</span>
+            </div>
+            <div class="notification-actions">
+                <button class="btn-icon delete-btn" title="Delete"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+
+        <div class="notification-item unread">
+            <div class="notification-icon-wrapper">
+                <i class="fas fa-user-plus icon-blue"></i>
+            </div>
+            <div class="notification-content">
+                <p class="notification-message"><strong>New Registration:</strong> A new student, "Fatima Zahra," has joined.</p>
+                <span class="notification-time">3 days ago</span>
+            </div>
+            <div class="notification-actions">
+                <button class="btn-icon mark-read-btn" title="Mark as Read"><i class="fas fa-envelope-open"></i></button>
+                <button class="btn-icon delete-btn" title="Delete"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+
+        {# Add more notification items here dynamically if fetching from backend #}
+        
+        <p class="no-notifications" style="display: none;">No new notifications.</p>
+    </div>
+
+    <div class="pagination-controls">
+        <button class="btn btn-secondary" disabled><i class="fas fa-chevron-left"></i> Previous</button>
+        <span>Page 1 of 5</span>
+        <button class="btn btn-secondary">Next <i class="fas fa-chevron-right"></i></button>
+    </div>
+
+</div>
+{% endblock %}

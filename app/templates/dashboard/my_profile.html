@@ -1,0 +1,44 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}My Profile-EdFlow{% endblock %}
+
+{% block page_heading %}My Profile{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-main-info dashboard-card"> 
+        
+        <div class="profile-picture-section"> 
+            <img src="{{ url_for('static', filename='images/default_profile.png') }}" alt="Profile Picture" class="profile-picture">
+            <h3 class="profile-name">Palwasha </h3> 
+            <p class="profile-role">Administrator</p>
+        </div>
+        
+        <div class="profile-details-section"> 
+            <h3 class="section-title">Account Details</h3>
+            <div class="detail-item">
+                <span class="detail-label"><i class="fas fa-envelope icon-purple"></i> Email:</span>
+                <span class="detail-value">palwasha.com</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label"><i class="fas fa-id-badge icon-purple"></i> User ID:</span>
+                <span class="detail-value">EDP-001</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label"><i class="fas fa-calendar-alt icon-purple"></i> Member Since:</span>
+                <span class="detail-value">Jan 1, 2023</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-actions dashboard-card">
+        <h3 class="section-title">Quick Actions</h3>
+        <div class="action-buttons">
+            <a href="{{ url_for('dashboard.personal_information') }}" class="btn btn-primary"><i class="fas fa-info-circle"></i> View Personal Information</a>
+            <a href="{{ url_for('dashboard.change_password') }}" class="btn btn-secondary"><i class="fas fa-key"></i> Change Password</a>
+            <a href="{{ url_for('dashboard.login_history') }}" class="btn btn-info"><i class="fas fa-history"></i> My Logins History</a>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}
