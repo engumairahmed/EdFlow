@@ -115,14 +115,47 @@ def predict_form():
 
 @dashboard_bp.route('/analytics',methods=['GET'])
 @login_required
-@role_required(["analyst","teacher"])
+@role_required(["admin","analyst","teacher"])
 def analytics():
     return render_template("dashboard/analytics.html")
 
-subscriptions = []
 
-@dashboard_bp.route('/subscribe', methods=['POST'])
-def subscribe():
-    data = request.get_json()
-    subscriptions.append(data)
-    return jsonify({'status': 'success'})
+
+# --- Existing Profile-Related Pages Ke Routes ---
+@dashboard_bp.route('/my_profile')
+@login_required
+def my_profile():
+    return render_template('dashboard/my_profile.html')
+
+@dashboard_bp.route('/change_password')
+@login_required
+def change_password():
+    return render_template('dashboard/change_password.html')
+
+@dashboard_bp.route('/login_history')
+@login_required
+def login_history():
+    return render_template('dashboard/login_history.html')
+
+# --- Personal Information Page Ka Route ---
+@dashboard_bp.route('/personal_information')
+@login_required
+def personal_information():
+    return render_template('dashboard/personal_information.html')
+
+
+# --- Notification Related Routes 
+@dashboard_bp.route('/all_notifications')
+@login_required
+def all_notifications():
+    return render_template('dashboard/all_notifications.html') 
+
+@dashboard_bp.route('/notification_settings')
+@login_required
+def notification_settings():
+    return render_template('dashboard/notification_settings.html') 
+@dashboard_bp.route('/update_profile')
+def update_profile():
+    return render_template('dashboard/update_profile.html')
+
+koi route ghayab to nahi huwa..??
