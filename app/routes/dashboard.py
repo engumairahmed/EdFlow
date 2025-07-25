@@ -157,5 +157,3 @@ def notification_settings():
 @dashboard_bp.route('/update_profile')
 def update_profile():
     return render_template('dashboard/update_profile.html')
-
-koi route ghayab to nahi huwa..??
