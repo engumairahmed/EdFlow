@@ -16,6 +16,9 @@ verification_codes = {}
 
 users=mongo.db['users']
 
+# =============================
+# REGISTER ROUTE
+# =============================
 @auth_bp.route('/register', methods=['POST','GET'])
 def register():
     if not session.get('user_id'):
@@ -24,21 +27,40 @@ def register():
             password = request.form['password']
             email = request.form['email']
             role = request.form['role']
-
-            session['email_to_verify'] = email  # ✅ email directly from form input
-             # or whatever your user's email is
+ 
 
             if users.find_one({"email": email}):
-                return jsonify({"error": "User already exists"}), 400
+                flash("User already exists.", "danger")
+                return redirect(url_for('auth.register'))
 
             hashed = generate_password_hash(password)
-            users.insert_one({"username": username, "email":email, "password": hashed, "role": role})
-            # return jsonify({"message": "Registered successfully"}), 201
-            flash("Registration successful. Please login.","success")
+
+            users.insert_one({
+                "username": username,
+                "email":email,
+                "password": hashed,
+                "role": role,
+                "is_verified": False
+                })
+            
+            # Generate OTP and store temporarily
+            code = str(random.randint(100000, 999999))
+            verification_codes[email] = code
+            session['email_to_verify'] = email  # store in session for verify-email page
+
+            # Send code via email
+            msg = Message("Email Verification Code", recipients=[email])
+            msg.body = f"Your verification code is: {code}"
+            mail.send(msg)
+
+            flash("Verification code sent to your email. Please verify to continue.", "info")
+
             return render_template('auth/login.html')
         return render_template('auth/register.html')
     return redirect(url_for('dashboard.dashboard_view'))
-
+# =============================
+# LOGIN ROUTE
+# =============================
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if session.get('user_id'):
@@ -112,9 +134,43 @@ def forgot_password():
 
     return render_template('auth/forgot.html')
 
+# =============================
+# UPDATE PASSWORD
+# =============================
+@auth_bp.route('/update-password', methods=['GET', 'POST'])
+def update_password():
+    if 'username' not in session:
+        flash("Login required to update password", "danger")
+        return redirect(url_for('auth.login'))
+
+    user = mongo.db.users.find_one({'username': session['username']})
+    if not user:
+        flash("User not found", "danger")
+        return redirect(url_for('auth.login'))
+
+    if request.method == 'POST':
+        current = request.form.get('current_password')
+        new = request.form.get('new_password')
+        confirm = request.form.get('confirm_password')
+
+        if not check_password_hash(user['password'], current):
+            flash("Current password is incorrect.", "danger")
+        elif new != confirm:
+            flash("New passwords do not match.", "danger")
+        elif len(new) < 6:
+            flash("New password must be at least 6 characters long.", "danger")
+        else:
+            hashed = generate_password_hash(new)
+            mongo.db.users.update_one({'_id': user['_id']}, {'$set': {'password': hashed}})
+            flash("Password updated successfully. Please log in again.", "success")
+            return redirect(url_for('auth.logout'))
+
+    return render_template('update_password.html')
 
 
+# =============================
 # RESET PASSWORD VIA TOKEN
+# =============================
 @auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:
@@ -188,12 +244,10 @@ def resend_code():
     flash('A new verification code has been sent to your email.', 'info')
     return redirect(url_for('auth.verify_email'))
 
-
+# =============================
+# LOGOUT
+# =============================
 @auth_bp.route('/logout')
 def logout():
     session.clear()  # Clears all session data
     return redirect(url_for('auth.login'))
-
-# @auth_bp.route('/forgot')
-# def forgot():
-#     return render_template('forgot.html')
