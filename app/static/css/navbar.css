@@ -106,6 +106,15 @@
   background-color:  rgb(111, 68, 114)!important;
   color: white !important;
 }
+.username-display {
+  color: #fff;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  font-weight: 500;
+  background: transparent;
+  cursor: default;
+}
 #userDropdown::after {
   display: none !important;
 }
@@ -119,6 +128,10 @@
   transition: color 0.3s ease;
 }
 
+.custom-dropdown-toggle:hover{
+  color: rgb(111, 68, 114);
+}
+
 .custom-dropdown-menu {
   background: rgb(111, 68, 114) !important;
   backdrop-filter: blur(15px);
@@ -127,7 +140,7 @@
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   min-width: 180px;
   padding: 0.5rem 0;
-  /* z-index: 1100; */
+  
 }
 
 .custom-dropdown-menu::before {
