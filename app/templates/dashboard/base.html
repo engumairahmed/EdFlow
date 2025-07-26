@@ -17,7 +17,7 @@
     <div class="dashboard-container">
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Dashboard Logo"
+                <img src="{{ url_for('static', filename='Images/EdFlow Logo.png') }}" alt="EdFlow Logo"
                     class="dashboard-logo">
                 <h3>EdFlow</h3>
             </div>
@@ -40,7 +40,10 @@
                         class="{% if request.endpoint == 'dashboard.dataset' %}active{% endif %}"><i
                             class="fas fa-database"></i>
                         Dataset</a></li>
-
+                 <li><a href="{{ url_for('dashboard.dataset') }}"
+                        class="{% if request.endpoint == 'dashboard.my_models' %}active{% endif %}"><i
+                            class="fas fa-database"></i>
+                        Trained Models</a></li>
 
                         
                 <!-- <li><a href="{{ url_for('dashboard.upload_data') }}" class="{% if request.endpoint == 'about_project' %}active{% endif %}"><i class="fas fa-info-circle"></i> About Project</a></li> -->
@@ -127,30 +130,50 @@
 
     <script>
 
-        if ('serviceWorker' in navigator && 'PushManager' in window) {
-            navigator.serviceWorker.register('/static/service-worker.js')
-                .then(function (registration) {
-                    console.log('Service Worker registered:', registration);
-
-                    return registration.pushManager.subscribe({
-                        userVisibleOnly: true,
-                        applicationServerKey: '<YOUR_PUBLIC_VAPID_KEY_BASE64>'
-                    });
-                })
-                .then(function (subscription) {
-                    console.log('Push Subscription:', JSON.stringify(subscription));
-                    // Send this subscription to your Flask server
-                    fetch('/subscribe', {
-                        method: 'POST',
-                        body: JSON.stringify(subscription),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                })
-                .catch(console.error);
+      const vapidPublicKey = "BLu_gV52vGyYtr5QaZ5FugLdQLfEBt9hcIuFS4oqAfP8CdnqDVmJjchVDitvpDZIQwu-Tk7_Gp_JEvlOUNNNXqg";
+        console.log(vapidPublicKey);
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const rawData = atob(base64);
+            return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
         }
 
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('{{ url_for("static", filename="service-worker.js") }}');
+                    console.log('✅ Service Worker registered:', registration);
+
+                    const permission = await Notification.requestPermission();
+                    if (permission !== 'granted') {
+                        console.warn('🚫 Notification permission not granted');
+                        return;
+                    }
+
+                    const subscription = await registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+                    });
+
+                    console.log('🔔 Push subscription successful:', subscription);
+
+                    // TODO: Send this `subscription` object to your Flask backend using fetch()
+                    // Example:
+                    await fetch('/notifications/subscribe', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(subscription)
+                    });
+                } catch (error) {
+                    console.error('❌ Push setup failed:', error);
+                }
+            });
+        } else {
+            console.warn('🚫 Push messaging is not supported in this browser');
+        }
 
         // JavaScript for sidebar toggle
   document.addEventListener('DOMContentLoaded', function () { // Added DOMContentLoaded wrapper

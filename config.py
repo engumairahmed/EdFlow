@@ -23,3 +23,6 @@ class Config:
 
     VAPID_PRIVATE_KEY = os.getenv('VAPID_PRIVATE_KEY')
     VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY')
+    VAPID_CLAIMS = {
+    "sub": f"mailto:{MAIL_DEFAULT_SENDER}"
+    }
