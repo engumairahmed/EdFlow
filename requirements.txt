@@ -9,4 +9,5 @@ numpy
 scikit-learn
 joblib
 hdfs
+itsdangerous
 pywebpush

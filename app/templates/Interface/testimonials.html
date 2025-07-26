@@ -45,6 +45,15 @@ endblock %} {% block head %}
 <section class="all-testimonials py-5 bg-white">
   <div class="container">
     <h2 class="text-center fw-bold mb-5">EdFlow Testimonials</h2>
+     {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div
+          class="alert alert-{{ 'success' }} show mb-3"
+          role="alert"
+        >
+          {{ message }}
+        </div>
+        {% endfor %} {% endif %} {% endwith %}
     <div class="row gy-4 ">
       {% if testimonials|length == 0 %}
       <div class="col-12 text-center text-light">
@@ -68,4 +77,13 @@ endblock %} {% block head %}
     </div>
   </div>
 </section>
+<script>
+   window.setTimeout(function () {
+    const alert = document.querySelector(".alert");
+    if (alert) {
+      alert.classList.add("fade-out");
+      setTimeout(() => alert.remove(), 500);
+    }
+  }, 2500);
+</script>
 {% endblock %}

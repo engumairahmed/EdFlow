@@ -1,7 +1,7 @@
 import re
 from app.models import get_feedbacks_collection
 
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
 
 class Feedback:
