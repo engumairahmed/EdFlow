@@ -1,3 +1,5 @@
+# app/routes/dashboard.py
+
 import os
 from flask import Blueprint, render_template, jsonify, request, session, redirect, url_for, flash
 import pandas as pd
@@ -7,11 +9,14 @@ from app.ml.predictors import predict, predict_missing_fields
 from app.ml.trainer import train_models_and_save_metrics
 from app.utils.auth_decorators import login_required
 from app import mongo
-from app.utils.mongodb_utils import save_dataset_to_mongodb
 from app.utils.notifications import send_role_notification
 from app.utils.role_required import role_required
+# Import the new anomaly detector
+from app.ml.anomaly_detector import detect_student_anomalies
 from config import Config
 
+# Correctly define UPLOADS_DIR relative to the project root
+# os.getcwd() is the project root if you run python run.py from there
 MODEL_DIR = os.path.join(os.getcwd(), "app", "ml", "models")
 UPLOADS_DIR = os.path.join(os.getcwd(), "uploads")
 VAPID_PUBLIC_KEY = Config.VAPID_PUBLIC_KEY
@@ -36,9 +41,9 @@ def upload_data():
             model_name = request.form.get("model_name").strip()
             is_paid = True if request.form.get("is_paid") == "on" else False
 
-            if not file or not model_name:
-                flash("Please provide a file and model name.", "danger")
-                return redirect(url_for("data.upload_data"))
+            if not file or file.filename == "":
+                flash("No file selected.", "danger")
+                return redirect(request.url)
 
             df = pd.read_csv(file)
             try:
@@ -56,42 +61,23 @@ def upload_data():
                 )
                 return redirect(url_for("dashboard.dashboard_view"))
             except Exception as e:
-                flash(f"Error: {str(e)}", "danger")
-                return redirect(url_for("dashboard.upload_data"))
+                flash(f"Error processing file: {e}", "danger")
+            finally:
+                if os.path.exists(filepath):
+                    os.remove(filepath) # Clean up the uploaded file
 
+            return redirect(url_for("dashboard.upload_data"))
+        
         return render_template("dashboard/upload.html")
-
-@dashboard_bp.route("/dataset")
-@login_required
-@role_required(["admin", "analyst"])
-def dataset():
-    return render_template("dashboard/dataset.html")
-
-@dashboard_bp.route("/data-summary")
-@login_required
-@role_required(["admin"])
-def data_summary():
-    try:
-        summary = {
-            "total_records": db.count_documents({}),
-            "latest_entry": db.find_one(sort=[("timestamp", -1)])
-        }
-        return render_template("summary.html", summary=summary)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 @dashboard_bp.route("/my-models")
 @login_required
-@role_required(["admin"])
+@role_required(["admin", "analyst"])
 def my_models():
-    if 'username' not in session:
-        flash("Please login to access this page", "warning")
-        return redirect(url_for('auth.login'))
-
     user = db.users.find_one({"username": session['username']})
     model_names = user.get("models", [])
 
-    return render_template("my_models.html", models=model_names)
+    return render_template("dashboard/my_models.html", models=model_names)
 
 @dashboard_bp.route("/predict", methods=["GET", "POST"])
 @login_required
@@ -108,10 +94,10 @@ def predict_form():
         model_doc = db.trained_models.find_one({"name": model_name})
         if not model_doc:
             flash("Model not found.", "danger")
-            return redirect(url_for("dashboard.predict"))
+            return redirect(url_for("dashboard.predict_form")) # Changed to predict_form
 
         # Access control: is model paid & does user have plan?
-        if model_doc["is_paid"] and session['plan'] != "premium":
+        if model_doc["is_paid"] and session.get('plan') != "premium": # Assuming 'plan' in session for user
             flash("This model requires a premium plan.", "danger")
             return redirect(url_for("dashboard.predict"))
 
@@ -163,6 +149,42 @@ def all_notifications():
 @login_required
 def notification_settings():
     return render_template('dashboard/notification_settings.html') 
+
 @dashboard_bp.route('/update_profile')
 def update_profile():
     return render_template('dashboard/update_profile.html')
+
+# =========================================================
+# NEW ANOMALY DETECTION ROUTE
+# =========================================================
+@dashboard_bp.route('/anomaly-results', methods=['GET'])
+@login_required
+@role_required(['admin', 'analyst']) # Only admins and analysts can view anomalies
+def anomaly_results_view():
+    # Adjust contamination based on your dataset; 0.03 means expecting 3% outliers
+    # If you see too many or too few anomalies, adjust this value (e.g., 0.01 to 0.1)
+    full_df, anomalous_students = detect_student_anomalies(contamination=0.03) 
+    
+    if anomalous_students: # Check if the list of anomalies is not empty
+        # Prepare data for display, ensuring all relevant columns are passed
+        display_anomalies = []
+        for student in anomalous_students:
+            display_anomalies.append({
+                'student_id': student.get('student_id', 'N/A'),
+                'age': student.get('age', 'N/A'),
+                'gender': student.get('gender', 'N/A'),
+                'attendance_percentage': student.get('attendance_percentage', 'N/A'),
+                'study_hours_per_day': student.get('study_hours_per_day', 'N/A'),
+                'exam_score': student.get('exam_score', 'N/A'),
+                'social_media_hours': student.get('social_media_hours', 'N/A'),
+                'sleep_hours': student.get('sleep_hours', 'N/A'),
+                'mental_health_rating': student.get('mental_health_rating', 'N/A'),
+                'extracurricular_participation': student.get('extracurricular_participation', 'N/A'),
+                'anomaly_score': f"{student.get('anomaly_score', 0):.4f}" # Format score for display
+            })
+        
+        return render_template('dashboard/anomaly_results.html', anomalies=display_anomalies)
+    else:
+        # If no anomalies or data loading failed
+        flash("Could not load student data for anomaly detection or no anomalies found.", "info")
+        return render_template('dashboard/anomaly_results.html', anomalies=[])

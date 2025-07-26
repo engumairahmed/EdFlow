@@ -27,8 +27,8 @@
                             class="fas fa-home"></i> Home</a>
                 </li>
                 <li><a href="{{ url_for('dashboard.upload_data') }}"
-                        class="{% if request.endpoint == 'dashboard.upload_data' %}active{% endif %}"><i
-                            class="fas fa-cloud-upload-alt"></i> Upload Data</a></li>
+                        class="{% if request.endpoint == 'dashboard.upload_data' %}active{% endif %}"><i class="fas fa-upload"></i> Upload Data</a>
+                </li>
                 <li><a href="{{ url_for('dashboard.predict_form') }}"
                         class="{% if request.endpoint == 'dashboard.predict_form' %}active{% endif %}"><i
                             class="fas fa-brain"></i>
@@ -48,8 +48,8 @@
                         
                 <!-- <li><a href="{{ url_for('dashboard.upload_data') }}" class="{% if request.endpoint == 'about_project' %}active{% endif %}"><i class="fas fa-info-circle"></i> About Project</a></li> -->
                 <li><a href="{{ url_for('auth.logout') }}"
-                        class="{% if request.endpoint == 'logout' %}active{% endif %}"><i
-                            class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        class="{% if request.endpoint == 'auth.logout' %}active{% endif %}"><i {# CORRECTED: Changed from logout #}
+                                class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </div>
 
@@ -114,7 +114,6 @@
         </div>
     </div>
 
-    <!-- Toast Notifications -->
     <div class="toast-container" id="toast-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
