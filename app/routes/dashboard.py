@@ -9,6 +9,7 @@ from app.ml.predictors import predict, predict_missing_fields
 from app.ml.trainer import train_models_and_save_metrics
 from app.utils.auth_decorators import login_required
 from app import mongo
+from app.utils.mongodb_utils import save_dataset_to_mongodb
 from app.utils.notifications import send_role_notification
 from app.utils.role_required import role_required
 # Import the new anomaly detector
@@ -62,9 +63,6 @@ def upload_data():
                 return redirect(url_for("dashboard.dashboard_view"))
             except Exception as e:
                 flash(f"Error processing file: {e}", "danger")
-            finally:
-                if os.path.exists(filepath):
-                    os.remove(filepath) # Clean up the uploaded file
 
             return redirect(url_for("dashboard.upload_data"))
         
