@@ -26,3 +26,6 @@ class Config:
     VAPID_CLAIMS = {
     "sub": f"mailto:{MAIL_DEFAULT_SENDER}"
     }
+
+    HDFS_URL = os.getenv("HDFS_URL")
+    HDFS_USER = os.getenv("HDFS_USER")
