@@ -80,3 +80,10 @@ def insert_dataset(df: pd.DataFrame, hash_val: str):
 
 def delete_dataset_by_hash(hash_val: str):
     datasets_collection.delete_many({"hash": hash_val})
+
+def get_mongo_collections():
+    collections = db.list_collection_names()
+    return collections
+
+def get_mongo_collection(collection_name):
+    return db[collection_name]

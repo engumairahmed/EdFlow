@@ -8,10 +8,13 @@ from app.ml.trainer import train_models_and_save_metrics
 from app.utils.auth_decorators import login_required
 from app import mongo
 from app.utils.mongodb_utils import save_dataset_to_mongodb
+from app.utils.notifications import send_role_notification
 from app.utils.role_required import role_required
+from config import Config
 
 MODEL_DIR = os.path.join(os.getcwd(), "app", "ml", "models")
 UPLOADS_DIR = os.path.join(os.getcwd(), "uploads")
+VAPID_PUBLIC_KEY = Config.VAPID_PUBLIC_KEY
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
@@ -22,7 +25,7 @@ db = mongo.db
 def dashboard_view():
     username = session.get('username')
     role = session.get('role')
-    return render_template("dashboard/home.html", username=username, role=role)
+    return render_template("dashboard/home.html", username=username, role=role, VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY)
 
 @dashboard_bp.route("/upload", methods=["GET", "POST"])
 @login_required
@@ -45,6 +48,12 @@ def upload_data():
                 train_models_and_save_metrics(df, model_name)
                 save_dataset_to_mongodb(df, model_name, session['user_id'], is_paid)
                 flash(f"✅ Model '{model_name}' trained and saved!", "success")
+                send_role_notification(
+                    title="📢 New Model Trained",
+                    body=f"The model '{model_name}' has been successfully trained.",
+                    role="admin",  # or send to all: loop roles if needed
+                    url="/my-models"
+                )
                 return redirect(url_for("dashboard.dashboard_view"))
             except Exception as e:
                 flash(f"Error: {str(e)}", "danger")
