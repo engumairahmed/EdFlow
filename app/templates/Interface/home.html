@@ -163,4 +163,53 @@
   </div>
 </section>
 
+<!-- Testimonials Section -->
+<section id="testimonials" class="py-5 bg-white">
+  <div class="container">
+    <div class="row justify-content-center mb-4">
+      <div class="col-12 col-md-10 col-lg-8 text-center">
+        <h2 class="display-5 fw-bold text-theme mb-3">Testimonials</h2>
+        <p class="text-secondary mb-0">
+          Discover how EdFlow is transforming education through the voices of
+          our happy users.
+        </p>
+      </div>
+    </div>
+
+    <!-- <div class="row gy-4 justify-content-center">
+    {% for feedback in feedbacks %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <div
+          class="testimonial-card p-4 rounded shadow h-100 border border-2 border-theme"
+        >
+          <h6 class="fw-bold mb-2 text-black text-center">
+            {{ feedback.name }}
+          </h6>
+          <div class="stars mb-3 text-center">
+            {% for i in range(feedback.rating) %}
+            <i class="fas fa-star text-warning"></i>
+            {% endfor %} {% for i in range(5 - feedback.rating) %}
+            <i class="far fa-star text-muted"></i>
+            {% endfor %}
+          </div>
+          <p class="text-secondary text-center mb-0">
+            “{{ feedback.message | truncate(200) }}”
+          </p>
+        </div>
+      </div>
+      {% endfor %}
+    </div> -->
+
+    <div class="row mt-5">
+      <div class="col text-center">
+        <a
+          href="{{ url_for('interface.testimonials') }}"
+          class="btn btn-theme px-4 py-2 shadow-sm rounded-pill"
+        >
+          View All Testimonials
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock %}

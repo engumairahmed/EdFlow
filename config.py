@@ -20,3 +20,9 @@ class Config:
     MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER_EMAIL')
     
     PERMANENT_SESSION_LIFETIME = timedelta(days=30)
+
+    VAPID_PRIVATE_KEY = os.getenv('VAPID_PRIVATE_KEY')
+    VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY')
+    VAPID_CLAIMS = {
+    "sub": f"mailto:{MAIL_DEFAULT_SENDER}"
+    }

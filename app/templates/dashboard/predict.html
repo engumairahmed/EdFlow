@@ -6,11 +6,13 @@
 
 {% block content %}
 <div class="prediction-container">
-    <div class="prediction-input-card dashboard-card animated-slide-in-up">
+    <div class="prediction-input-card dashboard-card ">
         <h2><i class="fas fa-edit icon-purple"></i> Enter Student Details</h2>
-        <p>Input the student's academic and personal information to get a prediction of their future outcome. Please fill in all the required fields accurately.</p>
+        <p>Input the student's academic and personal information to get a prediction of their future outcome. Please
+            fill in all the required fields accurately.</p>
+            {{ result }}
 
-        <form id="predictionForm" class="prediction-form">
+        <form id="predictionForm" class="prediction-form" method="post"  action="/dashboard/predict">
             <div class="form-grid">
                 <div class="form-group">
                     <label for="studentName">Student Name:</label>
@@ -18,9 +20,9 @@
                 </div>
                 <div class="form-group">
                     <label for="age">Age:</label>
-                    <input type="number" id="age" name="age" min="15" max="30" placeholder="e.g., 18" required>
+                    <input type="number" id="age" name="age"  placeholder="e.g., 18" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="gender">Gender:</label>
                     <select id="gender" name="gender" required>
@@ -32,16 +34,19 @@
                 </div>
                 <div class="form-group">
                     <label for="gradeLevel">Grade Level:</label>
-                    <input type="text" id="gradeLevel" name="gradeLevel" placeholder="e.g., 10th Grade / Senior" required>
+                    <input type="text" id="gradeLevel" name="gradeLevel" placeholder="e.g., 10th Grade / Senior"
+                        required>
                 </div>
 
                 <div class="form-group">
                     <label for="gpa">Current GPA (0.0-4.0):</label>
-                    <input type="number" id="gpa" name="gpa" step="0.01" min="0" max="4" placeholder="e.g., 3.5" required>
+                    <input type="number" id="gpa" name="gpa" step="0.01" min="0" max="4" placeholder="e.g., 3.5"
+                        required>
                 </div>
                 <div class="form-group">
                     <label for="attendance">Attendance Rate (%):</label>
-                    <input type="number" id="attendance" name="attendance" min="0" max="100" placeholder="e.g., 95" required>
+                    <input type="number" id="attendance" name="attendance" min="0" max="100" placeholder="e.g., 95"
+                        required>
                 </div>
 
                 <div class="form-group">
@@ -52,7 +57,7 @@
                         <option value="No">No</option>
                     </select>
                 </div>
-                 <div class="form-group">
+                <div class="form-group">
                     <label for="supportNeeded">Support Needed:</label>
                     <select id="supportNeeded" name="supportNeeded" required>
                         <option value="">Select Option</option>
@@ -74,26 +79,38 @@
                     <label for="studyHours">Weekly Study Hours:</label>
                     <input type="number" id="studyHours" name="studyHours" min="0" placeholder="e.g., 15" required>
                 </div>
+                <div class="form-group">
+                    <label for="model">Prediction Model:</label>
+                    <select id="model" name="model" required>
+                        <option value="">Select Model</option>
+                        <option value="random_forest">Random Forest</option>
+                        <option value="logistic_regression">Logistic Regression</option>
+                        <option value="linear_regression">Linear Regression</option>
+                    </select>
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-primary predict-btn"><i class="fas fa-flask"></i> Predict Outcome</button>
+            <button type="submit" class="btn btn-primary predict-btn"><i class="fas fa-flask"></i> Predict
+                Outcome</button>
         </form>
     </div>
 
-    <div id="predictionResults" class="prediction-results-card dashboard-card animated-slide-in-up delay-1" style="display: none;">
+    <div id="predictionResults" class="prediction-results-card dashboard-card "
+        style="display: none;">
         <h2><i class="fas fa-chart-pie icon-purple"></i> Prediction Results</h2>
         <div class="result-details">
             <p><strong>Predicted Outcome:</strong> <span id="predictedOutcome" class="outcome-label"></span></p>
             <p><strong>Confidence Level:</strong> <span id="confidenceLevel"></span></p>
         </div>
-        
+
         <div class="prediction-chart-container">
             <canvas id="predictionChart"></canvas>
         </div>
 
         <div class="recommendations-section">
             <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
-            <p id="recommendationsText">Based on the prediction, personalized recommendations will appear here to help improve student outcomes.</p>
+            <p id="recommendationsText">Based on the prediction, personalized recommendations will appear here to help
+                improve student outcomes.</p>
         </div>
     </div>
 
@@ -106,7 +123,7 @@
 </div>
 
 
-                    <!-- JavaScript for Prediction Page Logic  -->
+<!-- JavaScript for Prediction Page Logic  -->
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -175,7 +192,7 @@
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 let label = context.label || '';
                                 if (label) {
                                     label += ': ';
@@ -192,8 +209,8 @@
         });
     }
 
-                                // Handle form submission
-                                
+    // Handle form submission
+
 
     predictionForm.addEventListener('submit', async (e) => {
         e.preventDefault(); // Prevent default form submission
@@ -210,7 +227,7 @@
 
         try {
             // Replace with your actual Flask prediction API endpoint
-            const response = await fetch('/api/predict', { 
+            const response = await fetch('/dashboard/predict', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -226,9 +243,9 @@
                 recommendationsText.textContent = result.recommendations || 'No specific recommendations at this time.';
 
                 // Assign class based on outcome for styling
-                predictedOutcomeSpan.className = 'outcome-label ' + 
-                    (result.predicted_outcome === 'Success' ? 'outcome-success' : 
-                    (result.predicted_outcome === 'At Risk' ? 'outcome-at-risk' : 'outcome-neutral'));
+                predictedOutcomeSpan.className = 'outcome-label ' +
+                    (result.predicted_outcome === 'Success' ? 'outcome-success' :
+                        (result.predicted_outcome === 'At Risk' ? 'outcome-at-risk' : 'outcome-neutral'));
 
                 // Example chart data structure (replace with actual model output)
                 // This assumes your API returns probabilities for different outcomes

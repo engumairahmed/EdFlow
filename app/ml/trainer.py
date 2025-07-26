@@ -13,7 +13,7 @@ from app import mongo
 # MongoDB setup
 db = mongo.db
 metrics_collection = db['model_metrics']
-runs_collection = db['training_runs']
+runs_collection = db['trained_models']
 datasets_collection = db['uploaded_datasets']  # NEW: collection for uploaded dataset
 
 # Folder to store models
@@ -51,14 +51,12 @@ def train_models_and_save_metrics(df: pd.DataFrame, dataset_name: str):
         try:
             data = df_cleaned.dropna(subset=[target])
             if len(data) < 10:
-                print(f"⏭️ Skipping {target}: not enough data")
                 continue
 
             X = data.drop(columns=[target] + EXCLUDED_COLUMNS)
             y = data[target]
 
             if X.select_dtypes(include=[float, int]).shape[1] == 0:
-                print(f"⏭️ Skipping {target}: no valid numeric features")
                 continue
 
             # Fill missing values
@@ -86,7 +84,6 @@ def train_models_and_save_metrics(df: pd.DataFrame, dataset_name: str):
                     'r2_score': r2_lr,
                     'model_path': lr_path
                 }
-                print(f"✅ Linear Regression saved: {lr_path}")
             except Exception as e:
                 print(f"❌ Linear Regression failed for {target}: {e}")
 
@@ -106,7 +103,6 @@ def train_models_and_save_metrics(df: pd.DataFrame, dataset_name: str):
                     'r2_score': r2_rf,
                     'model_path': rf_path
                 }
-                print(f"🌲 Random Forest saved: {rf_path}")
             except Exception as e:
                 print(f"❌ Random Forest failed for {target}: {e}")
 
@@ -124,7 +120,6 @@ def train_models_and_save_metrics(df: pd.DataFrame, dataset_name: str):
         'details': last_run_results
     })
 
-    print(f"📝 MongoDB record saved for model: {dataset_name}")
 
     # ✅ Save the raw dataset in MongoDB (max 5000 rows)
     df_sample = df.head(5000)
@@ -135,7 +130,6 @@ def train_models_and_save_metrics(df: pd.DataFrame, dataset_name: str):
             'uploaded_at': datetime.now(),
             'sample_data': dataset_dicts
         })
-        print(f"📦 Dataset saved in MongoDB: {dataset_name}")
     else:
         print(f"⚠️ Dataset was empty or could not be parsed")
 

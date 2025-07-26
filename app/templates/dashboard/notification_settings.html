@@ -1,0 +1,75 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Notification Settings-EdFlow{% endblock %}
+
+{% block page_heading %}Notification Settings{% endblock %}
+
+{% block content %}
+<div class="dashboard-card content-section">
+    <h3 class="section-title">Manage Your Notification Preferences</h3>
+    <p>Control how and when you receive alerts from EduPredict.</p>
+
+    <form class="settings-form">
+        <div class="form-group-heading">
+            <h4>Email Notifications</h4>
+            <p class="text-muted">Receive updates directly in your inbox.</p>
+        </div>
+        <div class="setting-item">
+            <label class="toggle-switch">
+                <input type="checkbox" checked>
+                <span class="slider round"></span>
+            </label>
+            <span class="setting-label">New Assignment Alerts</span>
+        </div>
+        <div class="setting-item">
+            <label class="toggle-switch">
+                <input type="checkbox">
+                <span class="slider round"></span>
+            </label>
+            <span class="setting-label">Grade Updates</span>
+        </div>
+        <div class="setting-item">
+            <label class="toggle-switch">
+                <input type="checkbox" checked>
+                <span class="slider round"></span>
+            </label>
+            <span class="setting-label">Course Announcements</span>
+        </div>
+
+        <div class="form-group-heading mt-5">
+            <h4>In-App Notifications</h4>
+            <p class="text-muted">Get instant alerts within the EduPredict dashboard.</p>
+        </div>
+        <div class="setting-item">
+            <label class="toggle-switch">
+                <input type="checkbox" checked>
+                <span class="slider round"></span>
+            </label>
+            <span class="setting-label">Prediction Results Ready</span>
+        </div>
+        <div class="setting-item">
+            <label class="toggle-switch">
+                <input type="checkbox" checked>
+                <span class="slider round"></span>
+            </label>
+            <span class="setting-label">System Updates & Maintenance</span>
+        </div>
+
+        <div class="form-group-heading mt-5">
+            <h4>Notification Frequency</h4>
+            <p class="text-muted">How often would you like to receive summary emails?</p>
+        </div>
+        <div class="setting-item">
+            <label for="frequency" class="setting-label">Email Digest Frequency:</label>
+            <select id="frequency" class="form-control">
+                <option value="daily">Daily</option>
+                <option value="weekly" selected>Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="never">Never</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-5"><i class="fas fa-save"></i> Save Preferences</button>
+    </form>
+</div>
+{% endblock %}

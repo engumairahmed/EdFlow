@@ -65,9 +65,18 @@ endblock %} {% block head %}
       </div>
 
       <!-- Contact Form -->
-      <div class="col-lg-7">
+     <div class="col-lg-7">
         <div class="p-4 p-md-5 bg-white rounded shadow">
-          <form>
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %} {% for category, message in messages %}
+          <div
+            class="alert alert-{{ 'success' }} alert-dismissible fade show mb-4"
+            role="alert"
+          >
+            {{ message }}
+          </div>
+          {% endfor %} {% endif %} {% endwith %}
+          <form method="POST" action="{{ url_for('interface.contact') }}">
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label"
@@ -75,10 +84,14 @@ endblock %} {% block head %}
                 ></label>
                 <input
                   type="text"
+                  name="fullname"
                   class="form-control"
                   placeholder="Your Name"
-                  required
+                  value="{{ form_data.fullname if form_data else '' }}"
                 />
+                {% if errors.fullname %}
+  <div class="text-danger">{{ errors.fullname }}</div>
+{% endif %}
               </div>
               <div class="col-md-6">
                 <label class="form-label"
@@ -86,21 +99,30 @@ endblock %} {% block head %}
                 ></label>
                 <input
                   type="email"
+                  name="email"
                   class="form-control"
-                  placeholder="you@example.com"
-                  required
+                  placeholder="Your Email"
+                 value="{{ form_data.email if form_data else '' }}"
                 />
+                {% if errors.email %}
+  <div class="text-danger">{{ errors.email }}</div>
+{% endif %}
               </div>
+              
               <div class="col-12">
                 <label class="form-label"
                   >Subject <span class="text-danger"></span
                 ></label>
                 <input
                   type="text"
+                  name="subject"
                   class="form-control"
                   placeholder="Subject"
-                  required
+                  value="{{ form_data.subject if form_data else '' }}"
                 />
+                {% if errors.subject %}
+  <div class="text-danger">{{ errors.subject }}</div>
+{% endif %}
               </div>
               <div class="col-12">
                 <label class="form-label"
@@ -109,9 +131,13 @@ endblock %} {% block head %}
                 <textarea
                   class="form-control"
                   rows="4"
+                  name="message"
                   placeholder="Write your message here..."
-                  required
+                  {{ form_data.message if form_data else '' }}
                 ></textarea>
+                {% if errors.message %}
+  <div class="text-danger">{{ errors.message }}</div>
+{% endif %}
               </div>
               <div class="col-12">
                 <button class="btn w-100 text-white custom-hover" type="submit">
@@ -125,4 +151,18 @@ endblock %} {% block head %}
     </div>
   </div>
 </section>
+
+<script>
+  window.setTimeout(function () {
+    const alert = document.querySelector(".alert");
+    if (alert) {
+      alert.classList.remove("show");
+      alert.classList.add("fade-out");
+
+      setTimeout(() => {
+        alert.remove();
+      }, 500);
+    }
+  }, 2000);
+</script>
 {% endblock %}
