@@ -25,22 +25,25 @@
                 <li><a href="{{ url_for('dashboard.dashboard_view') }}"
                         class="{% if request.endpoint == 'dashboard.dashboard_view' %}active{% endif %}"><i class="fas fa-home"></i> Home</a>
                 </li>
+                <li><a href="{{ url_for('dashboard.analytics') }}" {# CORRECTED: Changed from analytics_view #}
+                        class="{% if request.endpoint == 'dashboard.analytics' %}active{% endif %}"><i class="fas fa-chart-line"></i> Analytics</a>
+                </li>
+                <li><a href="{{ url_for('dashboard.dataset') }}" {# CORRECTED: Changed from dataset_view #}
+                        class="{% if request.endpoint == 'dashboard.dataset' %}active{% endif %}"><i class="fas fa-database"></i> Dataset</a>
+                </li>
+                {# NEW ANOMALY DETECTION LINK #}
+                <li><a href="{{ url_for('dashboard.anomaly_results_view') }}"
+                        class="{% if request.endpoint == 'dashboard.anomaly_results_view' %}active{% endif %}"><i class="fas fa-exclamation-triangle"></i> Anomaly Detection</a>
+                </li>
                 <li><a href="{{ url_for('dashboard.upload_data') }}"
-                        class="{% if request.endpoint == 'dashboard.upload_data' %}active{% endif %}"><i
-                            class="fas fa-cloud-upload-alt"></i> Upload Data</a></li>
+                        class="{% if request.endpoint == 'dashboard.upload_data' %}active{% endif %}"><i class="fas fa-upload"></i> Upload Data</a>
+                </li>
                 <li><a href="{{ url_for('dashboard.predict_form') }}"
-                        class="{% if request.endpoint == 'dashboard.predict_form' %}active{% endif %}"><i class="fas fa-brain"></i>
-                        Prediction</a></li>
-                <li><a href="{{ url_for('dashboard.analytics') }}"
-                        class="{% if request.endpoint == 'dashboard.analytics' %}active{% endif %}"><i
-                            class="fas fa-chart-line"></i> Analytics</a></li>
-                <li><a href="{{ url_for('dashboard.dataset') }}"
-                        class="{% if request.endpoint == 'dashboard.dataset' %}active{% endif %}"><i class="fas fa-database"></i>
-                        Dataset</a></li>
-                <!-- <li><a href="{{ url_for('dashboard.upload_data') }}" class="{% if request.endpoint == 'about_project' %}active{% endif %}"><i class="fas fa-info-circle"></i> About Project</a></li> -->
+                        class="{% if request.endpoint == 'dashboard.predict_form' %}active{% endif %}"><i class="fas fa-brain"></i> Predict</a>
+                </li>
                 <li><a href="{{ url_for('auth.logout') }}"
-                        class="{% if request.endpoint == 'logout' %}active{% endif %}"><i
-                            class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        class="{% if request.endpoint == 'auth.logout' %}active{% endif %}"><i {# CORRECTED: Changed from logout #}
+                                class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </div>
 
@@ -56,13 +59,12 @@
                 </div>
             </header>
             <div class="content-area">
-                <h1>{{request.endpoint}}</h1>
+                {# REMOVED: <h1>{{request.endpoint}}</h1> line was likely for debugging #}
                 {% block content %}{% endblock %}
             </div>
         </div>
     </div>
 
-    <!-- Toast Notifications -->
     <div class="toast-container" id="toast-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
