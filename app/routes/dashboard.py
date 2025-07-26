@@ -149,6 +149,42 @@ def all_notifications():
 @login_required
 def notification_settings():
     return render_template('dashboard/notification_settings.html') 
+
 @dashboard_bp.route('/update_profile')
 def update_profile():
     return render_template('dashboard/update_profile.html')
+
+# =========================================================
+# NEW ANOMALY DETECTION ROUTE
+# =========================================================
+@dashboard_bp.route('/anomaly-results', methods=['GET'])
+@login_required
+@role_required(['admin', 'analyst']) # Only admins and analysts can view anomalies
+def anomaly_results_view():
+    # Adjust contamination based on your dataset; 0.03 means expecting 3% outliers
+    # If you see too many or too few anomalies, adjust this value (e.g., 0.01 to 0.1)
+    full_df, anomalous_students = detect_student_anomalies(contamination=0.03) 
+    
+    if anomalous_students: # Check if the list of anomalies is not empty
+        # Prepare data for display, ensuring all relevant columns are passed
+        display_anomalies = []
+        for student in anomalous_students:
+            display_anomalies.append({
+                'student_id': student.get('student_id', 'N/A'),
+                'age': student.get('age', 'N/A'),
+                'gender': student.get('gender', 'N/A'),
+                'attendance_percentage': student.get('attendance_percentage', 'N/A'),
+                'study_hours_per_day': student.get('study_hours_per_day', 'N/A'),
+                'exam_score': student.get('exam_score', 'N/A'),
+                'social_media_hours': student.get('social_media_hours', 'N/A'),
+                'sleep_hours': student.get('sleep_hours', 'N/A'),
+                'mental_health_rating': student.get('mental_health_rating', 'N/A'),
+                'extracurricular_participation': student.get('extracurricular_participation', 'N/A'),
+                'anomaly_score': f"{student.get('anomaly_score', 0):.4f}" # Format score for display
+            })
+        
+        return render_template('dashboard/anomaly_results.html', anomalies=display_anomalies)
+    else:
+        # If no anomalies or data loading failed
+        flash("Could not load student data for anomaly detection or no anomalies found.", "info")
+        return render_template('dashboard/anomaly_results.html', anomalies=[])
