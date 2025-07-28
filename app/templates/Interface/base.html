@@ -68,9 +68,7 @@
           </ul>
           <div class="ms-2 d-flex align-items-center">
             {% if session.username %}
-            <span class="btn btn-outline-light me-2"
-              >Hi, {{ session.username }}</span
-            >
+            <span class="username-display me-2">Hi, {{ session.username }}</span>
             <div class="dropdown">
               <button
                 class="dropdown-toggle custom-dropdown-toggle"
@@ -80,6 +78,7 @@
                 aria-expanded="false"
               >
                 <i class="fas fa-user-gear"></i>
+                <i class="fas fa-chevron-down ms-0" style="font-size:x-small;"></i>
               </button>
 
               <ul
