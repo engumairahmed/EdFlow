@@ -158,34 +158,85 @@ def update_profile():
 # =========================================================
 # NEW ANOMALY DETECTION ROUTE
 # =========================================================
-@dashboard_bp.route('/anomaly-results', methods=['GET'])
+@dashboard_bp.route('/anomaly-results', methods=['GET', 'POST'])
 @login_required
 @role_required(['admin', 'analyst']) # Only admins and analysts can view anomalies
 def anomaly_results_view():
-    # Adjust contamination based on your dataset; 0.03 means expecting 3% outliers
-    # If you see too many or too few anomalies, adjust this value (e.g., 0.01 to 0.1)
-    full_df, anomalous_students = detect_student_anomalies(contamination=0.03) 
+    all_files = []
+    # Check if the uploads directory exists
+    if os.path.exists(UPLOADS_DIR):
+        for f in os.listdir(UPLOADS_DIR):
+            if f.endswith('.csv'): # Sirf CSV files ko list karein
+                all_files.append(f)
+        all_files.sort() # Files ko alphabetical order mein sort karein
     
-    if anomalous_students: # Check if the list of anomalies is not empty
-        # Prepare data for display, ensuring all relevant columns are passed
-        display_anomalies = []
-        for student in anomalous_students:
-            display_anomalies.append({
-                'student_id': student.get('student_id', 'N/A'),
-                'age': student.get('age', 'N/A'),
-                'gender': student.get('gender', 'N/A'),
-                'attendance_percentage': student.get('attendance_percentage', 'N/A'),
-                'study_hours_per_day': student.get('study_hours_per_day', 'N/A'),
-                'exam_score': student.get('exam_score', 'N/A'),
-                'social_media_hours': student.get('social_media_hours', 'N/A'),
-                'sleep_hours': student.get('sleep_hours', 'N/A'),
-                'mental_health_rating': student.get('mental_health_rating', 'N/A'),
-                'extracurricular_participation': student.get('extracurricular_participation', 'N/A'),
-                'anomaly_score': f"{student.get('anomaly_score', 0):.4f}" # Format score for display
-            })
+    anomalous_students = []
+    anomaly_chart_data = {}
+    anomaly_insights = {}
+    selected_file = request.args.get('selected_file') # GET request se file name lenge
+    
+    if request.method == 'POST': # Agar form submit hua hai
+        selected_file = request.form.get('file_select')
         
-        return render_template('dashboard/anomaly_results.html', anomalies=display_anomalies)
+    if selected_file:
+        flash(f"Running anomaly detection on: {selected_file}", "info")
+        df_processed, anomalous_students = detect_student_anomalies(file_name=selected_file) # file_name pass kiya
+        
+        # --- Prepare data for Anomaly Overview Visualizations (Same logic as before) ---
+        anomaly_chart_data = {
+            'gender': {'Male': 0, 'Female': 0, 'Other': 0},
+            'scores': {'bin1': 0, 'bin2': 0, 'bin3': 0, 'bin4': 0}
+        }
+        
+        anomaly_insights = {
+            'gender_insight': "Analysis of anomaly distribution by gender.",
+            'score_insight': "Insights into the spread of anomaly scores."
+        }
+
+        if anomalous_students:
+            for student in anomalous_students:
+                gender = student.get('gender')
+                if gender == 'Male':
+                    anomaly_chart_data['gender']['Male'] += 1
+                elif gender == 'Female':
+                    anomaly_chart_data['gender']['Female'] += 1
+                else:
+                    anomaly_chart_data['gender']['Other'] += 1 
+
+                try:
+                    score = float(student.get('anomaly_score', 0))
+                    if score < -0.5:
+                        anomaly_chart_data['scores']['bin1'] += 1
+                    elif -0.5 <= score < -0.2:
+                        anomaly_chart_data['scores']['bin2'] += 1
+                    elif -0.2 <= score < 0:
+                        anomaly_chart_data['scores']['bin3'] += 1
+                    else:
+                        anomaly_chart_data['scores']['bin4'] += 1
+                except ValueError:
+                    pass 
+
+            total_anomalies = len(anomalous_students)
+            if total_anomalies > 0:
+                male_anomalies = anomaly_chart_data['gender']['Male']
+                female_anomalies = anomaly_chart_data['gender']['Female']
+                
+                if male_anomalies > female_anomalies * 1.5:
+                    anomaly_insights['gender_insight'] = "Significantly more male students detected as anomalous."
+                elif female_anomalies > male_anomalies * 1.5:
+                    anomaly_insights['gender_insight'] = "Significantly more female students detected as anomalous."
+                else:
+                    anomaly_insights['gender_insight'] = "Anomalies are relatively balanced across genders."
+                
+                if anomaly_chart_data['scores']['bin1'] > anomaly_chart_data['scores']['bin2'] + anomaly_chart_data['scores']['bin3']:
+                    anomaly_insights['score_insight'] = "Most anomalies have very low scores, indicating strong deviation from norm."
     else:
-        # If no anomalies or data loading failed
-        flash("Could not load student data for anomaly detection or no anomalies found.", "info")
-        return render_template('dashboard/anomaly_results.html', anomalies=[])
+        # Initial load or no file selected
+        flash("Please select a CSV file to run anomaly detection.", "warning")
+
+    return render_template('dashboard/anomaly_results.html', 
+                           all_files=all_files, # Sabhi files ki list pass ki
+                           selected_file=selected_file, # Jo file select ki gai
+                           anomalous_students=anomalous_students,
+                           anomaly_chart_data=anomaly_chart_data,
+                           anomaly_insights=anomaly_insights)

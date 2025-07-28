@@ -1,104 +1,244 @@
 {% extends 'dashboard/base.html' %}
 
-{% block title %}Anomaly Results - EdFlow{% endblock %}
+{% block title %}Anomaly Detection - EdFlow{% endblock %}
 
-{% block page_heading %}Student Anomaly Detection{% endblock %}
+{% block page_heading %}Anomaly Detection Results{% endblock %}
 
 {% block content %}
-<div class="dashboard-card anomaly-results-card animated-slide-in-up">
-    <h2><i class="fas fa-exclamation-triangle icon-purple"></i> Suspicious Student Activities</h2>
-    <p class="card-description">
-        Below is a list of students identified as potential anomalies based on their academic and behavioral data.
-        A lower anomaly score indicates a higher likelihood of being an outlier.
-    </p>
+<div class="anomaly-results-container">
 
-    {% if anomalies %}
-    <div class="table-responsive">
-        <table class="table table-dark table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>Student ID</th>
-                    <th>Age</th>
-                    <th>Gender</th>
-                    <th>Attendance (%)</th>
-                    <th>Study Hours/Day</th>
-                    <th>Exam Score</th>
-                    <th>Social Media Hours</th>
-                    <th>Sleep Hours</th>
-                    <th>Mental Health Rating</th>
-                    <th>Extracurricular Participation</th>
-                    <th>Anomaly Score</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for student in anomalies %}
-                <tr class="table-row-anomaly"> {# Optional: Add a class for styling anomalies #}
-                    <td>{{ student.student_id }}</td>
-                    <td>{{ student.age }}</td>
-                    <td>{{ student.gender }}</td>
-                    <td>{{ student.attendance_percentage }}</td>
-                    <td>{{ student.study_hours_per_day }}</td>
-                    <td>{{ student.exam_score }}</td>
-                    <td>{{ student.social_media_hours }}</td>
-                    <td>{{ student.sleep_hours }}</td>
-                    <td>{{ student.mental_health_rating }}</td>
-                    <td>{{ student.extracurricular_participation }}</td>
-                    <td><span class="badge bg-danger">{{ student.anomaly_score }}</span></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="dashboard-card animated-fade-in delay-0">
+        <h3 class="card-title"><i class="fas fa-file-csv icon-purple"></i> Select Data File for Anomaly Detection</h3>
+        <p class="card-description">Choose a CSV file from your uploaded data to analyze for anomalies.</p>
+        <form method="POST" action="{{ url_for('dashboard.anomaly_results_view') }}" class="file-selection-form">
+            <div class="form-group">
+                <label for="file_select">Select a CSV File:</label>
+                <select name="file_select" id="file_select" class="form-control">
+                    {% if all_files %}
+                        <option value="">-- Choose a file --</option>
+                        {% for file in all_files %}
+                            <option value="{{ file }}" {% if selected_file == file %}selected{% endif %}>{{ file }}</option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="">No CSV files found in 'uploads' folder.</option>
+                    {% endif %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3"><i class="fas fa-play-circle"></i> Run Anomaly Detection</button>
+        </form>
     </div>
-    {% else %}
-    <div class="alert alert-info text-center mt-4" role="alert">
-        No anomalous student behaviors detected at this time, or data could not be loaded.
-    </div>
-    {% endif %}
 
-    <div class="mt-4 text-center">
-        <p class="text-muted">
-            <em>Note: Anomaly detection is an experimental feature. Further investigation may be required for identified students.</em>
-        </p>
-    </div>
+    {% if anomalous_students or selected_file %} {# Only show results/no anomaly message if a file was processed #}
+        <div class="dashboard-card animated-fade-in delay-0">
+            <h3 class="card-title"><i class="fas fa-chart-pie icon-purple"></i> Anomaly Overview Visualizations</h3>
+            <p class="card-description">Visual representation of anomalies based on key features.</p>
+            <div class="charts-grid">
+                <div class="chart-container-small">
+                    <h4>Anomalies by Gender</h4>
+                    <canvas id="genderAnomalyChart"></canvas>
+                </div>
+                <div class="chart-container-small">
+                    <h4>Anomaly Score Distribution</h4>
+                    <canvas id="scoreDistributionChart"></canvas>
+                </div>
+            </div>
+            <div class="insights mt-3">
+                <h5>Key Anomaly Insights:</h5>
+                <ul>
+                    <li>{{ anomaly_insights.gender_insight | default("No specific gender-based anomaly insights.") }}</li>
+                    <li>{{ anomaly_insights.score_insight | default("Anomaly scores show a concentration around the detection threshold.") }}</li>
+                </ul>
+            </div>
+        </div>
+
+        {% if anomalous_students %}
+        <div class="dashboard-card animated-fade-in delay-1">
+            <h3 class="card-title"><i class="fas fa-exclamation-triangle icon-purple"></i> Anomalous Students ({{ anomalous_students | length }})</h3>
+            <p class="card-description">Detected students with unusual patterns based on the model.</p>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Anomaly Score</th>
+                            <th>Extreme Features (Reason for Anomaly)</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in anomalous_students %}
+                        <tr>
+                            <td>{{ student.student_id }}</td>
+                            <td>{{ student.anomaly_score }}</td>
+                            <td>
+                                {% if student.extreme_features %}
+                                    <ul>
+                                    {% for feature, data in student.extreme_features.items() %}
+                                        <li><strong>{{ feature | replace('_', ' ') | title }}:</strong> {{ data.value }} ({{ data.description }})</li>
+                                    {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    N/A (No individual feature significantly extreme)
+                                {% endif %}
+                            </td>
+                            <td>
+                <button class="btn btn-sm btn-info" onclick="showStudentDetails({ student , tojson })">View Details</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="studentDetailsModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h3 id="modalStudentId">Student Details</h3>
+                <div id="modalContent">
+                    </div>
+            </div>
+        </div>
+
+        {% else %}
+        <div class="dashboard-card animated-fade-in delay-0">
+            <h3 class="card-title"><i class="fas fa-check-circle icon-green"></i> No Anomalies Detected</h3>
+            <p class="card-description">The system did not find any significant anomalies based on the current model parameters and data for the selected file ({{ selected_file }}).</p>
+            <p>Try adjusting the <a href="#" onclick="alert('You can adjust contamination parameter in anomaly detection settings or upload more diverse data.')">anomaly detection parameters</a> or <a href="{{ url_for('dashboard.upload_data') }}">uploading new data</a>.</p>
+        </div>
+        {% endif %}
+
+    {% endif %} {# End of if anomalous_students or selected_file #}
+
 </div>
 
-<style>
-    /* Add custom styles for the anomaly results page */
-    .anomaly-results-card {
-        background-color: #2a2a4a; /* Darker background for the card */
-        color: white;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-    .anomaly-results-card h2 {
-        color: #e0b0ff; /* Purple-ish title */
-        margin-bottom: 15px;
-    }
-    .anomaly-results-card .card-description {
-        color: #bbb;
-        margin-bottom: 25px;
-    }
-    .table-responsive {
-        margin-top: 20px;
-    }
-    .table-dark thead th {
-        background-color: #3e3e6b; /* Darker header for table */
-        color: white;
-    }
-    .table-dark tbody tr {
-        background-color: #333355; /* Darker rows */
-    }
-    .table-dark tbody tr:hover {
-        background-color: #4a4a7a; /* Lighter on hover */
-    }
-    .badge.bg-danger {
-        background-color: #dc3545 !important;
-    }
-    .alert-info {
-        background-color: #2196F3; /* Bootstrap info blue */
-        border-color: #2196F3;
-        color: white;
-    }
-</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- Anomaly Overview Charts ---
+        // Parse the JSON data passed from Flask
+        // Use an empty object as a fallback if anomaly_chart_data is not provided
+        const anomalyChartData = "{{ anomaly_chart_data | tojson | safe }} || {}";
+
+        const genderAnomalyData = {
+            labels: ['Male', 'Female', 'Other'],
+            datasets: [{
+                data: [
+                    (anomalyChartData.gender && anomalyChartData.gender.Male) || 0,
+                    (anomalyChartData.gender && anomalyChartData.gender.Female) || 0,
+                    (anomalyChartData.gender && anomalyChartData.gender.Other) || 0
+                ],
+                backgroundColor: ['#800080', '#1f9ba5', '#cccccc'],
+            }]
+        };
+
+        const scoreDistributionData = {
+            labels: ['<-0.5', '-0.5 to -0.2', '-0.2 to 0', '>0'],
+            datasets: [{
+                label: 'Number of Anomalies',
+                data: [
+                    (anomalyChartData.scores && anomalyChartData.scores.bin1) || 0,
+                    (anomalyChartData.scores && anomalyChartData.scores.bin2) || 0,
+                    (anomalyChartData.scores && anomalyChartData.scores.bin3) || 0,
+                    (anomalyChartData.scores && anomalyChartData.scores.bin4) || 0
+                ],
+                backgroundColor: ['#e74c3c', '#f39c12', '#3498db', '#2ecc71'],
+                borderColor: '#fff',
+                borderWidth: 1
+            }]
+        };
+
+        if (document.getElementById('genderAnomalyChart')) {
+            const hasGenderData = genderAnomalyData.datasets[0].data.some(val => val > 0);
+            if (hasGenderData) {
+                new Chart(document.getElementById('genderAnomalyChart').getContext('2d'), {
+                    type: 'pie',
+                    data: genderAnomalyData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: false }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('genderAnomalyChart').style.display = 'none';
+                const chartParent = document.getElementById('genderAnomalyChart').closest('.chart-container-small');
+                if (chartParent) {
+                    chartParent.innerHTML += '<p class="text-muted text-center">No gender data for anomalies.</p>';
+                }
+            }
+        }
+
+        if (document.getElementById('scoreDistributionChart')) {
+            const hasScoreData = scoreDistributionData.datasets[0].data.some(val => val > 0);
+            if (hasScoreData) {
+                new Chart(document.getElementById('scoreDistributionChart').getContext('2d'), {
+                    type: 'bar',
+                    data: scoreDistributionData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('scoreDistributionChart').style.display = 'none';
+                const chartParent = document.getElementById('scoreDistributionChart').closest('.chart-container-small');
+                if (chartParent) {
+                    chartParent.innerHTML += '<p class="text-muted text-center">No score distribution data for anomalies.</p>';
+                }
+            }
+        }
+
+
+        // --- Student Details Modal ---
+        const modal = document.getElementById("studentDetailsModal");
+        const closeButton = document.querySelector(".close-button");
+        const modalContentDiv = document.getElementById("modalContent");
+        const modalStudentId = document.getElementById("modalStudentId");
+
+        window.showStudentDetails = function(student) {
+            modalStudentId.textContent = `Student Details: ${student.student_id}`;
+            let detailsHtml = '<ul>';
+            for (const key in student) {
+                if (key === 'anomaly_score' || key === 'extreme_features' || key === 'is_anomaly') {
+                    continue;
+                }
+                let value = student[key];
+                if (typeof value === 'object' && value !== null) {
+                    value = JSON.stringify(value);
+                }
+                detailsHtml += `<li><strong>${key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}:</strong> ${value}</li>`;
+            }
+            detailsHtml += '</ul>';
+            modalContentDiv.innerHTML = detailsHtml;
+            modal.style.display = "block";
+        }
+
+        if (closeButton) {
+            closeButton.onclick = function() {
+                modal.style.display = "none";
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    });
+</script>
 {% endblock %}
