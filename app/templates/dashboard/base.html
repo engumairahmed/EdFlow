@@ -44,7 +44,7 @@
                         class="{% if request.endpoint == 'dashboard.dataset' %}active{% endif %}"><i
                             class="fas fa-database"></i>
                         Dataset</a></li>
-                 <li><a href="{{ url_for('dashboard.dataset') }}"
+                 <li><a href="{{ url_for('dashboard.my_models') }}"
                         class="{% if request.endpoint == 'dashboard.my_models' %}active{% endif %}"><i
                             class="fas fa-database"></i>
                         Trained Models</a></li>
@@ -271,7 +271,37 @@
                     toast.style.display = 'none';
                 });
             }, 36000);
+
+            // --- Yahan upar diya gaya Password Show/Hide JavaScript code paste karein ---
+const togglePasswordIcons = document.querySelectorAll('.toggle-password');
+
+togglePasswordIcons.forEach(icon => {
+    icon.addEventListener('click', function() {
+        const targetId = this.dataset.target;
+        const passwordInput = document.getElementById(targetId);
+        const iconElement = this.querySelector('i'); // Icon element ko pakad liya
+
+        // Check current type of the input
+        const isPassword = passwordInput.getAttribute('type') === 'password';
+
+        // Toggle the type attribute
+        if (isPassword) {
+            passwordInput.setAttribute('type', 'text');
+            iconElement.classList.remove('fa-eye-slash');
+            iconElement.classList.add('fa-eye'); 
+        } else {
+            passwordInput.setAttribute('type', 'password');
+            iconElement.classList.remove('fa-eye');
+            iconElement.classList.add('fa-eye-slash'); // Ab eye dikhega (show karein)
+        }
+    });
+});
         });
+
+
+
+
+        
     </script>
 </body>
 
