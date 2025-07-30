@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import re
 from app.models import get_feedbacks_collection
 
@@ -26,7 +27,10 @@ class Feedback:
             "message": message,
             "rating": int(rating),
             "verified": False, 
-            "verify_token": token
+            "verify_token": token,
+            "createdAt": datetime.now() - timedelta(days=10)
+
+
         }).inserted_id
 
         return str(feedback_id), token

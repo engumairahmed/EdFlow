@@ -158,17 +158,20 @@ def update_password():
 
         if not check_password_hash(user['password'], current):
             flash("Current password is incorrect.", "danger")
+            return render_template('change_password.html')
         elif new != confirm:
             flash("New passwords do not match.", "danger")
+            return render_template('change_password.html')
         elif len(new) < 6:
             flash("New password must be at least 6 characters long.", "danger")
+            return render_template('change_password.html')
         else:
             hashed = generate_password_hash(new)
             mongo.db.users.update_one({'_id': user['_id']}, {'$set': {'password': hashed}})
             flash("Password updated successfully. Please log in again.", "success")
             return redirect(url_for('auth.logout'))
 
-    return render_template('update_password.html')
+    return render_template('change_password.html')
 
 
 # =============================

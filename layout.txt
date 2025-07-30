@@ -1,6 +1,4 @@
-Folder PATH listing
-Volume serial number is C8B7-5FB9
-D:.
+.
 |   .env
 |   .gitattributes
 |   .gitignore
@@ -16,6 +14,7 @@ D:.
 |   |   __init__.py
 |   |   
 |   +---ml
+|   |   |   anomaly_detector.py
 |   |   |   dataset_manager.py
 |   |   |   model_utils.py
 |   |   |   predictors.py
@@ -24,6 +23,7 @@ D:.
 |   |   |   
 |   |   +---models
 |   |   \---__pycache__
+|   |           anomaly_detector.cpython-313.pyc
 |   |           dataset_manager.cpython-313.pyc
 |   |           model_utils.cpython-313.pyc
 |   |           predictors.cpython-313.pyc
@@ -66,6 +66,7 @@ D:.
 |   |   |   3805758.webp
 |   |   |   forgot-password-Image .png
 |   |   |   login-image.png
+|   |   |   service-worker.js
 |   |   |   signup-image.png
 |   |   |   style.css
 |   |   |   transparent_image.png
@@ -92,7 +93,6 @@ D:.
 |   |   \---js
 |   |           datatables-demo.js
 |   |           datatables-simple-demo.js
-|   |           service-worker.js
 |   |           
 |   +---templates
 |   |   +---auth
@@ -103,11 +103,20 @@ D:.
 |   |   |       verify-email.html
 |   |   |       
 |   |   +---dashboard
+|   |   |       all_notifications.html
 |   |   |       analytics.html
+|   |   |       anomaly_results.html
 |   |   |       base.html
+|   |   |       change_password.html
 |   |   |       dataSet.html
 |   |   |       home.html
+|   |   |       login_history.html
+|   |   |       my_models.html
+|   |   |       my_profile.html
+|   |   |       notification_settings.html
+|   |   |       personal_information.html
 |   |   |       predict.html
+|   |   |       update_profile.html
 |   |   |       upload.html
 |   |   |       
 |   |   \---Interface
@@ -141,9 +150,8 @@ D:.
 |           __init__.cpython-313.pyc
 |           
 +---data
-+---uploads
-|       merged_dataset_4.csv
-|       
 \---__pycache__
         config.cpython-313.pyc
-        
+        vapid_keys.cpython-313.pyc
+
+tree /F /A > layout.txt
