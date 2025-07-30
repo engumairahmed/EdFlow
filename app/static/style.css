@@ -308,7 +308,7 @@ p {
 .stat-item {
     flex: 0 0 auto; 
     width: clamp(100px, 20vw, 180px); 
-    height: 100px; 
+    height: 150px; 
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -438,87 +438,7 @@ a{
     font-size: 0.85em; 
 }
 
-                               /* --- Keyframe Animations --- */
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-.animated-fade-in {
-    animation: fadeIn 1s ease-out forwards;
-    opacity: 0;
-}
-.animated-fade-in.delay-1 { animation-delay: 0.2s; }
-.animated-fade-in.delay-2 { animation-delay: 0.4s; }
-.animated-fade-in.delay-3 { animation-delay: 0.6s; }
-.animated-fade-in.delay-4 { animation-delay: 0.8s; }
-.animated-fade-in.delay-5 { animation-delay: 1s; }
-
-/* Slide In Up */
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-.animated-slide-in-up {
-    animation: slideInUp 0.8s ease-out forwards;
-    opacity: 0;
-}
-
-                                       /* Slide In Left */
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-40px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-.animated-slide-in-left {
-    animation: slideInLeft 0.8s ease-out forwards;
-    opacity: 0;
-}
-
-                                        /* Slide In Right */
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(40px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-.animated-slide-in-right {
-    animation: slideInRight 0.8s ease-out forwards;
-    opacity: 0;
-}
-
-                             /* Slide In Down (New animation for heading) */
-@keyframes slideInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-/* Pulse for badge */
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
+               
 
                      /* --- Responsive Design (Media Queries) --- */
 
@@ -586,15 +506,19 @@ a{
         padding: 10px 20px;
         font-size: 0.85em;
     }
+    
+
+    }
     .dashboard-grid {
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 15px;
     }
     .stat-item {
         width: clamp(90px, 25vw, 160px); 
-        height: 90px;
+       min-height: 120px;
         padding: 8px;
     }
+ 
     .stat-item i {
         font-size: 2em;
     }
@@ -621,7 +545,7 @@ a{
     .testimonial-item {
         padding: 15px;
     }
-}
+
 
                              /* Mobile devices (max-width 768px) */
 @media (max-width: 768px) {
@@ -693,6 +617,7 @@ a{
         padding: 15px 15px;
         font-size: 0.8em;
     }
+   
 
     .dashboard-grid {
         grid-template-columns: 1fr;
@@ -2435,31 +2360,68 @@ input:checked + .slider:before {
     color: var(--dark-blue-text);
     font-size: 1.05em; /* Slightly larger font for labels */
 }
+/* --- Basic Form Styles (Updated for always visible border) --- */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--dark-blue-text);
+    font-size: 1.05em;
+}
 
 .form-control {
     width: 100%;
-    padding: 12px 15px; 
-    border: 1px solid var(--border-color);
-    border-radius: 8px; /* More rounded corners */
+    padding: 12px 15px;
+    border-radius: 8px;
     font-size: 1em;
-    box-sizing: border-box; 
-    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for focus states */
+    box-sizing: border-box;
+    border-color: var(--purple-accent);
+    outline: none;
+
 }
 
-.form-control:focus {
-    border-color: var(--purple-accent);
-    outline: none; /* Remove default outline */
-    box-shadow: 0 0 0 3px rgba(97, 68, 172, 0.25); 
-}
+/* .form-control:focus {
+    
+} */
 
 .form-control::placeholder {
-    color: var(--text-color-light); /* Placeholder text color */
+    color: var(--text-color-light);
+}
+
+/* --- Password Input Group Styles --- */
+.password-input-group {
+    position: relative;
+    display: flex; /* Make it a flex container */
+    align-items: center; /* Vertically align items */
+    width: 100%;
+}
+
+.password-input-group .form-control {
+    padding-right: 45px; /* Space for the icon */
+    flex-grow: 1; /* Allow input to take available space */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px; /* Position icon inside the input field */
+    cursor: pointer;
+    color: var(--text-color-light);
+    font-size: 1em;
+    transition: color 0.2s ease;
+    z-index: 10; /* Ensure icon is clickable */
+}
+
+.toggle-password:hover {
+    color: var(--purple-accent);
 }
 
                /* --- Specific Styles for Change Password Page --- */
 .dashboard-card.content-section {
     padding: 30px; /* Consistent padding for the card */
-    background-color: var(--white);
     border-radius: 12px; /* Slightly larger border-radius for the card */
     box-shadow: var(--box-shadow); /* Consistent shadow for cards */
 }
@@ -2468,7 +2430,6 @@ input:checked + .slider:before {
     font-size: 1.8em; /* Larger title */
     color: var(--dark-blue-text);
     margin-bottom: 10px;
-    border-bottom: 2px solid var(--border-color); /* Underline for title */
     padding-bottom: 10px;
 }
 
@@ -2572,3 +2533,200 @@ input:checked + .slider:before {
     gap: 15px; /* Space between buttons */
     justify-content: center; /* Center buttons */
 }
+
+
+
+    /* Page Specific Header (within content block) */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .page-header h1 {
+        font-size: 32px;
+        color: var(--dark-purple); /* Page heading in dark purple */
+        margin: 0;
+    }
+
+    /* Filters & Sorting Section */
+    .filters-sort {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        align-items: center;
+        background-color: var(--white);
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .filters-sort .filter-group label {
+        font-weight: 500;
+        color: var(--dark-grey);
+        margin-right: 10px;
+    }
+
+    .filters-sort .filter-group select,
+    .filters-sort .search-input {
+        padding: 8px 12px;
+        border: 1px solid var(--medium-grey);
+        border-radius: 5px;
+        font-size: 14px;
+        color: var(--text-color);
+        transition: border-color 0.2s ease;
+    }
+
+    .filters-sort .filter-group select:focus,
+    .filters-sort .search-input:focus {
+        border-color: var(--primary-purple); /* Purple border on focus */
+        outline: none;
+    }
+
+    .filters-sort .search-input {
+        flex-grow: 1;
+        min-width: 180px;
+    }
+
+    /* Model Grid */
+    .model-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+    }
+
+    .model-card {
+        background-color: var(--white);
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .model-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+    }
+
+    .model-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .model-card-content {
+        padding: 15px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .model-card h3 {
+        font-size: 18px;
+        margin: 0 0 10px 0;
+        color: var(--dark-purple); /* Model title in dark purple */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .model-card .status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    /* Status Badge Colors (using a mix of theme colors and standard for clear status) */
+    .status-badge.published { background-color: #d4edda; color: #28a745; } /* Standard Green */
+    .status-badge.draft { background-color: #fff3cd; color: #ffc107; } /* Standard Orange */
+    .status-badge.review { background-color: var(--light-purple); color: var(--primary-purple); } /* Purple for review */
+    .status-badge.archived { background-color: var(--medium-grey); color: var(--dark-grey); } /* Grey */
+
+
+    .model-card .model-meta {
+        font-size: 13px;
+        color: var(--dark-grey);
+        margin-top: auto;
+    }
+
+    .model-card .model-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .model-card .model-actions .action-btn {
+        background: none;
+        border: 1px solid var(--primary-purple); /* Purple border for action buttons */
+        font-size: 14px;
+        color: var(--primary-purple);
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .model-card .model-actions .action-btn:hover {
+        background-color: var(--primary-purple);
+        color: var(--white);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background-color: var(--white);
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        margin-top: 30px;
+    }
+
+    .empty-state h2 {
+        font-size: 28px;
+        color: var(--dark-purple); /* Heading in dark purple */
+        margin-bottom: 15px;
+    }
+
+    .empty-state p {
+        font-size: 18px;
+        color: var(--text-color);
+        margin-bottom: 30px;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .filters-sort {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .filters-sort .filter-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .filters-sort .filter-group select,
+        .filters-sort .search-input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .model-grid {
+            grid-template-columns: 1fr;
+        }
+    }

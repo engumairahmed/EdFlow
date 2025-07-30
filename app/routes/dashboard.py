@@ -117,6 +117,12 @@ def analytics():
 def dataset():
     return render_template("dashboard/dataset.html")
 
+    
+@dashboard_bp.route('/my_models.html')
+@login_required
+def my_models():
+    return render_template("dashboard/my_models.html")
+
 # --- Existing Routes of Profile-Related Pages ---
 @dashboard_bp.route('/my_profile')
 @login_required
