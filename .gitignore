@@ -52,8 +52,8 @@ coverage.xml
 cover/
 
 app/ml/models
-app/logs
-app/uploads
+app/logs/
+app/uploads/
 
 
 # Translations
