@@ -27,7 +27,8 @@
                             class="fas fa-home"></i> Home</a>
                 </li>
                 <li><a href="{{ url_for('dashboard.upload_data') }}"
-                        class="{% if request.endpoint == 'dashboard.upload_data' %}active{% endif %}"><i class="fas fa-upload"></i> Upload Data</a>
+                        class="{% if request.endpoint == 'dashboard.upload_data' %}active{% endif %}"><i
+                            class="fas fa-upload"></i> Upload Data</a>
                 </li>
                 <li><a href="{{ url_for('dashboard.predict_form') }}"
                         class="{% if request.endpoint == 'dashboard.predict_form' %}active{% endif %}"><i
@@ -37,23 +38,23 @@
                         class="{% if request.endpoint == 'dashboard.predict_form' %}active{% endif %}"><i
                             class="fas fa-exclamation-triangle"></i>
                         Anomaly Detection</a></li>
-                        <li><a href="{{ url_for('dashboard.analytics') }}"
+                <li><a href="{{ url_for('dashboard.analytics') }}"
                         class="{% if request.endpoint == 'dashboard.analytics' %}active{% endif %}"><i
                             class="fas fa-chart-line"></i> Analytics</a></li>
                 <li><a href="{{ url_for('dashboard.dataset') }}"
                         class="{% if request.endpoint == 'dashboard.dataset' %}active{% endif %}"><i
                             class="fas fa-database"></i>
                         Dataset</a></li>
-                 <li><a href="{{ url_for('dashboard.my_models') }}"
+                <li><a href="{{ url_for('dashboard.my_models') }}"
                         class="{% if request.endpoint == 'dashboard.my_models' %}active{% endif %}"><i
                             class="fas fa-database"></i>
                         Trained Models</a></li>
 
-                        
+
                 <!-- <li><a href="{{ url_for('dashboard.upload_data') }}" class="{% if request.endpoint == 'about_project' %}active{% endif %}"><i class="fas fa-info-circle"></i> About Project</a></li> -->
                 <li><a href="{{ url_for('auth.logout') }}"
-                        class="{% if request.endpoint == 'auth.logout' %}active{% endif %}"><i {# CORRECTED: Changed from logout #}
-                                class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        class="{% if request.endpoint == 'auth.logout' %}active{% endif %}"><i {# CORRECTED: Changed
+                            from logout #} class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </div>
 
@@ -63,7 +64,7 @@
                     <i class="fas fa-bars"></i>
                 </div>
                 <h1>{% block page_heading %}{% endblock %}</h1>
-                 <div class="header-right">
+                <div class="header-right">
                     {# Notification Dropdown #}
                     <div class="notification-dropdown-container">
                         <span class="header-icon-wrapper notification-icon" id="notificationDropdownToggle">
@@ -96,7 +97,7 @@
                             <a href="{{ url_for('dashboard.my_profile') }}">
                                 <i class="fas fa-user"></i> My Profile
                             </a>
-                       
+
                             <a href="{{ url_for('dashboard.update_profile') }}">
                                 <i class="fas fa-edit"></i> Update Profile
                             </a>
@@ -133,7 +134,7 @@
 
     <script>
 
-      const vapidPublicKey = "BLu_gV52vGyYtr5QaZ5FugLdQLfEBt9hcIuFS4oqAfP8CdnqDVmJjchVDitvpDZIQwu-Tk7_Gp_JEvlOUNNNXqg";
+        const vapidPublicKey = "BLu_gV52vGyYtr5QaZ5FugLdQLfEBt9hcIuFS4oqAfP8CdnqDVmJjchVDitvpDZIQwu-Tk7_Gp_JEvlOUNNNXqg";
         console.log(vapidPublicKey);
         function urlBase64ToUint8Array(base64String) {
             const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -179,7 +180,7 @@
         }
 
         // JavaScript for sidebar toggle
-  document.addEventListener('DOMContentLoaded', function () { // Added DOMContentLoaded wrapper
+        document.addEventListener('DOMContentLoaded', function () { // Added DOMContentLoaded wrapper
             const hamburger = document.getElementById('hamburger');
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.querySelector('.main-content');
@@ -209,7 +210,7 @@
                 });
             }
 
-            // --- UPDATED JavaScript code for User AND Notification Dropdowns ---
+            // / --- UPDATED JavaScript code for User AND Notification Dropdowns ---
             const userDropdownToggle = document.getElementById('userDropdownToggle');
             const userDropdownMenu = document.getElementById('userDropdownMenu');
 
@@ -217,12 +218,12 @@
             const notificationDropdownToggle = document.getElementById('notificationDropdownToggle');
             const notificationDropdownMenu = document.getElementById('notificationDropdownMenu');
 
-            // Function to close all dropdowns
-            function closeAllDropdowns() {
-                if (userDropdownMenu) {
+            // Function to close all dropdowns EXCEPT the one being opened/toggled (optional, but good for robust closing)
+            function closeAllDropdowns(excludeMenu = null) {
+                if (userDropdownMenu && userDropdownMenu !== excludeMenu) {
                     userDropdownMenu.classList.remove('show');
                 }
-                if (notificationDropdownMenu) {
+                if (notificationDropdownMenu && notificationDropdownMenu !== excludeMenu) {
                     notificationDropdownMenu.classList.remove('show');
                 }
             }
@@ -231,7 +232,14 @@
             if (userDropdownToggle && userDropdownMenu) { // Check if elements exist
                 userDropdownToggle.addEventListener('click', (event) => {
                     event.stopPropagation(); // Prevent document click from immediately closing
-                    closeAllDropdowns(); // Close other dropdowns first
+
+                    const isUserMenuOpen = userDropdownMenu.classList.contains('show');
+
+                    // Close all other dropdowns, but exclude the user menu if it's currently open
+                    // so it doesn't get closed just to be re-opened by toggle()
+                    closeAllDropdowns(isUserMenuOpen ? userDropdownMenu : null);
+
+                    // Toggle the user menu's visibility
                     userDropdownMenu.classList.toggle('show');
                 });
             }
@@ -240,21 +248,17 @@
             if (notificationDropdownToggle && notificationDropdownMenu) { // Check if elements exist
                 notificationDropdownToggle.addEventListener('click', (event) => {
                     event.stopPropagation();
-                    closeAllDropdowns(); // Close other dropdowns first
+
+                    const isNotificationMenuOpen = notificationDropdownMenu.classList.contains('show');
+
+                    // Close all other dropdowns, but exclude the notification menu if it's currently open
+                    closeAllDropdowns(isNotificationMenuOpen ? notificationDropdownMenu : null);
+
+                    // Toggle the notification menu's visibility
                     notificationDropdownMenu.classList.toggle('show');
                 });
             }
-
-            // Close dropdowns when clicking outside
-            document.addEventListener('click', (event) => {
-                if (userDropdownMenu && !userDropdownMenu.contains(event.target) && !userDropdownToggle.contains(event.target)) {
-                    userDropdownMenu.classList.remove('show');
-                }
-                if (notificationDropdownMenu && !notificationDropdownMenu.contains(event.target) && !notificationDropdownToggle.contains(event.target)) {
-                    notificationDropdownMenu.classList.remove('show');
-                }
-            });
-        }); 
+        });
 
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -273,35 +277,35 @@
             }, 36000);
 
             // --- Yahan upar diya gaya Password Show/Hide JavaScript code paste karein ---
-const togglePasswordIcons = document.querySelectorAll('.toggle-password');
+            const togglePasswordIcons = document.querySelectorAll('.toggle-password');
 
-togglePasswordIcons.forEach(icon => {
-    icon.addEventListener('click', function() {
-        const targetId = this.dataset.target;
-        const passwordInput = document.getElementById(targetId);
-        const iconElement = this.querySelector('i'); // Icon element ko pakad liya
+            togglePasswordIcons.forEach(icon => {
+                icon.addEventListener('click', function () {
+                    const targetId = this.dataset.target;
+                    const passwordInput = document.getElementById(targetId);
+                    const iconElement = this.querySelector('i'); // Icon element ko pakad liya
 
-        // Check current type of the input
-        const isPassword = passwordInput.getAttribute('type') === 'password';
+                    // Check current type of the input
+                    const isPassword = passwordInput.getAttribute('type') === 'password';
 
-        // Toggle the type attribute
-        if (isPassword) {
-            passwordInput.setAttribute('type', 'text');
-            iconElement.classList.remove('fa-eye-slash');
-            iconElement.classList.add('fa-eye'); 
-        } else {
-            passwordInput.setAttribute('type', 'password');
-            iconElement.classList.remove('fa-eye');
-            iconElement.classList.add('fa-eye-slash'); // Ab eye dikhega (show karein)
-        }
-    });
-});
+                    // Toggle the type attribute
+                    if (isPassword) {
+                        passwordInput.setAttribute('type', 'text');
+                        iconElement.classList.remove('fa-eye-slash');
+                        iconElement.classList.add('fa-eye');
+                    } else {
+                        passwordInput.setAttribute('type', 'password');
+                        iconElement.classList.remove('fa-eye');
+                        iconElement.classList.add('fa-eye-slash'); // Ab eye dikhega (show karein)
+                    }
+                });
+            });
         });
 
 
 
 
-        
+
     </script>
 </body>
 
