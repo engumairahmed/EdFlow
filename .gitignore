@@ -50,7 +50,11 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+
 app/ml/models
+app/logs
+app/uploads
+
 
 # Translations
 *.mo
