@@ -35,7 +35,7 @@
                             class="fas fa-brain"></i>
                         Prediction</a></li>
                 <li><a href="{{ url_for('dashboard.anomaly_results_view') }}"
-                        class="{% if request.endpoint == 'dashboard.predict_form' %}active{% endif %}"><i
+                        class="{% if request.endpoint == 'dashboard.anomaly_results_view' %}active{% endif %}"><i
                             class="fas fa-exclamation-triangle"></i>
                         Anomaly Detection</a></li>
                 <li><a href="{{ url_for('dashboard.analytics') }}"
