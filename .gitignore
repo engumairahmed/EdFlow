@@ -52,8 +52,9 @@ coverage.xml
 cover/
 
 app/ml/models
-app/logs/
-app/uploads/
+logs/
+uploads/
+logs/edflow_logs.txt
 
 
 # Translations
