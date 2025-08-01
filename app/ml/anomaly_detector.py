@@ -1,157 +1,161 @@
-# app/ml/anomaly_detector.py
+# app/ml/anomaly_detector.py - Final Code
 
 import pandas as pd
 from sklearn.ensemble import IsolationForest
-import os
 import numpy as np
+import os
+from app import mongo
 
-# UPLOADS_DIR ko ab bhi define karenge, lekin DATA_FILE_PATH ko function ke andar decide karenge
+# UPLOADS_DIR ko define karenge
 UPLOADS_DIR = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)), 'uploads')
 
-def detect_student_anomalies(file_name, n_estimators=100, contamination=0.05, random_state=42): # file_name argument add kiya
+def run_isolation_forest(df):
     """
-    Detects anomalies in student data using Isolation Forest, including categorical feature handling
-    and identifying contributing features for anomalies.
-
-    Args:
-        file_name (str): The name of the CSV file to process from the 'uploads' directory.
-        n_estimators (int): The number of base estimators in the ensemble.
-        contamination (float or 'auto'): The amount of contamination of the dataset,
-                                       i.e. the proportion of outliers in the dataset.
-        random_state (int): Controls the pseudo-randomness of the estimator.
-
-    Returns:
-        pd.DataFrame: Original DataFrame with an added 'is_anomaly' column (1 for anomaly, -1 for normal)
-                      and 'anomaly_score' column.
-        list: List of dictionaries for anomalous students, each including 'extreme_features'.
+    Runs Isolation Forest on a given DataFrame and returns the results.
     """
-    DATA_FILE_PATH = os.path.join(UPLOADS_DIR, file_name) # Ab file_name use karenge
+    # Identify numeric and categorical columns
+    numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
+    categorical_cols = df.select_dtypes(exclude=np.number).columns.tolist()
+
+    # Pre-process categorical data using one-hot encoding
+    df_processed = pd.get_dummies(df, columns=categorical_cols, drop_first=True)
+
+    # Fill any NaN values that might remain after one-hot encoding
+    df_processed = df_processed.fillna(df_processed.median())
+
+    # Initialize and train Isolation Forest model
+    model = IsolationForest(contamination=0.05, random_state=42)
+    model.fit(df_processed)
+
+    # Predict anomalies
+    df_processed['is_anomaly'] = model.predict(df_processed)
+    df_processed['anomaly_score'] = model.decision_function(df_processed)
+
+    # Map back to original DataFrame
+    df['is_anomaly'] = df_processed['is_anomaly']
+    df['anomaly_score'] = df_processed['anomaly_score']
+    
+    return df, df_processed
+
+def get_insights(df_anomalies):
+    """
+    Generates human-readable insights from the anomalous data.
+    """
+    anomaly_insights = {}
+    if not df_anomalies.empty:
+        gender_counts = df_anomalies.get('gender', pd.Series()).value_counts()
+        if 'Male' in gender_counts and 'Female' in gender_counts:
+            if gender_counts['Male'] > gender_counts['Female'] * 1.5:
+                anomaly_insights['gender_insight'] = "Significantly more male students were flagged as anomalous."
+            elif gender_counts['Female'] > gender_counts['Male'] * 1.5:
+                anomaly_insights['gender_insight'] = "Significantly more female students were flagged as anomalous."
+            else:
+                anomaly_insights['gender_insight'] = "Anomalies are relatively balanced across genders."
+        
+        if len(df_anomalies[df_anomalies['anomaly_score'] < -0.2]) > len(df_anomalies) / 2:
+            anomaly_insights['score_insight'] = "Most anomalies have very low scores, indicating strong deviation from the norm."
+        else:
+            anomaly_insights['score_insight'] = "Anomalies are concentrated around the detection threshold."
+    
+    return anomaly_insights
+
+def detect_anomalies_from_db():
+    """
+    Fetches student data from MongoDB, detects anomalies, and returns the results.
+    """
+    db = mongo.db
+    students_collection = db.students
+    
+    try:
+        data = list(students_collection.find())
+        if not data:
+            return [], {}, 0
+        
+        df = pd.DataFrame(data)
+        
+        if '_id' in df.columns:
+            df = df.drop(columns=['_id'])
+
+        if 'student_name' not in df.columns:
+            df['student_name'] = df.get('name', 'N/A')
+        if 'studentID' not in df.columns:
+            df['studentID'] = df.get('student_id', 'N/A')
+        
+        df_anomalies, _ = run_isolation_forest(df)
+
+        anomalous_df = df_anomalies[df_anomalies['is_anomaly'] == -1].copy()
+
+        anomaly_insights = get_insights(anomalous_df)
+        
+        anomalous_students = anomalous_df.to_dict('records')
+
+        return anomalous_students, anomaly_insights, len(df)
+        
+    except Exception as e:
+        print(f"Error connecting to or processing data from MongoDB: {e}")
+        return [], {}, 0
+
+def detect_anomalies_from_df(file_name, n_estimators=100, contamination=0.05, random_state=42):
+    """
+    Detects anomalies in a given pandas DataFrame (from a file) and returns the results.
+    """
+    DATA_FILE_PATH = os.path.join(UPLOADS_DIR, file_name)
 
     if not os.path.exists(DATA_FILE_PATH):
         print(f"Error: Data file not found at {DATA_FILE_PATH}.")
-        return pd.DataFrame(), []
-
+        return pd.DataFrame(), {}, 0
+    
     try:
-        df = pd.read_csv(DATA_FILE_PATH)
-    except Exception as e:
-        print(f"Error reading CSV file at {DATA_FILE_PATH}: {e}")
-        return pd.DataFrame(), []
-
-    # Define numerical and categorical features expected in your dataset
-    numerical_cols = [
-        'age',
-        'attendance_percentage',
-        'study_hours_per_day',
-        'exam_score',
-        'social_media_hours',
-        'sleep_hours',
-        'mental_health_rating',
-        'netflix_hours',
-        'exercise_frequency'
-    ]
-    
-    categorical_cols = [
-        'gender',
-        'part_time_job',
-        'diet_quality',
-        'parental_education_level',
-        'internet_quality',
-        'extracurricular_participation'
-    ]
-
-    # Filter features based on what's actually in the DataFrame
-    numerical_features_in_df = [col for col in numerical_cols if col in df.columns]
-    categorical_features_in_df = [col for col in categorical_cols if col in df.columns]
-
-    df_processed = df.copy()
-
-    # Process Numerical Features: Convert to numeric and impute NaNs
-    for col in numerical_features_in_df:
-        df_processed[col] = pd.to_numeric(df_processed[col], errors='coerce')
-        # Impute NaNs with the median of the column
-        if df_processed[col].isnull().any():
-            median_val = df_processed[col].median()
-            df_processed[col].fillna(median_val, inplace=True)
-
-    # Process Categorical Features: Fill NaNs and One-Hot Encode
-    for col in categorical_features_in_df:
-        if df_processed[col].isnull().any():
-            df_processed[col].fillna('Unknown', inplace=True)
-    
-    if categorical_features_in_df:
-        df_processed = pd.get_dummies(df_processed, columns=categorical_features_in_df, drop_first=True, dtype=int)
-
-    # Define the final set of features to be used by Isolation Forest
-    model_features = numerical_features_in_df + [col for col in df_processed.columns if any(col.startswith(cat_col + '_') for cat_col in categorical_features_in_df)]
-    
-    final_model_features = []
-    for f in model_features:
-        if f in df_processed.columns and pd.api.types.is_numeric_dtype(df_processed[f]):
-            final_model_features.append(f)
+        if file_name.endswith('.csv'):
+            df = pd.read_csv(DATA_FILE_PATH)
+        elif file_name.endswith(('.xlsx', '.xls')):
+            df = pd.read_excel(DATA_FILE_PATH)
         else:
-            print(f"Warning: Feature '{f}' could not be converted to numeric or is missing after processing and will be excluded from the model.")
+            raise ValueError("Unsupported file format.")
+    except Exception as e:
+        print(f"Error reading file at {DATA_FILE_PATH}: {e}")
+        return pd.DataFrame(), {}, 0
+    
+    # Ensure necessary columns are present or handle their absence gracefully
+    required_cols = ['student_name', 'studentID']
+    for col in required_cols:
+        if col not in df.columns:
+            df[col] = 'N/A'
 
-    if len(final_model_features) < 2:
-        print(f"Error: Not enough valid numerical features for anomaly detection after preprocessing. Found: {final_model_features}")
-        return pd.DataFrame(), []
+    df_anomalies, df_processed = run_isolation_forest(df)
 
-    X = df_processed[final_model_features]
-
-    # Initialize and train Isolation Forest model
-    model = IsolationForest(n_estimators=n_estimators, contamination=contamination, random_state=random_state)
-    model.fit(X)
-
-    # Predict anomalies (-1 for outliers, 1 for inliers)
-    df_processed['is_anomaly'] = model.predict(X)
-    df['is_anomaly'] = df_processed['is_anomaly'] # Add to original df for tracking
-
-    # Get raw anomaly scores
-    df_processed['anomaly_score'] = model.decision_function(X)
-    df['anomaly_score'] = df_processed['anomaly_score'] # Add to original df for tracking
-
-    # Filter for anomalous students from the ORIGINAL dataframe
-    anomalous_students_df_original = df[df['is_anomaly'] == -1]
-
-    # Calculate medians/stds for interpretation (using PROCESSED numerical features)
-    feature_medians = df_processed[numerical_features_in_df].median()
-    feature_stds = df_processed[numerical_features_in_df].std()
-
+    anomalous_df = df_anomalies[df_anomalies['is_anomaly'] == -1].copy()
+    
     anomalous_students_list = []
-    for index, original_row in anomalous_students_df_original.iterrows():
-        student_data = original_row.to_dict() # Start with original data for full display
-        
-        # Identify extreme features for this anomalous student using PROCESSED values
-        extreme_features = {}
-        
-        for feature in numerical_features_in_df:
-            # Get the processed value for deviation calculation
-            feature_value_processed = df_processed.loc[index, feature]
+    if not anomalous_df.empty:
+        feature_medians = df_processed.median()
+        feature_stds = df_processed.std()
+
+        for _, row in anomalous_df.iterrows():
+            student_data = row.to_dict()
+            student_data['anomaly_score'] = f"{row.get('anomaly_score', 0):.4f}"
+
+            processed_row = pd.get_dummies(pd.DataFrame([row]), columns=df.select_dtypes(exclude=np.number).columns.tolist(), drop_first=True).iloc[0]
             
-            # Check for NaN and ensure it's numeric before comparison
-            if pd.notna(feature_value_processed) and pd.api.types.is_numeric_dtype(feature_value_processed):
-                median_val = feature_medians.get(feature, np.nan) 
-                std_val = feature_stds.get(feature, np.nan) 
-                
+            extreme_features = {}
+            for feature in processed_row.index:
+                feature_value_processed = processed_row[feature]
+                median_val = feature_medians.get(feature, np.nan)
+                std_val = feature_stds.get(feature, np.nan)
+
                 if pd.notna(median_val) and pd.notna(std_val) and std_val > 0:
                     deviation = (feature_value_processed - median_val) / std_val
-                    
-                    if abs(deviation) > 1.5: # Threshold for "extreme" deviation
-                        extreme_features[feature] = {
-                            'value': round(feature_value_processed, 2), # Display the processed value
-                            'deviation': round(deviation, 2),
-                            'median': round(median_val, 2),
-                            'description': ""
+                    if abs(deviation) > 1.5:
+                        description = "higher than average" if deviation > 0 else "lower than average"
+                        original_feature_name = feature.split('_')[0] if '_' in feature else feature
+                        original_value = student_data.get(original_feature_name)
+                        extreme_features[original_feature_name] = {
+                            'value': original_value,
+                            'description': description
                         }
-                        if deviation > 0:
-                            extreme_features[feature]['description'] = "higher than average"
-                        else:
-                            extreme_features[feature]['description'] = "lower than average"
-        
-        student_data['anomaly_score'] = f"{original_row.get('anomaly_score', 0):.4f}"
-        student_data['extreme_features'] = extreme_features
-        
-        student_data['student_id'] = student_data.get('student_id', f"Unknown_ID_{index}")
+            student_data['extreme_features'] = extreme_features
+            anomalous_students_list.append(student_data)
 
-        anomalous_students_list.append(student_data)
-
-    return df_processed, anomalous_students_list
+    anomaly_insights = get_insights(anomalous_df)
+    
+    return pd.DataFrame(anomalous_students_list), anomaly_insights, len(df)

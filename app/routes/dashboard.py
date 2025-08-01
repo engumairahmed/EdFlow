@@ -13,7 +13,7 @@ from app.utils.mongodb_utils import save_dataset_to_mongodb
 from app.utils.notifications import send_role_notification
 from app.utils.role_required import role_required
 # Import the new anomaly detector
-from app.ml.anomaly_detector import detect_student_anomalies
+from app.ml.anomaly_detector import detect_student_anomalies, get_insights
 from config import Config
 
 # Correctly define UPLOADS_DIR relative to the project root
@@ -172,7 +172,7 @@ def anomaly_results_view():
         all_files.sort() # Files ko alphabetical order mein sort karein
     
     anomalous_students = []
-    anomaly_chart_data = {}
+    anomaly_chart_data = {'gender': {}, 'scores': {}}
     anomaly_insights = {}
     selected_file = request.args.get('selected_file') # GET request se file name lenge
     
@@ -195,45 +195,23 @@ def anomaly_results_view():
         }
 
         if anomalous_students:
-            for student in anomalous_students:
-                gender = student.get('gender')
-                if gender == 'Male':
-                    anomaly_chart_data['gender']['Male'] += 1
-                elif gender == 'Female':
-                    anomaly_chart_data['gender']['Female'] += 1
-                else:
-                    anomaly_chart_data['gender']['Other'] += 1 
+            anomalous_df = pd.DataFrame(anomalous_students)
+            
+            # Prepare Gender Chart Data
+            gender_counts = anomalous_df.get('gender', pd.Series()).value_counts().to_dict()
+            
+            # Prepare Anomaly Score Chart Data
+            score_bins = {
+                '<-0.5': len(anomalous_df[anomalous_df['anomaly_score'].astype(float) < -0.5]),
+                '-0.5 to -0.2': len(anomalous_df[(anomalous_df['anomaly_score'].astype(float) >= -0.5) & (anomalous_df['anomaly_score'].astype(float) < -0.2)]),
+                '-0.2 to 0': len(anomalous_df[(anomalous_df['anomaly_score'].astype(float) >= -0.2) & (anomalous_df['anomaly_score'].astype(float) < 0)]),
+                '>0': len(anomalous_df[anomalous_df['anomaly_score'].astype(float) >= 0]),
+            }
+            
+            anomaly_chart_data = {'gender': gender_counts, 'scores': score_bins}
 
-                try:
-                    score = float(student.get('anomaly_score', 0))
-                    if score < -0.5:
-                        anomaly_chart_data['scores']['bin1'] += 1
-                    elif -0.5 <= score < -0.2:
-                        anomaly_chart_data['scores']['bin2'] += 1
-                    elif -0.2 <= score < 0:
-                        anomaly_chart_data['scores']['bin3'] += 1
-                    else:
-                        anomaly_chart_data['scores']['bin4'] += 1
-                except ValueError:
-                    pass 
-
-            total_anomalies = len(anomalous_students)
-            if total_anomalies > 0:
-                male_anomalies = anomaly_chart_data['gender']['Male']
-                female_anomalies = anomaly_chart_data['gender']['Female']
-                
-                if male_anomalies > female_anomalies * 1.5:
-                    anomaly_insights['gender_insight'] = "Significantly more male students detected as anomalous."
-                elif female_anomalies > male_anomalies * 1.5:
-                    anomaly_insights['gender_insight'] = "Significantly more female students detected as anomalous."
-                else:
-                    anomaly_insights['gender_insight'] = "Anomalies are relatively balanced across genders."
-                
-                if anomaly_chart_data['scores']['bin1'] > anomaly_chart_data['scores']['bin2'] + anomaly_chart_data['scores']['bin3']:
-                    anomaly_insights['score_insight'] = "Most anomalies have very low scores, indicating strong deviation from norm."
-    else:
-        # Initial load or no file selected
-        flash("Please select a CSV file to run anomaly detection.", "warning")
+            # Prepare Insights (optional but related to visualization)
+            anomaly_insights = get_insights(anomalous_df)
 
     return render_template('dashboard/anomaly_results.html', 
                            all_files=all_files, # Sabhi files ki list pass ki
