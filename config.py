@@ -29,3 +29,13 @@ class Config:
 
     HDFS_URL = os.getenv("HDFS_URL")
     HDFS_USER = os.getenv("HDFS_USER")
+
+    MODEL_DIR = os.path.join(os.getcwd(), "app", "ml", "models")
+
+    CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL') or 'redis://localhost:6379/0'
+    CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND') or 'mongodb://localhost:27017/celery_results'
+    CELERY_ACCEPT_CONTENT = ['json']
+    CELERY_TASK_SERIALIZER = 'json'
+    CELERY_RESULT_SERIALIZER = 'json'
+    CELERY_TIMEZONE = 'UTC'
+    CELERY_ENABLE_UTC = True

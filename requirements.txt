@@ -12,3 +12,4 @@ hdfs
 itsdangerous
 pywebpush
 cryptography
+celery
