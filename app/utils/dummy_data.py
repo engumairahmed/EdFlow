@@ -70,10 +70,10 @@ def create_dummy_data(db):
             "gender": "Male", "ethnicity": "Asian", "socioeconomicStatus": "Middle",
             "highSchoolGPA": 3.8, "entranceExamScores": {"SAT": 1450}, "financialAidStatus": "Recipient",
             "currentGPA": 3.5,
-            "study_hou": 15, "social_me": 2, "netflix_ho": 1, "part_time_job": "No",
-            "attendanc": 95, "sleep_hou": 8, "diet_quality": "Good", "exercise_freq": "High",
-            "parental_edu": "Master", "internet_quality": "Good", "mental_health_score": 90,
-            "extracurricular": "Yes", "exam_score": 92
+            "study_hours": 15, "social_media_time": 2, "netflix_hours": 1, "part_time_job": "No",
+            "attendance": 95, "sleep_hours": 8, "diet_quality": "Good", "exercise_frequency": "High",
+            "parental_education_level": "Master", "internet_quality": "Good", "mental_health_score": 90,
+            "extracurricular_activities": "Yes", "exam_score": 92
         },
         # Student 2: Medium risk (lower GPA, higher social/netflix, average attendance)
         {
@@ -81,10 +81,10 @@ def create_dummy_data(db):
             "gender": "Female", "ethnicity": "Caucasian", "socioeconomicStatus": "Middle",
             "highSchoolGPA": 3.2, "entranceExamScores": {"SAT": 1300}, "financialAidStatus": "None",
             "currentGPA": 2.8,
-            "study_hou": 10, "social_me": 6, "netflix_ho": 4, "part_time_job": "No",
-            "attendanc": 85, "sleep_hou": 7, "diet_quality": "Average", "exercise_freq": "Moderate",
-            "parental_edu": "Bachelor", "internet_quality": "Average", "mental_health_score": 70,
-            "extracurricular": "No", "exam_score": 75
+            "study_hours": 10, "social_media_time": 6, "netflix_hours": 4, "part_time_job": "No",
+            "attendance": 85, "sleep_hours": 7, "diet_quality": "Average", "exercise_frequency": "Moderate",
+            "parental_education_level": "Bachelor", "internet_quality": "Average", "mental_health_score": 70,
+            "extracurricular_activities": "No", "exam_score": 75
         },
         # Student 3: High risk (low GPA, high time-wasters, low attendance) -> Labeled as dropout for training
         {
@@ -92,11 +92,11 @@ def create_dummy_data(db):
             "gender": "Male", "ethnicity": "Hispanic", "socioeconomicStatus": "Low",
             "highSchoolGPA": 2.5, "entranceExamScores": {"SAT": 1050}, "financialAidStatus": "Recipient",
             "currentGPA": 1.9, # Low GPA
-            "study_hou": 5, "social_me": 10, "netflix_ho": 8, "part_time_job": "Yes",
-            "attendanc": 60, # Low attendance
-            "sleep_hou": 6, "diet_quality": "Poor", "exercise_freq": "Low",
-            "parental_edu": "High School", "internet_quality": "Poor", "mental_health_score": 45,
-            "extracurricular": "No", "exam_score": 55
+            "study_hours": 5, "social_media_time": 10, "netflix_hours": 8, "part_time_job": "Yes",
+            "attendance": 60, # Low attendance
+            "sleep_hours": 6, "diet_quality": "Poor", "exercise_frequency": "Low",
+            "parental_education_level": "High School", "internet_quality": "Poor", "mental_health_score": 45,
+            "extracurricular_activities": "No", "exam_score": 55
         },
         # Student 4: Medium-High risk (struggling, but not dropout yet)
         {
@@ -104,10 +104,10 @@ def create_dummy_data(db):
             "gender": "Female", "ethnicity": "African American", "socioeconomicStatus": "Middle",
             "highSchoolGPA": 3.0, "entranceExamScores": {"ACT": 25}, "financialAidStatus": "None",
             "currentGPA": 2.2,
-            "study_hou": 8, "social_me": 7, "netflix_ho": 5, "part_time_job": "Yes",
-            "attendanc": 75, "sleep_hou": 6.5, "diet_quality": "Average", "exercise_freq": "Moderate",
-            "parental_edu": "Bachelor", "internet_quality": "Average", "mental_health_score": 60,
-            "extracurricular": "Yes", "exam_score": 68
+            "study_hours": 8, "social_media_time": 7, "netflix_hours": 5, "part_time_job": "Yes",
+            "attendance": 75, "sleep_hours": 6.5, "diet_quality": "Average", "exercise_frequency": "Moderate",
+            "parental_education_level": "Bachelor", "internet_quality": "Average", "mental_health_score": 60,
+            "extracurricular_activities": "Yes", "exam_score": 68
         },
         # Student 5: Low risk (good overall)
         {
@@ -115,10 +115,10 @@ def create_dummy_data(db):
             "gender": "Female", "ethnicity": "Asian", "socioeconomicStatus": "High",
             "highSchoolGPA": 4.0, "entranceExamScores": {"SAT": 1550}, "financialAidStatus": "None",
             "currentGPA": 3.9,
-            "study_hou": 20, "social_me": 1, "netflix_ho": 0.5, "part_time_job": "No",
-            "attendanc": 98, "sleep_hou": 8.5, "diet_quality": "Good", "exercise_freq": "High",
-            "parental_edu": "PhD", "internet_quality": "Good", "mental_health_score": 95,
-            "extracurricular": "Yes", "exam_score": 95
+            "study_hours": 20, "social_media_time": 1, "netflix_hours": 0.5, "part_time_job": "No",
+            "attendance": 98, "sleep_hours": 8.5, "diet_quality": "Good", "exercise_frequency": "High",
+            "parental_education_level": "PhD", "internet_quality": "Good", "mental_health_score": 95,
+            "extracurricular_activities": "Yes", "exam_score": 95
         }
     ]
 
@@ -145,21 +145,23 @@ def create_dummy_data(db):
             "riskFactors": [],
             "notes": [],
             # New fields from exemplary data
-            "study_hou": student_config["study_hou"],
-            "social_me": student_config["social_me"],
-            "netflix_ho": student_config["netflix_ho"],
-            "part_time_job": student_config["part_time_job"],
-            "attendanc": student_config["attendanc"],
-            "sleep_hou": student_config["sleep_hou"],
-            "diet_quality": student_config["diet_quality"],
-            "exercise_freq": student_config["exercise_freq"],
-            "parental_edu": student_config["parental_edu"],
-            "internet_quality": student_config["internet_quality"],
-            "mental_health_score": student_config["mental_health_score"],
-            "extracurricular": student_config["extracurricular"],
-            "exam_score": student_config["exam_score"],
+             "ml_features":{
+                "study_hours": student_config["study_hours"],
+                "social_media_time": student_config["social_media_time"],
+                "netflix_hours": student_config["netflix_hours"],
+                "part_time_job": student_config["part_time_job"],
+                "attendance": student_config["attendance"],
+                "sleep_hours": student_config["sleep_hours"],
+                "diet_quality": student_config["diet_quality"],
+                "exercise_frequency": student_config["exercise_frequency"],
+                "parental_education_level": student_config["parental_education_level"],
+                "internet_quality": student_config["internet_quality"],
+                "mental_health_score": student_config["mental_health_score"],
+                "extracurricular_activities": student_config["extracurricular_activities"],
+                "exam_score": student_config["exam_score"],
+             },
             # Define 'is_dropout' based on conditions
-            "is_dropout": True if (student_config["currentGPA"] < 2.0 or student_config["attendanc"] < 70) else False,
+            "is_dropout": True if (student_config["currentGPA"] < 2.0 or student_config["attendance"] < 70) else False,
             "dropoutPredictionScore": None # Reset this, as we'll predict it
         }
         dummy_students.append(student_doc)
