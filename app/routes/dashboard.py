@@ -12,7 +12,7 @@ from app import mongo
 from app.utils.mongodb_utils import save_dataset_to_mongodb
 from app.utils.notifications import send_role_notification
 from app.utils.role_required import role_required
-from app.ml.anomaly_detector import detect_anomalies_from_df, detect_anomalies_from_db
+from app.ml.anomaly_detector import detect_student_anomalies, get_insights
 from config import Config
 
 MODEL_DIR = os.path.join(os.getcwd(), "app", "ml", "models")
