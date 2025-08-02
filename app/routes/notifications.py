@@ -8,7 +8,6 @@ notifications_bp = Blueprint('notifications', __name__)
 
 @notifications_bp.route('/notifications/subscribe', methods=['POST'])
 def subscribe():
-    print("Subscribing...")
     subscription = request.get_json()
     user_id = session.get("user_id")
 
