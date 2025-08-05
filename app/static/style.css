@@ -2669,6 +2669,8 @@ a {
     /* Rounded slider */
 }
 
+/* ... Your existing CSS for the toggle-switch ... */
+
 .slider:before {
     position: absolute;
     content: "";
@@ -2676,16 +2678,13 @@ a {
     width: 17px;
     left: 4px;
     bottom: 4px;
-    background-color: white;
+    background-color: var(--primary-purple); /* Change this to a gray color */
     transition: .4s;
     border-radius: 50%;
-    /* Circular handle */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* Add a subtle shadow for depth */
 }
 
-input:checked+.slider {
-    background-color: var(--purple-accent);
-    /* Purple when checked */
-}
+
 
 input:focus+.slider {
     box-shadow: 0 0 1px var(--purple-accent);

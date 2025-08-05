@@ -160,7 +160,7 @@
                     <label for="model">Prediction Model:</label>
                     <select id="model" name="model" required>
                         <option value="none">Select Model</option>
-                            {% for model_group in available_models %} {# Changed 'model' to 'model_group' for clarity #}
+                            {% for model_group in available_models %}
                             {% for detail in model_group.details %}
                             {% if detail.type in ['classification'] %}
                             <option value="{{ detail.model_path }}">
