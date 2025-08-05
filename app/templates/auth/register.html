@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,6 +9,11 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </head>
+<style>
+  body {
+    overflow: hidden;
+  }
+</style>
 
 <body
   style="margin: 0; font-family: 'Segoe UI', sans-serif; background: linear-gradient(to right, #40006B, #1f9ba5); color: white;">
@@ -25,8 +31,9 @@
       <!-- Form Section -->
       <div class="col-lg-5 order-2 order-lg-1 d-flex flex-column justify-content-center p-4 text-white"
         style="text-align: center;">
+        <!-- Logo 👇 -->
         <h1 class="fw-bold mb-2" style="font-size: 3rem; ">Create Account</h1>
-        <p class="mb-4" style="font-size: 1.2rem;">Smart choices. Bright future.<br>Create your account today.</p>
+        <p class="mb-4" style="font-size: 1.2rem;">Smart choices. Bright future.</p>
 
         <div class="mx-auto shadow"
           style="width: 100%; max-width: 400px; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(12px); border-radius: 20px; padding: 30px;">
@@ -44,7 +51,12 @@
           {% endwith %}
 
           <!-- Register Form -->
-          <form method="POST" action="/auth/register">
+          <form method="POST" action="/auth/register" style="margin-top:-12% ;">
+            <a href="/" class=" d-block text-start">
+              <img src="/static/Images/EdFlow Logo.png" alt="EdFlow Logo"
+                style="height: 7rem; transition: 0.3s; border-radius: 50%; padding: 5px; padding-left: 6rem;"
+                onmouseover="this.style.opacity='0.85';" onmouseout="this.style.opacity='1';">
+            </a>
             <div class="mb-3 text-start">
               <label for="username" class="form-label text-white">Username</label>
               <input type="text" name="username" id="username" class="form-control"
@@ -76,10 +88,10 @@
               <label for="role" class="form-label text-white">Role</label>
               <select name="role" id="role" class="form-select"
                 style="background-color: transparent; border: none; border-bottom: 1px solid #ffffff; border-radius: 0; color: white;">
-                <option value="analyst" selected style="background-color: #000000; color: white;">Analyst</option>
-                <option value="admin" style="background-color: #000000; color: white;">Admin</option>
-                <option value="admin" style="background-color: #000000; color: white;">Teacher</option>
-                <option value="admin" style="background-color: #000000; color: white;">Student</option>
+                <option value="analyst" selected style="background-color: #7e64a7; color: white;">Analyst</option>
+                <option value="admin" style="background-color: #7e64a7; color: white;">Admin</option>
+                <option value="admin" style="background-color: #7e64a7; color: white;">Teacher</option>
+                <option value="admin" style="background-color: #7e64a7; color: white;">Student</option>
               </select>
             </div>
 
@@ -89,7 +101,8 @@
 
           <div class="text-center mt-3">
             <small>Already have an account?
-              <a href="/auth/login" class="text-white" style="font-size: 1rem; text-decoration: underline;">Login here</a>
+              <a href="/auth/login" class="text-white" style="font-size: 1rem; text-decoration: underline;">Login
+                here</a>
             </small>
           </div>
         </div>
@@ -100,19 +113,18 @@
 
   <!-- JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
     function togglePassword() {
-      const passwordField = document.getElementById("password");
-      const toggleIcon = document.getElementById("toggleIcon");
-      if (passwordField.type === "password") {
-        passwordField.type = "text";
-        toggleIcon.classList.remove("bi-eye");
-        toggleIcon.classList.add("bi-eye-slash");
+      const password = document.getElementById('password');
+      const icon = document.getElementById('toggleIcon');
+      if (password.type === 'password') {
+        password.type = 'text';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
       } else {
-        passwordField.type = "password";
-        toggleIcon.classList.remove("bi-eye-slash");
-        toggleIcon.classList.add("bi-eye");
+        password.type = 'password';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
       }
     }
   </script>
