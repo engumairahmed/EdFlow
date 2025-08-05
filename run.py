@@ -1,5 +1,10 @@
+
+import os
 import socket
+from dotenv import load_dotenv
 from app import create_app
+
+load_dotenv()
 
 def find_available_port(start_port=5000):
     port = start_port
@@ -15,4 +20,5 @@ app = create_app()
 
 if __name__ == '__main__':
     port = find_available_port(5000)
-    app.run(debug=True, port=port, use_reloader=False)
+    host = os.environ.get('HOST', '0.0.0.0')    
+    app.run(host=host, port=port, debug=True, use_reloader=False)

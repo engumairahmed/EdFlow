@@ -1,7 +1,7 @@
 Flask
 flask-cors
 flask-pymongo
-flask-jwt-extended
+pymongo
 python-dotenv
 flask_mail
 pandas
@@ -14,3 +14,4 @@ pywebpush
 cryptography
 celery
 shap
+gunicorn
