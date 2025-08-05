@@ -33,100 +33,125 @@
             </select>
         </div>
     </div>
+    
+    {% if models %}
+    <div class="model-grid" id="model-grid-container">
+        {% for model_group in models %}
+            {% for detail in model_group.details %}
+                <div class="model-card" 
+                     data-name="{{ detail.model_name }}" 
+                     data-date="{{ model_group.created_at.strftime('%Y-%m-%d') }}"
+                     data-status="published">
+                    <div class="model-card-content">
+                        <h3>Model: {{ model_group.dataset }}</h3>
+                        <div class="status-badge {% if detail.model_name == 'Random Forest' %}published{% elif detail.model_name == 'Logistic Regression' %}draft{% elif detail.model_name == 'Linear Regression' %}archived{% else %}review{% endif %}">
+                            <span>Type: {{detail.type}}</span><br>
+                            <span>Algorithm: {{detail.model_name}}</span>
+                        </div>
+                        <p class="model-meta">
+                            Target: {{ detail.target }} | 
+                            Uploaded: {{ model_group.created_at.strftime('%Y-%m-%d') }}
+                        </p>
+                        
+                        {% if detail.type == 'Classification' %}
+                            <div class="metrics-block">
+                                <h5>Metrics:</h5>
+                                <p><strong>Accuracy:</strong> {{ '%.4f' | format(detail.metrics.accuracy) }}</p>
+                                <p><strong>Precision:</strong> {{ '%.4f' | format(detail.metrics.precision) }}</p>
+                                <p><strong>Recall:</strong> {{ '%.4f' | format(detail.metrics.recall) }}</p>
+                                <p><strong>F1 Score:</strong> {{ '%.4f' | format(detail.metrics.f1_score) }}</p>
+                                <p><strong>ROC AUC:</strong> {{ '%.4f' | format(detail.metrics.roc_auc) }}</p>
+                            </div>
+                        {% elif detail.type == 'Regression' %}
+                            <div class="metrics-block">
+                                <h5>Metrics:</h5>
+                                <p><strong>MSE:</strong> {{ '%.4f' | format(detail.metrics.mse) }}</p>
+                                <p><strong>R2 Score:</strong> {{ '%.4f' | format(detail.metrics.r2_score) }}</p>
+                            </div>
+                        {% endif %}
 
-    <div class="model-grid">
-        <div class="model-card">
-            <img src="https://via.placeholder.com/400x180/ADD8E6/000000?text=Model+Thumbnail+1" alt="Model Thumbnail">
-            <div class="model-card-content">
-                <h3>Student Performance Predictor</h3>
-                <span class="status-badge published">Published</span>
-                <p class="model-meta">Uploaded: 2025-07-20 | Views: 1,234</p>
-                <div class="model-actions">
-                    <button class="action-btn">Edit</button>
-                    <button class="action-btn">View</button>
-                    <button class="action-btn">Delete</button>
+                        <div class="model-actions">
+                            <button class="action-btn">Edit</button>
+                            <button class="action-btn">View</button>
+                            <button class="action-btn">Delete</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="model-card">
-            <img src="https://via.placeholder.com/400x180/FFDAB9/000000?text=Model+Thumbnail+2" alt="Model Thumbnail">
-            <div class="model-card-content">
-                <h3>Course Recommendation System</h3>
-                <span class="status-badge draft">Draft</span>
-                <p class="model-meta">Uploaded: 2025-07-15 | Views: 87</p>
-                <div class="model-actions">
-                    <button class="action-btn">Edit</button>
-                    <button class="action-btn">View</button>
-                    <button class="action-btn">Delete</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="model-card">
-            <img src="https://via.placeholder.com/400x180/CCE5FF/000000?text=Model+Thumbnail+3" alt="Model Thumbnail">
-            <div class="model-card-content">
-                <h3>Enrollment Forecast Model</h3>
-                <span class="status-badge review">Under Review</span>
-                <p class="model-meta">Uploaded: 2025-07-10 | Views: 456</p>
-                <div class="model-actions">
-                    <button class="action-btn">Edit</button>
-                    <button class="action-btn">View</button>
-                    <button class="action-btn">Delete</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="model-card">
-            <img src="https://via.placeholder.com/400x180/DDA0DD/000000?text=Model+Thumbnail+4" alt="Model Thumbnail">
-            <div class="model-card-content">
-                <h3>Resource Allocation Predictor</h3>
-                <span class="status-badge published">Published</span>
-                <p class="model-meta">Uploaded: 2025-07-01 | Views: 2,100</p>
-                <div class="model-actions">
-                    <button class="action-btn">Edit</button>
-                    <button class="action-btn">View</button>
-                    <button class="action-btn">Delete</button>
-                </div>
-            </div>
-        </div>
-                <div class="model-card">
-            <img src="https://via.placeholder.com/400x180/F0F8FF/000000?text=Model+Thumbnail+5" alt="Model Thumbnail">
-            <div class="model-card-content">
-                <h3>Graduate Job Success Model</h3>
-                <span class="status-badge published">Published</span>
-                <p class="model-meta">Uploaded: 2025-06-25 | Views: 980</p>
-                <div class="model-actions">
-                    <button class="action-btn">Edit</button>
-                    <button class="action-btn">View</button>
-                    <button class="action-btn">Delete</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="model-card">
-            <img src="https://via.placeholder.com/400x180/D3D3D3/000000?text=Model+Thumbnail+6" alt="Model Thumbnail">
-            <div class="model-card-content">
-                <h3>Alumni Engagement Score</h3>
-                <span class="status-badge draft">Draft</span>
-                <p class="model-meta">Uploaded: 2025-06-18 | Views: 150</p>
-                <div class="model-actions">
-                    <button class="action-btn">Edit</button>
-                    <button class="action-btn">View</button>
-                    <button class="action-btn">Delete</button>
-                </div>
-            </div>
-
-
-        </div>
-
+            {% endfor %}
+        {% endfor %}
     </div>
-
-
+    {% else %}
+    <p>No models have been trained yet.</p>
+    {% endif %}
 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-<script src="js/scripts.js"></script>
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
-<script src="js/datatables-simple-demo.js"></script>
+<script src="{{ url_for('static', filename='js/datatables-simple-demo.js') }}"></script>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.querySelector('.search-input');
+        const statusFilter = document.getElementById('status-filter');
+        const sortBy = document.getElementById('sort-by');
+        const modelGrid = document.getElementById('model-grid-container');
+        const modelCards = Array.from(document.querySelectorAll('.model-card'));
+
+        function filterAndSortModels() {
+            const searchQuery = searchInput.value.toLowerCase();
+            const status = statusFilter.value;
+            const sortValue = sortBy.value;
+
+            let filteredCards = modelCards.filter(card => {
+                const modelName = card.dataset.name.toLowerCase();
+                const cardStatus = card.dataset.status;
+                
+                // --- UPDATED LOGIC HERE ---
+                const datasetName = card.querySelector('h3').textContent.toLowerCase();
+                const modelType = card.querySelector('.status-badge span:first-child').textContent.toLowerCase();
+                const targetName = card.querySelector('.model-meta').textContent.toLowerCase();
+
+                const isMatchingSearch = modelName.includes(searchQuery) ||
+                                        datasetName.includes(searchQuery) ||
+                                        modelType.includes(searchQuery) ||
+                                        targetName.includes(searchQuery);
+
+                const isMatchingStatus = status === 'all' || cardStatus === status;
+
+                return isMatchingSearch && isMatchingStatus;
+            });
+
+            filteredCards.sort((a, b) => {
+                const aName = a.dataset.name;
+                const bName = b.dataset.name;
+                const aDate = new Date(a.dataset.date);
+                const bDate = new Date(b.dataset.date);
+                
+                if (sortValue === 'name-asc') {
+                    return aName.localeCompare(bName);
+                } else if (sortValue === 'name-desc') {
+                    return bName.localeCompare(aName);
+                } else if (sortValue === 'date-asc') {
+                    return aDate - bDate;
+                } else if (sortValue === 'date-desc') {
+                    return bDate - aDate;
+                }
+                return 0;
+            });
+
+            // Update the Grid
+            modelGrid.innerHTML = '';
+            filteredCards.forEach(card => modelGrid.appendChild(card));
+        }
+
+        // Event Listeners
+        searchInput.addEventListener('input', filterAndSortModels);
+        statusFilter.addEventListener('change', filterAndSortModels);
+        sortBy.addEventListener('change', filterAndSortModels);
+
+        // Initial call to set up the grid
+        filterAndSortModels();
+    d});
+</script>
+</script>
 {% endblock %}

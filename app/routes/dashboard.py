@@ -16,6 +16,7 @@ from app.utils.notifications import send_role_notification
 from app.utils.role_required import role_required
 from app.ml.anomaly_detector import detect_anomalies_from_db, detect_anomalies_from_df, get_insights
 from config import Config
+import plotly.express as px
 
 MODEL_DIR = os.path.join(os.getcwd(), "app", "ml", "models")
 UPLOADS_DIR = os.path.join(os.getcwd(), "uploads")
@@ -24,8 +25,14 @@ VAPID_PUBLIC_KEY = Config.VAPID_PUBLIC_KEY
 dashboard_bp = Blueprint("dashboard", __name__)
 
 db = mongo.db
+saved_charts_collection = db["saved_charts"]
 
 logger = logging.getLogger(__name__)
+
+
+# ===================================
+# DASHBOARD HOME ROUTE
+# =================================== 
 
 @dashboard_bp.route("", methods=["GET"], strict_slashes=False)
 @login_required
@@ -33,6 +40,10 @@ def dashboard_view():
     username = session.get('username')
     role = session.get('role')
     return render_template("dashboard/home.html", username=username, role=role, VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY)
+
+# ===================================
+# DATA UPLOAD & MODEL TRAINING ROUTE
+# =================================== 
 
 @dashboard_bp.route("/upload", methods=["GET", "POST"])
 @login_required
@@ -85,14 +96,49 @@ def upload_data():
 
     return render_template("dashboard/upload.html")
 
+# ===================================
+# VIEW AVAILABLE MODELS ROUTE
+# =================================== 
+
 @dashboard_bp.route("/my-models")
 @login_required
 @role_required(["admin", "analyst"])
 def my_models():
     user = db.users.find_one({"username": session['username']})
-    model_names = user.get("models", [])
+    models_cursor = db.trained_models.find({
+        "trained_by.userId": str(user["_id"])
+    })
+    models_list = []
+    for model_doc in models_cursor:
+        
+        if '_id' in model_doc:
+            model_doc['_id'] = str(model_doc['_id'])
 
-    return render_template("dashboard/my_models.html", models=model_names)
+        if 'details' in model_doc and isinstance(model_doc['details'], list):
+            filtered_details = []
+            regression_model_added = False
+            for detail in model_doc['details']:
+                if 'type' in detail:
+                    detail['type'] = detail['type'].replace('_', ' ').title()
+                if 'model_name' in detail:
+                    detail['model_name'] = detail['model_name'].replace('_', ' ').title()
+                if 'target' in detail:
+                    detail['target'] = detail['target'].replace('_', ' ').title()
+                if detail['type'] == 'Classification':
+                    filtered_details.append(detail)
+                elif detail['type'] == 'Regression' and not regression_model_added:
+                    filtered_details.append(detail)
+                    regression_model_added = True
+
+            model_doc['details'] = filtered_details
+        
+        models_list.append(model_doc)
+        print(models_list)
+    return render_template("dashboard/my_models.html", models=models_list)
+
+# ===================================
+# PREDICTION ROUTE
+# =================================== 
 
 @dashboard_bp.route("/predict", methods=["GET", "POST"])
 @login_required
@@ -167,19 +213,11 @@ def predict_form():
 
     return render_template("dashboard/predict.html", available_models=available_models)
 
-@dashboard_bp.route('/analytics',methods=['GET'])
-@login_required
-@role_required(["admin","analyst","teacher"])
-def analytics():
-    return render_template("dashboard/analytics.html")
-
 @dashboard_bp.route('/dataset')
 @login_required
 def dataset():
     return render_template("dashboard/dataset.html")
 
-
-# --- Existing Routes of Profile-Related Pages ---
 @dashboard_bp.route('/my_profile')
 @login_required
 def my_profile():
@@ -195,14 +233,12 @@ def change_password():
 def login_history():
     return render_template('dashboard/login_history.html')
 
-# --- Personal Information Page Ka Route ---
 @dashboard_bp.route('/personal_information')
 @login_required
 def personal_information():
     return render_template('dashboard/personal_information.html')
 
 
-# --- Notification Related Routes 
 @dashboard_bp.route('/all_notifications')
 @login_required
 def all_notifications():
@@ -217,9 +253,10 @@ def notification_settings():
 def update_profile():
     return render_template('dashboard/update_profile.html')
 
-# =========================================================
-# NEW ANOMALY DETECTION ROUTE
-# =========================================================
+# ===================================
+# ANOMALY DETECTION ROUTE
+# ===================================
+
 @dashboard_bp.route('/anomaly-results', methods=['GET', 'POST'])
 @login_required
 @role_required(['admin', 'analyst']) # Only admins and analysts can view anomalies
@@ -302,3 +339,290 @@ def anomaly_results_view():
         gender_chart_json=json.dumps(gender_anomaly_data),
         score_chart_json=json.dumps(score_distribution_data)
     )
+
+# ===================================
+# ANALYTICS/VISUALIZATION ROUTE
+# ===================================
+@dashboard_bp.route('/analytics', methods=['GET', 'POST']) 
+@login_required
+@role_required(["admin", "analyst", "teacher"])
+def analytics():
+    collections = db.list_collection_names()
+    selected_data = {}
+    fields = []
+    chart_html = None
+    form_data = None
+    rendered_charts = []
+
+    if request.method == "POST":
+        collection_name = request.form.get("collection")
+        selected_data["collection"] = collection_name
+        collection = db[collection_name]
+        sample_doc = collection.find_one()
+
+        if sample_doc:
+            fields = [key for key in sample_doc.keys() if key != "_id"]
+
+        # Chart generate logic
+        if "x_axis" in request.form and "y_axis" in request.form and "chart_type" in request.form:
+            x_axis = request.form["x_axis"]
+            y_axis = request.form["y_axis"]
+            chart_type = request.form["chart_type"]
+            limit = int(request.form.get("limit", 10))
+            color = request.form.get("color", "#636EFA")
+
+            data = list(collection.find({}, {"_id": 0}))
+            df = pd.DataFrame(data).head(limit)
+            
+            # Check if columns exist
+            if x_axis in df.columns and y_axis in df.columns:
+                df = df[[x_axis, y_axis]].dropna()
+
+                # Pie chart validation
+                if chart_type == "pie":
+                    if not pd.api.types.is_numeric_dtype(df[y_axis]):
+                        flash("The Y-axis must be numeric for a pie chart.", "danger")
+                        return redirect(url_for("dashboard.analytics"))
+
+                # Generate chart
+                fig = None
+                if chart_type == "bar":
+                    fig = px.bar(df, x=x_axis, y=y_axis, title="Bar Chart", color_discrete_sequence=[color])
+                elif chart_type == "line":
+                    fig = px.line(df, x=x_axis, y=y_axis, title="Line Chart", color_discrete_sequence=[color])
+                elif chart_type == "pie":
+                    fig = px.pie(df, names=x_axis, values=y_axis, title="Pie Chart", color_discrete_sequence=[color])
+                else:
+                    chart_html = "Invalid chart type selected."
+
+                if fig:
+                    fig.update_layout(template="plotly_white")  # Important!
+                    chart_html = fig.to_html(full_html=False)
+
+                form_data = {
+                    "collection": collection_name,
+                    "x_axis": x_axis,
+                    "y_axis": y_axis,
+                    "chart_type": chart_type,
+                    "limit": limit,
+                    "color": color
+                }
+            else:
+                flash("The selected fields are not found in the data.", "danger")
+                return redirect(url_for("dashboard.analytics"))
+
+        # Render saved charts
+        saved_charts_collection = db["saved_charts"]
+        charts = list(saved_charts_collection.find({"collection": selected_data.get("collection")}))
+        for chart in charts:
+            try:
+                c = db[chart["collection"]]
+                d = list(c.find({}, {"_id": 0}))
+                df = pd.DataFrame(d).head(chart["limit"])
+                df = df[[chart["x_axis"], chart["y_axis"]]].dropna()
+
+                f = None
+                if chart["chart_type"] == "bar":
+                    f = px.bar(df, x=chart["x_axis"], y=chart["y_axis"], color_discrete_sequence=[chart["color"]])
+                elif chart["chart_type"] == "line":
+                    f = px.line(df, x=chart["x_axis"], y=chart["y_axis"], color_discrete_sequence=[chart["color"]])
+                elif chart["chart_type"] == "pie":
+                    f = px.pie(df, names=chart["x_axis"], values=chart["y_axis"], color_discrete_sequence=[chart["color"]])
+
+                if f:
+                    f.update_layout(template="plotly_white")
+                    rendered_charts.append({
+                        "collection": chart["collection"],
+                        "x_axis": chart["x_axis"],
+                        "y_axis": chart["y_axis"],
+                        "chart_type": chart["chart_type"],
+                        "limit": chart["limit"],
+                        "color": chart["color"],
+                        "chart_html": f.to_html(full_html=False)
+                    })
+
+            except Exception as e:
+                logger.info("Error rendering saved chart:", e)
+
+    return render_template("dashboard/analytics.html",
+        collections=collections,
+        fields=fields,
+        selected_data=selected_data,
+        chart=chart_html,
+        form_data=form_data,
+        saved_charts=rendered_charts
+    )
+@dashboard_bp.route('/generate_chart', methods=['POST'])
+@login_required
+@role_required(["admin", "analyst", "teacher"])
+def generate_chart():
+    try:
+        collection_name = request.form["collection"]
+        x_axis = request.form["x_axis"]
+        y_axis = request.form["y_axis"]
+        chart_type = request.form["chart_type"]
+        limit = int(request.form["limit"])
+        color = request.form["color"]
+
+        chart_data = {
+            "collection": collection_name,
+            "x_axis": x_axis,
+            "y_axis": y_axis,
+            "chart_type": chart_type,
+            "limit": limit,
+            "color": color
+        }
+
+        collection = mongo.db[collection_name]
+        data = list(collection.find({}, {"_id": 0}))
+        df = pd.DataFrame(data).head(limit)
+        
+
+        if x_axis in df.columns and y_axis in df.columns:
+            df = df[[x_axis, y_axis]].dropna()
+
+            # Pie chart validation
+            if chart_type == "pie":
+                if not pd.api.types.is_numeric_dtype(df[y_axis]):
+                    flash( "Y-axis must be numeric for a pie chart.", "danger")
+                    return redirect(url_for("dashboard.analytics"))
+
+            # Generate chart
+            fig = None
+            if chart_type == "bar":
+                fig = px.bar(df, x=x_axis, y=y_axis, color_discrete_sequence=[color])
+            elif chart_type == "line":
+                fig = px.line(df, x=x_axis, y=y_axis, color_discrete_sequence=[color])
+            elif chart_type == "pie":
+                fig = px.pie(df, names=x_axis, values=y_axis, color_discrete_sequence=[color])
+
+            if fig:
+                fig.update_layout(template="plotly_white")
+                chart_html = fig.to_html(full_html=False)
+            else:
+                chart_html = None
+
+            # Render saved charts
+            saved_charts_collection = mongo.db.saved_charts
+            charts = list(saved_charts_collection.find({"collection": collection_name}))
+            rendered_charts = []
+
+            for chart in charts:
+                try:
+                    chart["_id"] = str(chart["_id"])
+                    c = mongo.db[chart["collection"]]
+                    d = list(c.find({}, {"_id": 0}))
+                    df = pd.DataFrame(d).head(chart["limit"])
+                    df = df[[chart["x_axis"], chart["y_axis"]]].dropna()
+
+                    f = None
+                    if chart["chart_type"] == "bar":
+                        f = px.bar(df, x=chart["x_axis"], y=chart["y_axis"], color_discrete_sequence=[chart["color"]])
+                    elif chart["chart_type"] == "line":
+                        f = px.line(df, x=chart["x_axis"], y=chart["y_axis"], color_discrete_sequence=[chart["color"]])
+                    elif chart["chart_type"] == "pie":
+                        f = px.pie(df, names=chart["x_axis"], values=chart["y_axis"], color_discrete_sequence=[chart["color"]])
+
+                    if f:
+                        f.update_layout(template="plotly_white")
+                        rendered_charts.append({
+                            "_id": chart["_id"],
+                            "collection": chart["collection"],
+                            "x_axis": chart["x_axis"],
+                            "y_axis": chart["y_axis"],
+                            "chart_type": chart["chart_type"],
+                            "limit": chart["limit"],
+                            "color": chart["color"],
+                            "chart_html": f.to_html(full_html=False)
+                        })
+
+                except Exception as e:
+                    logger.info("Error rendering saved chart:", e)
+
+            sample_doc = collection.find_one()
+            fields = [key for key in sample_doc.keys() if key != "_id"] if sample_doc else []
+
+            return render_template("dashboard/analytics.html",
+                fields=fields,
+                selected_data={"collection": collection_name},
+                chart=chart_html,
+                form_data=chart_data,
+                saved_charts=rendered_charts
+            )
+
+        else:
+            flash( "The fields you selected are not present in the data.", "danger")
+            return redirect(url_for("dashboard.analytics"))
+
+    except Exception as e:
+        logger.info("Error generating chart:", e)
+        flash("The chart could not be generated.", "danger")
+        return redirect(url_for("dashboard.analytics"))
+
+@dashboard_bp.route('/save_chart', methods=['POST'])
+@login_required
+@role_required(["admin", "analyst", "teacher"])
+def save_chart():
+    try:
+        collection = request.form.get("collection")
+        x_axis = request.form.get("x_axis")
+        y_axis = request.form.get("y_axis")
+        chart_type = request.form.get("chart_type")
+        limit = request.form.get("limit")
+        color = request.form.get("color")
+
+        if not all([collection, x_axis, y_axis, chart_type, limit, color]):
+            flash("Some fields are missing. The chart was not saved.", "warning")
+            return redirect(url_for("dashboard.analytics"))
+
+        chart_data = {
+            "collection": collection,
+            "x_axis": x_axis,
+            "y_axis": y_axis,
+            "chart_type": chart_type,
+            "limit": int(limit),
+            "color": color
+        }
+
+        saved_charts_collection = mongo.db.saved_charts
+        saved_charts_collection.insert_one(chart_data)
+
+        logger.info("Chart saved successfully:", chart_data)
+        flash("Chart has been saved!", "success")
+        return redirect(url_for("dashboard.analytics"))
+
+    except Exception as e:
+        logger.info("Error saving chart:", e)
+        flash("Chart has not been saved.", "danger")
+        return redirect(url_for("dashboard.analytics"))
+
+
+from bson.objectid import ObjectId
+from bson.objectid import ObjectId
+@dashboard_bp.route("/delete_chart", methods=["POST"])
+@login_required
+@role_required(["admin", "analyst", "teacher"])
+def delete_chart():
+    try:
+        collection = request.form.get("collection")
+        x_axis = request.form.get("x_axis")
+        y_axis = request.form.get("y_axis")
+        chart_type = request.form.get("chart_type")
+
+        deleted = saved_charts_collection.delete_one({
+            "collection": collection,
+            "x_axis": x_axis,
+            "y_axis": y_axis,
+            "chart_type": chart_type
+        })
+
+        if deleted.deleted_count:
+            flash("Chart deleted successfully!", "success")
+        else:
+            flash("Chart not found or already deleted.", "warning")
+
+        return redirect(url_for("dashboard.analytics"))
+
+    except Exception as e:
+        flash(f"Error deleting chart: {str(e)}", "danger")
+        return redirect(url_for("dashboard.analytics"))

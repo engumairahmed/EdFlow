@@ -1,15 +1,16 @@
 {% extends 'dashboard/base.html' %}
 
-{% block title %}Analytics-EdFlow{% endblock %}
+{% block title %}Analytics - EdFlow{% endblock %}
 
 {% block page_heading %}Detailed Analytics & Insights{% endblock %}
 
 {% block content %}
 <div class="analytics-grid-container">
 
+    <!-- Performance Trends -->
     <div class="dashboard-card">
         <h3 class="card-title"><i class="fas fa-chart-line icon-purple"></i> Overall Performance Trends</h3>
-        <p class="chart-description">Track average academic scores and attendance over selected periods.</p>
+        <p class="chart-description">Track average academic scores and attendance over time.</p>
         <div class="filter-controls">
             <label for="timeframe">Timeframe:</label>
             <select id="timeframe">
@@ -27,55 +28,165 @@
             </select>
         </div>
         <div class="chart-container-lg">
-            <div class="chart-placeholder">Overall Performance Chart Placeholder</div>
+            <div class="chart-placeholder">Overall Performance Chart</div>
         </div>
     </div>
 
+    <!-- Subject Comparison -->
     <div class="dashboard-card">
         <h3 class="card-title"><i class="fas fa-chart-bar icon-purple"></i> Subject Performance Comparison</h3>
-        <p class="chart-description">Average scores across different subjects for selected grade levels.</p>
+        <p class="chart-description">Average scores across subjects for selected grade levels.</p>
         <div class="chart-container-md">
-            <div class="chart-placeholder">Subject Comparison Chart Placeholder</div>
+            <div class="chart-placeholder">Subject Comparison Chart</div>
         </div>
     </div>
 
+    <!-- Risk Distribution -->
     <div class="dashboard-card">
         <h3 class="card-title"><i class="fas fa-exclamation-triangle icon-purple"></i> Student Risk Distribution</h3>
-        <p class="chart-description">Breakdown of students based on their predicted academic risk levels.</p>
+        <p class="chart-description">Breakdown of students based on predicted academic risk levels.</p>
         <div class="chart-container-sm">
-            <div class="chart-placeholder">Risk Distribution Chart Placeholder</div>
+            <div class="chart-placeholder">Risk Distribution Chart</div>
         </div>
-        
     </div>
 
+    <!-- Attendance vs Performance -->
     <div class="dashboard-card">
         <h3 class="card-title"><i class="fas fa-chart-scatter icon-purple"></i> Attendance vs. Performance</h3>
-        <p class="chart-description">Correlation between attendance rates and academic scores.</p>
+        <p class="chart-description">Correlation between attendance and academic scores.</p>
         <div class="chart-container-md">
-            <div class="chart-placeholder">Attendance Scatter Chart Placeholder</div>
+            <div class="chart-placeholder">Attendance Scatter Chart</div>
         </div>
     </div>
 
+    <!-- Report Generator -->
     <div class="dashboard-card" id="Generate">
         <h3 class="card-title"><i class="fas fa-file-export icon-purple"></i> Generate Custom Reports</h3>
         <div class="form-group">
             <label for="reportType">Report Type:</label>
-            <select id="reportType">
-                <option value="overall">Overall Performance Report</option>
-                <option value="student">Individual Student Report</option>
-                <option value="grade">Grade Level Summary</option>
-                <option value="risk">Risk Analysis Report</option>
+            <select id="reportType" class="form-select">
+                <option value="overall">Overall Performance</option>
+                <option value="student">Individual Student</option>
+                <option value="grade">Grade Summary</option>
+                <option value="risk">Risk Analysis</option>
             </select>
         </div>
         <div class="form-group">
             <label for="reportDateRange">Date Range:</label>
-            <input type="text" id="reportDateRange" placeholder="e.g., 2024-01-01">
+            <input type="text" id="reportDateRange" class="form-control" placeholder="e.g., 2024-01-01">
         </div>
-        <button id="btn_1" class="btn btn-primary"  ><i class="fas fa-download"></i> Download Report</button>
+        <button class="btn btn-primary"><i class="fas fa-download"></i> Download Report</button>
         <button class="btn btn-secondary"><i class="fas fa-envelope"></i> Email Report</button>
     </div>
 
-    
-
 </div>
+
+<!-- Collection Selector -->
+<form method="POST" action="/dashboard/analytics">
+    <div class="mb-3">
+        <label>Select Collection:</label>
+        <select name="collection" class="form-select" onchange="this.form.submit()">
+            <option disabled selected>Choose collection</option>
+            {% for col in collections %}
+            <option value="{{ col }}" {% if selected_data.collection==col %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</form>
+
+<!-- Chart Form -->
+{% if fields %}
+<form method="POST" action="{{ url_for('dashboard.generate_chart') }}">
+
+    <input type="hidden" name="collection" value="{{ selected_data.collection }}">
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label>X-axis:</label>
+            <select name="x_axis" class="form-select">
+                {% for field in fields %}
+                <option value="{{ field }}">{{ field }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Y-axis:</label>
+            <select name="y_axis" class="form-select">
+                {% for field in fields %}
+                <option value="{{ field }}">{{ field }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Chart Type:</label>
+            <select name="chart_type" class="form-select">
+                <option value="bar">Bar</option>
+                <option value="line">Line</option>
+                <option value="pie">Pie</option>
+            </select>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label>Rows to Display:</label>
+            <input type="number" name="limit" class="form-control" value="10" min="1">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label>Chart Color:</label>
+            <input type="color" name="color" class="form-control form-control-color" value="#636EFA">
+        </div>
+    </div>
+    <button type="submit" class="btn btn-success">Generate Chart</button>
+</form>
+{% endif %}
+
+<!-- Generated Chart Display + Save -->
+{% if chart %}
+<hr class="my-4">
+<h2 class="mb-4">Generated Chart</h2>
+<div class="card p-4 shadow">
+    {{ chart | safe }}
+</div>
+
+<form method="POST" action="{{ url_for('dashboard.save_chart') }}">
+
+    <input type="hidden" name="collection" value="{{ form_data['collection'] }}">
+    <input type="hidden" name="x_axis" value="{{ form_data['x_axis'] }}">
+    <input type="hidden" name="y_axis" value="{{ form_data['y_axis'] }}">
+    <input type="hidden" name="chart_type" value="{{ form_data['chart_type'] }}">
+    <input type="hidden" name="limit" value="{{ form_data['limit'] }}">
+    <input type="hidden" name="color" value="{{ form_data['color'] }}">
+    <button type="submit" class="btn btn-warning mt-3">Save Chart</button>
+</form>
+
+<a href="/" class="btn btn-primary mt-2">Go Back</a>
+{% endif %}
+{% if saved_charts %}
+<h4 class="mt-4">Saved Charts ({{ selected_data.collection }})</h4>
+{% for chart in saved_charts %}
+<div class="card mb-3 p-3 shadow">
+    <h5>{{ chart.chart_type|capitalize }} Chart: {{ chart.x_axis }} vs {{ chart.y_axis }}</h5>
+    {{ chart.chart_html|safe }}
+
+    <form action="{{ url_for('dashboard.delete_chart') }}" method="POST" class="mt-2"
+        onsubmit="return confirmDelete();">
+        <input type="hidden" name="collection" value="{{ chart.collection }}">
+        <input type="hidden" name="x_axis" value="{{ chart.x_axis }}">
+        <input type="hidden" name="y_axis" value="{{ chart.y_axis }}">
+        <input type="hidden" name="chart_type" value="{{ chart.chart_type }}">
+        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+    </form>
+</div>
+{% endfor %}
+{% endif %}
+
+<script>
+    function confirmDelete() {
+        return confirm("Are you sure you want to delete this chart?");
+    }
+</script>
+
+
+
+
+
+
+
 {% endblock %}
