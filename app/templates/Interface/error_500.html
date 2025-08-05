@@ -1,0 +1,94 @@
+{% extends "interface/base.html" %} 
+{% block title %}Internal Server Error{% endblock %} 
+{% block page_heading %}500 Internal Server Error{% endblock %} 
+{% block content %}
+<style>
+  .page-500 {
+    min-height: 75vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+  }
+
+  .page-500 .inner {
+    text-align: center;
+  }
+
+  .page-500 .inner-circle {
+    width: 350px;
+    height: 300px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background-color: #ffffff;
+    position: relative;
+    box-shadow: 0 0 0 15px #f0f0f0;
+    transition: all 0.4s;
+  }
+
+  .page-500 .inner-circle i {
+    font-size: 5em;
+    color: #f5f5f5;
+    background-image: linear-gradient(to bottom, var(--primary-purple), var(--dark-purple));
+    border-radius: 50%;
+    padding: 20px;
+    width: 1.2em;
+    height: 1.2em;
+    position: absolute;
+    top: -62px;
+    right: 15px;
+    text-align: center;
+  }
+
+  .page-500 .inner-circle span {
+    font-size: 11em;
+    font-weight: 700;
+    line-height: 300px;
+    color: #e0e0e0;
+    display: block;
+    transition: all 0.4s;
+  }
+
+  .page-500 .inner-status {
+    font-size: 20px;
+    color: #800080;
+    margin-top: 20px;
+    margin-bottom: 5px;
+  }
+  
+
+  .page-500 .inner-detail {
+    color: #999999;
+    margin-bottom: 20px;
+  }
+
+  .page-500 .cta-btn {
+    background-image: linear-gradient(to bottom, var(--primary-purple), var(--dark-purple));
+    color: white;
+    padding: 10px 25px;
+    border-radius: 25px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.3s ease;
+  }
+
+  .page-500 .cta-btn:hover {
+    background: #5a005a;
+  }
+</style>
+
+<div class="page-500">
+  <div class="inner">
+    <div class="inner-circle">
+      <i class="fa fa-cogs"></i>
+      <span>500</span>
+    </div>
+    <div class="inner-status text">Oops! Internal Server Error!</div>
+    <div class="inner-detail">
+      Unfortunately we're having trouble loading the page you are looking for.
+      Please try again later.
+    </div>
+    <a href="{{ url_for('interface.home') }}" class="cta-btn">Back to HomePage</a>
+  </div>
+</div>
+{% endblock %}

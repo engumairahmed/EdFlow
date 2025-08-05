@@ -5,14 +5,15 @@
 {% block page_heading %}Predict Student Outcome{% endblock %}
 
 {% block content %}
+
 <div class="prediction-container">
     <div class="prediction-input-card dashboard-card ">
         <h2><i class="fas fa-edit icon-purple"></i> Enter Student Details</h2>
         <p>Input the student's academic and personal information to get a prediction of their future outcome. Please
             fill in all the required fields accurately.</p>
-            {{ result }}
+        {# Removed the `{{ result }}` here, as it's not standard Jinja2 usage for displaying a whole object. #}
 
-        <form id="predictionForm" class="prediction-form" method="post"  action="/dashboard/predict">
+        <form id="predictionForm" class="prediction-form" method="post" action="/dashboard/predict">
             <div class="form-grid">
                 <div class="form-group">
                     <label for="studentName">Student Name:</label>
@@ -20,7 +21,7 @@
                 </div>
                 <div class="form-group">
                     <label for="age">Age:</label>
-                    <input type="number" id="age" name="age"  placeholder="e.g., 18" required>
+                    <input type="number" id="age" name="age" placeholder="e.g., 18" required>
                 </div>
 
                 <div class="form-group">
@@ -33,14 +34,31 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="gradeLevel">Grade Level:</label>
-                    <input type="text" id="gradeLevel" name="gradeLevel" placeholder="e.g., 10th Grade / Senior"
+                    <label for="parental_education">Parental Education:</label>
+                    <select id="parental_education" name="parental_education" required>
+                        <option value="">Select Option</option>
+                        <option value="none">None</option>
+                        <option value="high school">High School</option>
+                        <option value="bachelors">Bachelors</option>
+                        <option value="masters">Masters</option>
+                        <option value="phd">PhD</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="currentGPA">Current GPA (0.0-4.0):</label>
+                    <input type="number" id="currentGPA" name="currentGPA" step="0.01" min="0" max="4" placeholder="e.g., 3.5"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="exam_score">Exam Score:</label>
+                    <input type="number" id="exam_score" name="exam_score" min="0" max="100" placeholder="e.g., 95"
                         required>
                 </div>
 
                 <div class="form-group">
-                    <label for="gpa">Current GPA (0.0-4.0):</label>
-                    <input type="number" id="gpa" name="gpa" step="0.01" min="0" max="4" placeholder="e.g., 3.5"
+                    <label for="highSchoolGPA">High School GPA (0.0-4.0):</label>
+                    <input type="number" id="highSchoolGPA" name="highSchoolGPA" step="0.01" min="0" max="4" placeholder="e.g., 3.5"
                         required>
                 </div>
                 <div class="form-group">
@@ -50,8 +68,67 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="social_media_hours">Social Media Hours/day:</label>
+                    <input type="number" id="social_media_hours" name="social_media_hours" step="0.01"
+                        placeholder="e.g., 5" required>
+                </div>
+                <div class="form-group">
+                    <label for="netflix_hours">Netflix Hours/day:</label>
+                    <input type="number" id="netflix_hours" name="netflix_hours" min="0" max="100" placeholder="e.g., 2"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="diet_quality">Diet Quality:</label>
+                    <select id="diet_quality" name="diet_quality" required>
+                        <option value="">Select Option</option>
+                        <option value="poor">Poor</option>
+                        <option value="average">Average</option>
+                        <option value="good">Good</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="exercise_frequency">Exercise Frequency:</label>
+                    <select id="exercise_frequency" name="exercise_frequency" required>
+                        <option value="">Select Option</option>
+                        <option value="low">Low</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="sleep_hours">Sleep Hours/night:</label>
+                    <input type="number" id="sleep_hours" name="sleep_hours" step="0.01" placeholder="e.g., 7.5"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="internet_quality">Internet Quality:</label>
+                    <select id="internet_quality" name="internet_quality" required>
+                        <option value="">Select Option</option>
+                        <option value="poor">Poor</option>
+                        <option value="average">Average</option>
+                        <option value="good">Good</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="mental_health_score">Mental Health Score (1-100):</label>
+                    <input type="number" id="mental_health_score" name="mental_health_score" step="0.01"
+                        placeholder="e.g., 7" required>
+                </div>
+                <div class="form-group">
+                    <label for="part_time_job">Part Time Job:</label>
+                    <select id="part_time_job" name="part_time_job" required>
+                        <option value="">Select Option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label for="extracurriculars">Extracurricular Activities:</label>
-                    <select id="extracurriculars" name="extracurriculars" required>
+                    <select id="extracurriculars" name="extracurricular_activities" required>
                         <option value="">Select Option</option>
                         <option value="Yes">Yes</option>
                         <option value="No">No</option>
@@ -76,16 +153,25 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="studyHours">Weekly Study Hours:</label>
-                    <input type="number" id="studyHours" name="studyHours" min="0" placeholder="e.g., 15" required>
+                    <label for="studyHours">Daily Study Hours:</label>
+                    <input type="number" id="studyHours" name="study_hours" min="0" placeholder="e.g., 15" required>
                 </div>
                 <div class="form-group">
                     <label for="model">Prediction Model:</label>
                     <select id="model" name="model" required>
-                        <option value="">Select Model</option>
-                        <option value="random_forest">Random Forest</option>
-                        <option value="logistic_regression">Logistic Regression</option>
-                        <option value="linear_regression">Linear Regression</option>
+                        <option value="none">Select Model</option>
+                            {% for model_group in available_models %} {# Changed 'model' to 'model_group' for clarity #}
+                            {% for detail in model_group.details %}
+                            {% if detail.type in ['classification'] %}
+                            <option value="{{ detail.model_path }}">
+                                Type: {{ detail.model_name | replace("_", " ") | title }} |
+                                Dataset: {{ model_group.dataset }} |
+                                Acc: {{ "%.2f"|format(detail.metrics.accuracy * 100) }}%
+                                {% if model_group.is_paid %} 🔒 Premium {% endif %}
+                            </option>
+                            {% endif %}
+                            {% endfor %}
+                            {% endfor %}
                     </select>
                 </div>
             </div>
@@ -93,10 +179,19 @@
             <button type="submit" class="btn btn-primary predict-btn"><i class="fas fa-flask"></i> Predict
                 Outcome</button>
         </form>
+        {# REMOVED THIS REDUNDANT BLOCK WHICH WAS LIKELY CAUSING THE ERROR #}
+        {# <div>
+            {% if prediction %}
+            <p><strong>Predicted Outcome:</strong> {{ prediction }}</p>
+            {% for result in prediction%}
+            <p>{{ result }}</p>
+            {%endfor%}
+            {% endif %}
+        </div> #}
     </div>
 
-    <div id="predictionResults" class="prediction-results-card dashboard-card "
-        style="display: none;">
+    {# The prediction results card should initially be hidden and shown by JavaScript #}
+    <div id="predictionResults" class="prediction-results-card dashboard-card" style="display: none;">
         <h2><i class="fas fa-chart-pie icon-purple"></i> Prediction Results</h2>
         <div class="result-details">
             <p><strong>Predicted Outcome:</strong> <span id="predictedOutcome" class="outcome-label"></span></p>
@@ -122,9 +217,6 @@
 
 </div>
 
-
-<!-- JavaScript for Prediction Page Logic  -->
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const predictionForm = document.getElementById('predictionForm');
@@ -136,16 +228,9 @@
     const messageArea = document.getElementById('messageArea');
     let predictionChartInstance = null; // To store Chart.js instance
 
-    // Function to display messages (success/error)
-    function displayMessage(message, type) {
-        messageArea.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-        setTimeout(() => {
-            messageArea.innerHTML = ''; // Clear message after some time
-        }, 5000);
-    }
 
     // Function to render/update the Chart.js pie chart
-    function updatePredictionChart(data) {
+    function updatePredictionChart(dropoutProbability) {
         const ctx = document.getElementById('predictionChart').getContext('2d');
 
         // Destroy existing chart if it exists
@@ -153,17 +238,19 @@
             predictionChartInstance.destroy();
         }
 
-        const labels = Object.keys(data);
-        const values = Object.values(data);
+        const noDropoutProbability = (1 - dropoutProbability); // Calculate no-dropout probability
+        const dropoutProbPercent = (dropoutProbability * 100).toFixed(2);
+        const noDropoutProbPercent = (noDropoutProbability * 100).toFixed(2);
+
+        const labels = ['Dropout', 'No Dropout'];
+        const values = [parseFloat(dropoutProbPercent), parseFloat(noDropoutProbPercent)]; // Ensure they are numbers
         const backgroundColors = [
-            'rgba(75, 192, 192, 0.7)', // Success/High
-            'rgba(255, 99, 132, 0.7)', // Failure/Low
-            'rgba(255, 205, 86, 0.7)'  // Medium/Neutral
+            'rgba(255, 99, 132, 0.7)', // Red for Dropout
+            'rgba(75, 192, 192, 0.7)'  // Green for No Dropout
         ];
         const borderColors = [
-            'rgba(75, 192, 192, 1)',
             'rgba(255, 99, 132, 1)',
-            'rgba(255, 205, 86, 1)'
+            'rgba(75, 192, 192, 1)'
         ];
 
         predictionChartInstance = new Chart(ctx, {
@@ -172,8 +259,8 @@
                 labels: labels,
                 datasets: [{
                     data: values,
-                    backgroundColor: backgroundColors.slice(0, labels.length),
-                    borderColor: borderColors.slice(0, labels.length),
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
                     borderWidth: 1
                 }]
             },
@@ -198,7 +285,7 @@
                                     label += ': ';
                                 }
                                 if (context.parsed !== null) {
-                                    label += context.parsed + '%'; // Assuming values are percentages
+                                    label += context.parsed + '%'; // Values are already percentages
                                 }
                                 return label;
                             }
@@ -210,8 +297,6 @@
     }
 
     // Handle form submission
-
-
     predictionForm.addEventListener('submit', async (e) => {
         e.preventDefault(); // Prevent default form submission
 
@@ -226,7 +311,6 @@
         });
 
         try {
-            // Replace with your actual Flask prediction API endpoint
             const response = await fetch('/dashboard/predict', {
                 method: 'POST',
                 headers: {
@@ -238,32 +322,37 @@
             const result = await response.json();
 
             if (response.ok) {
-                predictedOutcomeSpan.textContent = result.predicted_outcome;
-                confidenceLevelSpan.textContent = `${(result.confidence * 100).toFixed(2)}%`; // Format as percentage
+                displayToast('Prediction successful!', 'success');
+                // Determine predicted outcome text and styling based on prediction_class
+                let outcomeText = '';
+                let outcomeClass = '';
+                console.log(result.prediction_class)
+                if (result.prediction_class === 1) { // Assuming 1 means dropout
+                    outcomeText = 'Student is predicted to Dropout';
+                    outcomeClass = 'outcome-at-risk';
+                } else { // Assuming 0 means no dropout
+                    outcomeText = 'Student is predicted to NOT Dropout';
+                    outcomeClass = 'outcome-success';
+                }
+
+                predictedOutcomeSpan.textContent = outcomeText;
+                confidenceLevelSpan.textContent = `${(result.prediction_probability * 100).toFixed(2)}%`; // Format as percentage
                 recommendationsText.textContent = result.recommendations || 'No specific recommendations at this time.';
 
-                // Assign class based on outcome for styling
-                predictedOutcomeSpan.className = 'outcome-label ' +
-                    (result.predicted_outcome === 'Success' ? 'outcome-success' :
-                        (result.predicted_outcome === 'At Risk' ? 'outcome-at-risk' : 'outcome-neutral'));
+                predictedOutcomeSpan.className = 'outcome-label ' + outcomeClass;
 
-                // Example chart data structure (replace with actual model output)
-                // This assumes your API returns probabilities for different outcomes
-                const chartData = {
-                    'Success': (result.probabilities && result.probabilities.Success) ? (result.probabilities.Success * 100).toFixed(2) : 0,
-                    'At Risk': (result.probabilities && result.probabilities['At Risk']) ? (result.probabilities['At Risk'] * 100).toFixed(2) : 0,
-                    'Neutral': (result.probabilities && result.probabilities.Neutral) ? (result.probabilities.Neutral * 100).toFixed(2) : 0
-                };
-                updatePredictionChart(chartData);
+                // Update the chart using the single prediction_probability value
+                updatePredictionChart(result.prediction_probability);
 
                 predictionResults.style.display = 'block';
-                displayMessage('Prediction successful!', 'success');
+                displayToast('Prediction successful!', 'success');
             } else {
-                displayMessage(result.message || 'An error occurred during prediction.', 'danger');
+                displayToast(result.message || 'An error occurred during prediction.', 'error');
             }
         } catch (error) {
             console.error('Prediction request failed:', error);
-            displayMessage('Network error or server issue. Please try again.', 'danger');
+            console.log(error)
+            displayToast('Network error or server issue. Please try again.', 'error');
         } finally {
             loadingIndicator.style.display = 'none';
         }
@@ -271,9 +360,7 @@
 
     // Initial load animations
     document.addEventListener('DOMContentLoaded', () => {
-        // Trigger animations for cards
         document.querySelector('.prediction-input-card').classList.add('animated-slide-in-up');
-        // predictionResults will be shown on successful prediction
     });
 </script>
 {% endblock %}

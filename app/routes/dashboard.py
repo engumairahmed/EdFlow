@@ -3,18 +3,18 @@
 
 import logging
 import os
-from flask import Blueprint, render_template, jsonify, request, session, redirect, url_for, flash
+from flask import Blueprint, json, jsonify, render_template, request, session, redirect, url_for, flash
+import numpy as np
 import pandas as pd
-from app.ml.dataset_manager import merge_with_existing_dataset, process_and_store_dataset
-from app.ml.model_utils import load_model
+from app.ml.dataset_manager import TARGET_FEATURE, validate_columns
 from app.ml.predictors import predict, predict_missing_fields
-from app.ml.trainer import train_dropout_models, train_models_and_save_metrics, train_regression_models
+from app.ml.trainer import train_all_models_and_save
 from app.utils.auth_decorators import login_required
 from app import mongo
 from app.utils.mongodb_utils import save_dataset_to_mongodb
 from app.utils.notifications import send_role_notification
 from app.utils.role_required import role_required
-from app.ml.anomaly_detector import get_insights
+from app.ml.anomaly_detector import detect_anomalies_from_db, detect_anomalies_from_df, get_insights
 from config import Config
 
 MODEL_DIR = os.path.join(os.getcwd(), "app", "ml", "models")
@@ -50,30 +50,31 @@ def upload_data():
 
         try:
             df = pd.read_csv(file)
+            missing = validate_columns(df)
+            if missing:
+                flash(f"Dataset is missing required columns: {', '.join(missing)}", "danger")
+                return redirect(request.url)
+
             upload_path = os.path.join(UPLOADS_DIR, f"{model_name}.csv")
             df.to_csv(upload_path, index=False)
 
-            metrics = train_models_and_save_metrics(df, model_name)
-            logger.info(f"Models trained for {model_name}. Metrics: {metrics}")
+            df['dropout'] = df['dropout'].values
 
-            # Flatten ml_features for training
-            ml_df = df[[col for col in df.columns if col.startswith('ml_features.')]]
-            ml_df.columns = [col.replace('ml_features.', '') for col in ml_df.columns]
-            ml_df.loc[:, 'dropout'] = df['dropout']
-
-
-            train_dropout_models(ml_df, dataset_name=model_name)
-            train_regression_models(ml_df, dataset_name=model_name)
+            train_all_models_and_save(df, dataset_name=model_name, is_paid=is_paid)
 
             save_dataset_to_mongodb(df, model_name, session['user_id'], is_paid)
             flash(f"✅ Model '{model_name}' trained and saved!", "success")
+            try:
+                send_role_notification(
+                    title="📢 New Model Trained",
+                    body=f"The model '{model_name}' has been successfully trained.",
+                    role="admin",
+                    url="/my-models"
+                )
+            except Exception as e:
+                logger.exception("Error sending notifications")
+                flash(f"Error: {e}", "danger")
 
-            send_role_notification(
-                title="📢 New Model Trained",
-                body=f"The model '{model_name}' has been successfully trained.",
-                role="admin",
-                url="/my-models"
-            )
             return redirect(url_for("dashboard.dashboard_view"))
 
         except Exception as e:
@@ -97,30 +98,74 @@ def my_models():
 @login_required
 @role_required(["admin"])
 def predict_form():
-    available_models = list(db.trained_models.find())
+    user = db.users.find_one({"_id": session["user_id"]})
+    user_plan = user.get("plan", "free") if user else "free"
+
+    if user_plan == "premium":
+        available_models = list(db.trained_models.find())
+    else:
+        available_models = list(db.trained_models.find({"is_paid": False}))
 
     if request.method == "POST":
-        model_name = request.form.get("model_name")
-        input_data = {
-            k: float(v) if v else None for k, v in request.form.items() if k != "model_name"
-        }
+        try:
+            data = request.get_json()
+            if not data or "model" not in data:
+                logger.warning("Prediction request missing model field.")
+                return jsonify({"error": "Invalid input. Model not specified."}), 400
 
-        model_doc = db.trained_models.find_one({"name": model_name})
-        if not model_doc:
-            flash("Model not found.", "danger")
-            return redirect(url_for("dashboard.predict_form")) # Changed to predict_form
+            model_path = data["model"]
 
-        # Access control: is model paid & does user have plan?
-        if model_doc["is_paid"] and session.get('plan') != "premium": # Assuming 'plan' in session for user
-            flash("This model requires a premium plan.", "danger")
-            return redirect(url_for("dashboard.predict"))
+            numeric_fields = ['age', 'currentGPA', 'attendance', 'study_hours',
+                              'sleep_hours', 'social_media_hours',
+                              'netflix_hours', 'mental_health_score', 'exam_score']
 
-        result = predict_missing_fields(input_data, model_name)
-        flash(f"Prediction complete: {result}", "success")
-        return render_template("dashboard/predict.html", available_models=available_models, prediction=result)
+            input_data = {}
+            for k, v in data.items():
+                if k == "model":
+                    continue
+                if k in numeric_fields:
+                    try:
+                        input_data[k] = float(v) if v is not None and str(v).strip() != '' else None
+                    except ValueError:
+                        logger.warning(f"Invalid numeric input for field '{k}': {v}")
+                        input_data[k] = None
+                else:
+                    input_data[k] = v if v is not None and str(v).strip() != '' else None
+
+            model_doc = db.trained_models.find_one({
+                "details.model_path": model_path
+            })
+
+            if not model_doc:
+                logger.error(f"Model not found for path: {model_path}")
+                return jsonify({"error": "Model not found."}), 404
+
+            if model_doc.get("is_paid") and user_plan != "premium":
+                logger.info(f"User with free plan tried accessing paid model: {model_path}")
+                return jsonify({"error": "This model requires a premium plan."}), 403
+
+            dataset_name_for_imputation = model_doc.get("dataset")
+            if not dataset_name_for_imputation:
+                logger.error("Dataset name for imputation missing in model document.")
+                return jsonify({"error": "Model dataset not specified for imputation."}), 400
+
+            imputed_input_data_dict = predict_missing_fields(input_data, dataset_name_for_imputation)
+            df_data = pd.DataFrame([imputed_input_data_dict])
+
+            prediction_class, probabilities, recommendations = predict(data=df_data, model_name=model_path)
+
+            logger.info(f"Prediction successful using model: {model_path}")
+            return jsonify({
+                "prediction_class": int(prediction_class),
+                "prediction_probability": float(probabilities[1]) if probabilities is not None else None,
+                "recommendations": recommendations
+            })
+
+        except Exception as e:
+            logger.exception("Unexpected error during prediction.")
+            return jsonify({"error": f"An unexpected error occurred. Please try again later."}), 500
 
     return render_template("dashboard/predict.html", available_models=available_models)
-
 
 @dashboard_bp.route('/analytics',methods=['GET'])
 @login_required
@@ -183,77 +228,77 @@ def anomaly_results_view():
     # Check if the uploads directory exists
     if os.path.exists(UPLOADS_DIR):
         for f in os.listdir(UPLOADS_DIR):
-            if f.endswith('.csv'): # Sirf CSV files ko list karein
+            if f.endswith('.csv') or f.endswith('.xlsx'): # CSV aur XLSX files ko list karein
                 all_files.append(f)
         all_files.sort() # Files ko alphabetical order mein sort karein
     
     anomalous_students = []
-    anomaly_chart_data = {}
     anomaly_insights = {}
-    selected_file = request.args.get('selected_file') # GET request se file name lenge
-    
-    if request.method == 'POST': # Agar form submit hua hai
-        selected_file = request.form.get('file_select')
-        
-    if selected_file:
-        flash(f"Running anomaly detection on: {selected_file}", "info")
-        df_processed, anomalous_students = detect_student_anomalies(file_name=selected_file) # file_name pass kiya
-        
-        # --- Prepare data for Anomaly Overview Visualizations (Same logic as before) ---
-        anomaly_chart_data = {
-            'gender': {'Male': 0, 'Female': 0, 'Other': 0},
-            'scores': {'bin1': 0, 'bin2': 0, 'bin3': 0, 'bin4': 0}
-        }
-        
-        anomaly_insights = {
-            'gender_insight': "Analysis of anomaly distribution by gender.",
-            'score_insight': "Insights into the spread of anomaly scores."
-        }
+    total_students = 0
+    selected_file = request.args.get('selected_file')
+    results_source = "file" # Default source file hai
 
-        if anomalous_students:
-            for student in anomalous_students:
-                gender = student.get('gender')
-                if gender == 'Male':
-                    anomaly_chart_data['gender']['Male'] += 1
-                elif gender == 'Female':
-                    anomaly_chart_data['gender']['Female'] += 1
-                else:
-                    anomaly_chart_data['gender']['Other'] += 1 
-
+    if request.method == 'POST':
+        if request.form.get('run_db_scan'):
+            results_source = "database"
+            # Ab 3 values ko sahi se unpack kiya ja raha hai
+            anomalous_students, anomaly_insights, total_students = detect_anomalies_from_db()
+            if not anomalous_students:
+                flash("No anomalies found in the database.", "info")
+            else:
+                flash(f"Successfully ran anomaly detection on database. Found {len(anomalous_students)} anomalies.", "success")
+        else:
+            selected_file = request.form.get('file_select')
+            if selected_file:
+                flash(f"Running anomaly detection on: {selected_file}", "info")
                 try:
-                    score = float(student.get('anomaly_score', 0))
-                    if score < -0.5:
-                        anomaly_chart_data['scores']['bin1'] += 1
-                    elif -0.5 <= score < -0.2:
-                        anomaly_chart_data['scores']['bin2'] += 1
-                    elif -0.2 <= score < 0:
-                        anomaly_chart_data['scores']['bin3'] += 1
-                    else:
-                        anomaly_chart_data['scores']['bin4'] += 1
-                except ValueError:
-                    pass 
+                    # Ab 3 values ko sahi se unpack kiya ja raha hai
+                    anomalous_df, anomaly_insights, total_students = detect_anomalies_from_df(selected_file)
+                    anomalous_students = anomalous_df.to_dict('records')
+                except FileNotFoundError:
+                    flash(f"Error: The file '{selected_file}' was not found.", "danger")
+                except KeyError as e:
+                    # Agar file mein koi column missing ho to is error ko catch karein
+                    flash(f"Error: Missing columns in the uploaded file: {e}. Please ensure the file has columns like 'age', 'total_score', or 'attendance'.", "danger")
+                except Exception as e:
+                    flash(f"An unexpected error occurred: {e}", "danger")
+            else:
+                flash("Please select a file or choose to run a database scan.", "warning")
 
-            total_anomalies = len(anomalous_students)
-            if total_anomalies > 0:
-                male_anomalies = anomaly_chart_data['gender']['Male']
-                female_anomalies = anomaly_chart_data['gender']['Female']
-                
-                if male_anomalies > female_anomalies * 1.5:
-                    anomaly_insights['gender_insight'] = "Significantly more male students detected as anomalous."
-                elif female_anomalies > male_anomalies * 1.5:
-                    anomaly_insights['gender_insight'] = "Significantly more female students detected as anomalous."
-                else:
-                    anomaly_insights['gender_insight'] = "Anomalies are relatively balanced across genders."
-                
-                if anomaly_chart_data['scores']['bin1'] > anomaly_chart_data['scores']['bin2'] + anomaly_chart_data['scores']['bin3']:
-                    anomaly_insights['score_insight'] = "Most anomalies have very low scores, indicating strong deviation from norm."
-    else:
-        # Initial load or no file selected
-        flash("Please select a CSV file to run anomaly detection.", "warning")
+    # Chart data JSON ke liye prepare karna
+    gender_anomaly_data = {}
+    score_distribution_data = {}
 
-    return render_template('dashboard/anomaly_results.html', 
-                           all_files=all_files, # Sabhi files ki list pass ki
-                           selected_file=selected_file, # Jo file select ki gai
-                           anomalous_students=anomalous_students,
-                           anomaly_chart_data=anomaly_chart_data,
-                           anomaly_insights=anomaly_insights)
+    if anomalous_students:
+        # Gender Chart data
+        genders = [s.get('gender') for s in anomalous_students if s.get('gender') is not None]
+        if genders:
+            gender_counts = pd.Series(genders).value_counts().to_dict()
+            gender_anomaly_data = {
+                'data': [{'labels': list(gender_counts.keys()), 'values': list(gender_counts.values()), 'type': 'pie'}],
+                'layout': {'title': 'Anomalies by Gender'}
+            }
+        
+        # Anomaly Score Chart data
+        scores = pd.Series([s.get('anomaly_score') for s in anomalous_students if s.get('anomaly_score') is not None])
+        if not scores.empty:
+            bins = [-float('inf'), -0.2, 0, float('inf')] # You can adjust these bins
+            labels = ['<-0.2', '-0.2 to 0', '>0']
+            score_bins = pd.cut(scores, bins=bins, labels=labels)
+            score_counts = score_bins.value_counts().sort_index().to_dict()
+            score_distribution_data = {
+                'data': [{'x': list(score_counts.keys()), 'y': list(score_counts.values()), 'type': 'bar'}],
+                'layout': {'title': 'Anomaly Score Distribution'}
+            }
+
+    return render_template(
+        'dashboard/anomaly_results.html',
+        all_files=all_files,
+        selected_file=selected_file,
+        anomalous_students=anomalous_students,
+        anomaly_insights=anomaly_insights, # Naya 'insights' variable pass kiya gaya hai
+        total_students=total_students, # Total students ki sankhya pass ki gai hai
+        results_source=results_source,
+        gender_chart_json=json.dumps(gender_anomaly_data),
+        score_chart_json=json.dumps(score_distribution_data)
+    )

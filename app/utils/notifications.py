@@ -1,4 +1,5 @@
 import json
+import logging
 from pywebpush import webpush, WebPushException
 from app import mongo
 from bson import ObjectId
@@ -9,6 +10,8 @@ VAPID_CLAIMS=Config.VAPID_CLAIMS
 
 db = mongo.db
 
+logger = logging.getLogger(__name__)
+
 def send_push(subscription_info, payload):
     try:
         webpush(
@@ -17,14 +20,14 @@ def send_push(subscription_info, payload):
             vapid_private_key=VAPID_PRIVATE_KEY,
             vapid_claims=VAPID_CLAIMS
         )
+        logger.info("Push sent successfully")
     except WebPushException as ex:
-        print(f"Push failed: {ex}")
+        logger.info(f"Push failed: {ex}")
 
 def send_role_notification(title, body, role, url):
 
     users = db.users.find({"role": role, "notifications_enabled": True, "push_subscription": {"$exists": True}})
     payload = {"title": title, "body": body, "url": url}
-    print(users)
     for user in users:
         # Insert into notifications collection
         db.notifications.insert_one({

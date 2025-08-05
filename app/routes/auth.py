@@ -1,3 +1,4 @@
+import logging
 from flask import Blueprint, redirect, render_template, request, jsonify, session, flash, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
@@ -8,8 +9,10 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from flask import current_app
 from app import mongo
 
-
 auth_bp = Blueprint("auth", __name__, url_prefix='/auth')
+
+
+logger = logging.getLogger(__name__)
 
 # Dummy email verification storage (in-memory for now)
 verification_codes = {}
@@ -54,7 +57,7 @@ def register():
             mail.send(msg)
 
             flash("Verification code sent to your email. Please verify to continue.", "info")
-
+            logger.info(f"Verification code sent to {email}")
             return render_template('auth/login.html')
         return render_template('auth/register.html')
     return redirect(url_for('dashboard.dashboard_view'))
@@ -72,6 +75,7 @@ def login():
             # User not found → clear session and show login again
             session.clear()
             flash("Your session has expired. Please login again.", "warning")
+            logger.info("User session expired")
             return redirect(url_for('auth.login'))
 
     if request.method == 'POST':
@@ -84,6 +88,7 @@ def login():
             if not user.get('is_verified', False):
                 session['email_to_verify'] = email
                 flash("Please verify your email before logging in.", "warning")
+                logger.info(f"User {email} is not verified")
                 return redirect(url_for('auth.verify_email'))
                 
             remember_me = True if request.form.get("remember_me") else False
@@ -98,6 +103,7 @@ def login():
             return redirect(url_for('dashboard.dashboard_view'))
 
         flash("Invalid email or password", "danger")
+        logger.info("Invalid email or password")
         return render_template('auth/login.html')
 
     return render_template('auth/login.html')

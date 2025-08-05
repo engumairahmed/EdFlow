@@ -45,6 +45,7 @@ def create_dummy_data(db):
         user_data["_id"] = ObjectId()
         user_data["password"] = hashed_password
         user_data["is_verified"] = True
+        user_data["plan"] = "free"
         user_data["createdAt"] = datetime.now()
         user_data["lastLogin"] = datetime.now()
         dummy_users.append(user_data)

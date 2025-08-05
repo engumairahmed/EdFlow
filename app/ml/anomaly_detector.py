@@ -1,39 +1,35 @@
-# app/ml/anomaly_detector.py - Final Code
+# app/ml/anomaly_detector.py
 
-import pandas as pd
-from sklearn.ensemble import IsolationForest
-import numpy as np
+import logging
 import os
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import IsolationForest
 from app import mongo
 
-# UPLOADS_DIR ko define karenge
-UPLOADS_DIR = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)), 'uploads')
+# MongoDB database instance
+db = mongo.db
+
+# File path for uploaded data (should match your config)
+UPLOADS_DIR = os.path.join(os.getcwd(), "uploads")
+
+logger = logging.getLogger(__name__)
 
 def run_isolation_forest(df):
     """
     Runs Isolation Forest on a given DataFrame and returns the results.
     """
-    # Identify numeric and categorical columns
     numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
     categorical_cols = df.select_dtypes(exclude=np.number).columns.tolist()
 
-    # Pre-process categorical data using one-hot encoding
     df_processed = pd.get_dummies(df, columns=categorical_cols, drop_first=True)
-
-    # Fill any NaN values that might remain after one-hot encoding
     df_processed = df_processed.fillna(df_processed.median())
 
-    # Initialize and train Isolation Forest model
     model = IsolationForest(contamination=0.05, random_state=42)
     model.fit(df_processed)
 
-    # Predict anomalies
-    df_processed['is_anomaly'] = model.predict(df_processed)
-    df_processed['anomaly_score'] = model.decision_function(df_processed)
-
-    # Map back to original DataFrame
-    df['is_anomaly'] = df_processed['is_anomaly']
-    df['anomaly_score'] = df_processed['anomaly_score']
+    df['is_anomaly'] = model.predict(df_processed)
+    df['anomaly_score'] = model.decision_function(df_processed)
     
     return df, df_processed
 
@@ -43,19 +39,21 @@ def get_insights(df_anomalies):
     """
     anomaly_insights = {}
     if not df_anomalies.empty:
-        gender_counts = df_anomalies.get('gender', pd.Series()).value_counts()
-        if 'Male' in gender_counts and 'Female' in gender_counts:
-            if gender_counts['Male'] > gender_counts['Female'] * 1.5:
-                anomaly_insights['gender_insight'] = "Significantly more male students were flagged as anomalous."
-            elif gender_counts['Female'] > gender_counts['Male'] * 1.5:
-                anomaly_insights['gender_insight'] = "Significantly more female students were flagged as anomalous."
-            else:
-                anomaly_insights['gender_insight'] = "Anomalies are relatively balanced across genders."
+        if 'gender' in df_anomalies.columns:
+            gender_counts = df_anomalies['gender'].value_counts()
+            if 'Male' in gender_counts and 'Female' in gender_counts:
+                if gender_counts['Male'] > gender_counts['Female'] * 1.5:
+                    anomaly_insights['gender_insight'] = "Significantly more male students were flagged as anomalous."
+                elif gender_counts['Female'] > gender_counts['Male'] * 1.5:
+                    anomaly_insights['gender_insight'] = "Significantly more female students were flagged as anomalous."
+                else:
+                    anomaly_insights['gender_insight'] = "Anomalies are relatively balanced across genders."
         
-        if len(df_anomalies[df_anomalies['anomaly_score'] < -0.2]) > len(df_anomalies) / 2:
-            anomaly_insights['score_insight'] = "Most anomalies have very low scores, indicating strong deviation from the norm."
-        else:
-            anomaly_insights['score_insight'] = "Anomalies are concentrated around the detection threshold."
+        if 'anomaly_score' in df_anomalies.columns:
+            if len(df_anomalies[df_anomalies['anomaly_score'] < -0.2]) > len(df_anomalies) / 2:
+                anomaly_insights['score_insight'] = "Most anomalies have very low scores, indicating strong deviation from the norm."
+            else:
+                anomaly_insights['score_insight'] = "Anomalies are concentrated around the detection threshold."
     
     return anomaly_insights
 
@@ -63,7 +61,6 @@ def detect_anomalies_from_db():
     """
     Fetches student data from MongoDB, detects anomalies, and returns the results.
     """
-    db = mongo.db
     students_collection = db.students
     
     try:
@@ -92,70 +89,136 @@ def detect_anomalies_from_db():
         return anomalous_students, anomaly_insights, len(df)
         
     except Exception as e:
-        print(f"Error connecting to or processing data from MongoDB: {e}")
+        logger.error(f"Error connecting to or processing data from MongoDB: {e}")
         return [], {}, 0
 
+def find_extreme_features(row, feature_names, model):
+    """
+    Finds the most extreme features for a given anomalous data point.
+    """
+    data_point = row[feature_names].values.reshape(1, -1)
+    
+    feature_contributions = model.decision_function(data_point)
+    
+    most_extreme_feature_index = np.argmax(np.abs(feature_contributions))
+    
+    feature_name = feature_names[most_extreme_feature_index]
+    feature_value = row[feature_name]
+    
+    description = "Unusually low" if feature_contributions[0] < 0 else "Unusually high"
+    
+    return {
+        feature_name: {
+            'value': feature_value,
+            'description': description
+        }
+    }
+
 def detect_anomalies_from_df(file_name, n_estimators=100, contamination=0.05, random_state=42):
+    file_path = os.path.join(UPLOADS_DIR, file_name)
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File not found at: {file_path}")
+    if file_name.endswith('.csv'):
+        df = pd.read_csv(file_path)
+    else:
+        df = pd.read_excel(file_path)
+    total_students = len(df)
+    
+    features_to_use = []
+    
+    if 'age' in df.columns:
+        features_to_use.append('age')
+    if 'total_score' in df.columns:
+        features_to_use.append('total_score')
+    if 'attendance' in df.columns:
+        features_to_use.append('attendance')
+
+    if not features_to_use:
+        return pd.DataFrame(), {'error': 'No suitable numerical features (age, total_score, attendance) found in the file for anomaly detection.'}, total_students
+
+    if 'gender' in df.columns:
+        df['gender'] = df['gender'].astype('category').cat.codes
+        features_to_use.append('gender')
+    if 'class_label' in df.columns:
+        df['class_label'] = df['class_label'].astype('category').cat.codes
+        features_to_use.append('class_label')
+
+    X = df[features_to_use]
+    model = IsolationForest(contamination=0.05, random_state=42)
+    model.fit(X)
+    df['anomaly_score'] = model.decision_function(X)
+    df['is_anomaly'] = model.predict(X)
+    anomalous_df = df[df['is_anomaly'] == -1].copy()
+    if anomalous_df.empty:
+        return pd.DataFrame(), {}, total_students
+
+    anomalous_df['extreme_features'] = anomalous_df.apply(
+        lambda row: find_extreme_features(row, X.columns, model), axis=1
+    )
+    
+    insights = get_insights(anomalous_df)
+    return anomalous_df, insights, total_students
+
+def detect_student_anomalies(file_name):
     """
-    Detects anomalies in a given pandas DataFrame (from a file) and returns the results.
+    Detects anomalies from a specified file or the MongoDB database using Isolation Forest.
+    Returns a dataframe of anomalous students, insights, and total student count.
     """
-    DATA_FILE_PATH = os.path.join(UPLOADS_DIR, file_name)
-
-    if not os.path.exists(DATA_FILE_PATH):
-        print(f"Error: Data file not found at {DATA_FILE_PATH}.")
-        return pd.DataFrame(), {}, 0
-    
-    try:
-        if file_name.endswith('.csv'):
-            df = pd.read_csv(DATA_FILE_PATH)
-        elif file_name.endswith(('.xlsx', '.xls')):
-            df = pd.read_excel(DATA_FILE_PATH)
-        else:
-            raise ValueError("Unsupported file format.")
-    except Exception as e:
-        print(f"Error reading file at {DATA_FILE_PATH}: {e}")
-        return pd.DataFrame(), {}, 0
-    
-    # Ensure necessary columns are present or handle their absence gracefully
-    required_cols = ['student_name', 'studentID']
-    for col in required_cols:
-        if col not in df.columns:
-            df[col] = 'N/A'
-
-    df_anomalies, df_processed = run_isolation_forest(df)
-
-    anomalous_df = df_anomalies[df_anomalies['is_anomaly'] == -1].copy()
-    
-    anomalous_students_list = []
-    if not anomalous_df.empty:
-        feature_medians = df_processed.median()
-        feature_stds = df_processed.std()
-
-        for _, row in anomalous_df.iterrows():
-            student_data = row.to_dict()
-            student_data['anomaly_score'] = f"{row.get('anomaly_score', 0):.4f}"
-
-            processed_row = pd.get_dummies(pd.DataFrame([row]), columns=df.select_dtypes(exclude=np.number).columns.tolist(), drop_first=True).iloc[0]
+    df = pd.DataFrame()
+    if file_name:
+        file_path = os.path.join(UPLOADS_DIR, file_name)
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found at: {file_path}")
             
-            extreme_features = {}
-            for feature in processed_row.index:
-                feature_value_processed = processed_row[feature]
-                median_val = feature_medians.get(feature, np.nan)
-                std_val = feature_stds.get(feature, np.nan)
-
-                if pd.notna(median_val) and pd.notna(std_val) and std_val > 0:
-                    deviation = (feature_value_processed - median_val) / std_val
-                    if abs(deviation) > 1.5:
-                        description = "higher than average" if deviation > 0 else "lower than average"
-                        original_feature_name = feature.split('_')[0] if '_' in feature else feature
-                        original_value = student_data.get(original_feature_name)
-                        extreme_features[original_feature_name] = {
-                            'value': original_value,
-                            'description': description
-                        }
-            student_data['extreme_features'] = extreme_features
-            anomalous_students_list.append(student_data)
-
-    anomaly_insights = get_insights(anomalous_df)
+        if file_name.endswith('.csv'):
+            df = pd.read_csv(file_path)
+        else:
+            df = pd.read_excel(file_path)
+    else:
+        students_collection = db.students
+        all_students_data = list(students_collection.find())
+        if not all_students_data:
+            return pd.DataFrame(), {}, 0
+        df = pd.DataFrame(all_students_data)
+        if '_id' in df.columns:
+            df.rename(columns={'_id': 'student_id'}, inplace=True)
+        
+    total_students = len(df)
     
-    return pd.DataFrame(anomalous_students_list), anomaly_insights, len(df)
+    features_to_use = []
+    if 'age' in df.columns:
+        features_to_use.append('age')
+    if 'total_score' in df.columns:
+        features_to_use.append('total_score')
+    if 'attendance' in df.columns:
+        features_to_use.append('attendance')
+
+    if not features_to_use:
+        return pd.DataFrame(), {'error': 'No suitable numerical features found in the dataset.'}, total_students
+
+    if 'gender' in df.columns:
+        df['gender'] = df['gender'].astype('category').cat.codes
+        features_to_use.append('gender')
+    if 'class_label' in df.columns:
+        df['class_label'] = df['class_label'].astype('category').cat.codes
+        features_to_use.append('class_label')
+
+    X = df[features_to_use]
+    model = IsolationForest(contamination=0.05, random_state=42)
+    model.fit(X)
+    
+    df['anomaly_score'] = model.decision_function(X)
+    df['is_anomaly'] = model.predict(X)
+    
+    anomalous_df = df[df['is_anomaly'] == -1].copy()
+    
+    if anomalous_df.empty:
+        return pd.DataFrame(), {}, total_students
+
+    anomalous_df['extreme_features'] = anomalous_df.apply(
+        lambda row: find_extreme_features(row, X.columns, model), axis=1
+    )
+    
+    insights = get_insights(anomalous_df)
+    
+    return anomalous_df, insights, total_students

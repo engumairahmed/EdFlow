@@ -1,4 +1,5 @@
-from flask import Flask, current_app
+from celery import Celery
+from flask import Flask, current_app, render_template, request
 from flask_mail import Mail
 import os
 
@@ -10,6 +11,7 @@ from app.utils.dummy_data import create_dummy_data
 
 mail = Mail()
 mongo = Mongo()
+celery_app = Celery('edflow_tasks')
 
 def create_app():
     app = Flask(__name__)
@@ -17,10 +19,22 @@ def create_app():
 
     mail.init_app(app)
     mongo.init_app(app)
+    celery_app.conf.update(app.config)
 
     # --- Logging Setup ---
     app.logger.setLevel(logging.INFO)
     app.logger.propagate = False 
+
+     # --- Celery Task Context Handling ---
+    # This crucial part ensures that Celery tasks run within a Flask application context.
+    # This allows tasks to access 'current_app' and 'current_app.db'.
+    class ContextTask(celery_app.Task):
+        def __call__(self, *args, **kwargs):
+            # 'with app.app_context():' sets up the context for the duration of the task.
+            with app.app_context():
+                return self.run(*args, **kwargs)
+    celery_app.Task = ContextTask
+    # --- End Celery Task Context Handling ---
 
     logs_dir = 'logs'
     if not os.path.exists(logs_dir):
@@ -28,7 +42,8 @@ def create_app():
 
     file_handler = RotatingFileHandler(os.path.join(logs_dir, 'edflow_logs.txt'),
                                        maxBytes=10240,
-                                       backupCount=10)
+                                       backupCount=10,
+                                       encoding='utf-8')
     file_formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
     file_handler.setFormatter(file_formatter)
     file_handler.setLevel(logging.INFO)
@@ -71,7 +86,6 @@ def create_app():
 
     from app.routes.home import home_bp
     from app.routes.auth import auth_bp
-    from app.routes.ingestion import ingestion_bp
     from app.routes.dashboard import dashboard_bp
     # from app.routes.student import student_bp
     # from app.routes.teacher import teacher_bp
@@ -82,12 +96,26 @@ def create_app():
 
     app.register_blueprint(home_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
-    app.register_blueprint(ingestion_bp, url_prefix="/ingest")
     app.register_blueprint(dashboard_bp, url_prefix="/dashboard")
     # app.register_blueprint(student_bp, url_prefix="/student")
     # app.register_blueprint(teacher_bp, url_prefix="/teacher")
     app.register_blueprint(interface_bp) 
     app.register_blueprint(notifications_bp)
+
+
+    @app.errorhandler(404)
+    def not_found_error(error):
+        if request.path.startswith("/dashboard"):
+            return render_template("dashboard/error_404.html"), 404
+        else:
+            return render_template("interface/error_404.html"), 404
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        if request.path.startswith("/dashboard"):
+            return render_template("dashboard/error_500.html"), 500
+        else:
+            return render_template("interface/error_500.html"), 500
 
 
     return app

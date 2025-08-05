@@ -1,18 +1,16 @@
 from datetime import datetime
+import logging
 import pandas as pd
 from bson.objectid import ObjectId
 
 from app import mongo
 
-# Load from env or use default
-# MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-# DB_NAME = os.getenv("DB_NAME", "edflow")  # you can change this as needed
-
-# client = MongoClient(MONGO_URI)
-# db = client[DB_NAME]
 db = mongo.db
 datasets_collection = db["uploaded_datasets"]
 model_collection = db["trained_models"]
+
+
+logger = logging.getLogger(__name__)
 
 # === General CRUD Utilities ===
 
@@ -65,9 +63,9 @@ def save_dataset_to_mongodb(df, dataset_name, user_id, is_paid):
             "data": records
         }
         datasets_collection.insert_one(doc)
-        print(f"📁 Dataset '{dataset_name}' inserted into MongoDB.")
+        logger.info(f"Dataset '{dataset_name}' inserted into MongoDB.")
     except Exception as e:
-        print(f"❌ Failed to save dataset to MongoDB: {e}")
+        logger.error(f"Failed to save dataset to MongoDB: {e}")
 
 def get_dataset_by_model(model_name, limit=5000):
     return find_many("datasets", {"model_name": model_name}, limit=limit)

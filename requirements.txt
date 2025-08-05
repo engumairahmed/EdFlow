@@ -13,3 +13,4 @@ itsdangerous
 pywebpush
 cryptography
 celery
+shap
