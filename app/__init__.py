@@ -26,8 +26,6 @@ def create_app():
     app.logger.propagate = False 
 
      # --- Celery Task Context Handling ---
-    # This crucial part ensures that Celery tasks run within a Flask application context.
-    # This allows tasks to access 'current_app' and 'current_app.db'.
     class ContextTask(celery_app.Task):
         def __call__(self, *args, **kwargs):
             # 'with app.app_context():' sets up the context for the duration of the task.
@@ -82,8 +80,9 @@ def create_app():
                 app.logger.error(f"Failed to ensure TTL index on otp_codes: {e}")
 
         create_dummy_data(db)
-
-
+    #-------------------------
+    # Importing Blueprints -
+    #-------------------------
     from app.routes.home import home_bp
     from app.routes.auth import auth_bp
     from app.routes.dashboard import dashboard_bp
@@ -92,8 +91,9 @@ def create_app():
     
     from app.routes.interface import interface_bp
     from app.routes.notifications import notifications_bp
-
-
+    #-------------------------
+    # Registering Blueprints -
+    #-------------------------
     app.register_blueprint(home_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(dashboard_bp, url_prefix="/dashboard")
@@ -101,7 +101,6 @@ def create_app():
     # app.register_blueprint(teacher_bp, url_prefix="/teacher")
     app.register_blueprint(interface_bp) 
     app.register_blueprint(notifications_bp)
-
 
     @app.errorhandler(404)
     def not_found_error(error):
@@ -116,6 +115,5 @@ def create_app():
             return render_template("dashboard/error_500.html"), 500
         else:
             return render_template("interface/error_500.html"), 500
-
-
+        
     return app
