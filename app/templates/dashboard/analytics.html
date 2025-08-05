@@ -80,12 +80,14 @@
     </div>
 
 </div>
-
+<div class="dashboard-card">
+    
 <!-- Collection Selector -->
+{% if collections %}
 <form method="POST" action="/dashboard/analytics">
-    <div class="mb-3">
-        <label>Select Collection:</label>
-        <select name="collection" class="form-select" onchange="this.form.submit()">
+    <div class="mb-3 form-group">
+        <label for="collection">Select Collection:</label>
+        <select id="collection" name="collection" class="form-select" onchange="this.form.submit()">
             <option disabled selected>Choose collection</option>
             {% for col in collections %}
             <option value="{{ col }}" {% if selected_data.collection==col %}selected{% endif %}>{{ col }}</option>
@@ -93,13 +95,14 @@
         </select>
     </div>
 </form>
+{%endif%}
 
 <!-- Chart Form -->
 {% if fields %}
 <form method="POST" action="{{ url_for('dashboard.generate_chart') }}">
 
     <input type="hidden" name="collection" value="{{ selected_data.collection }}">
-    <div class="row">
+    <div class="row form-group">
         <div class="col-md-4 mb-3">
             <label>X-axis:</label>
             <select name="x_axis" class="form-select">
@@ -128,15 +131,16 @@
             <label>Rows to Display:</label>
             <input type="number" name="limit" class="form-control" value="10" min="1">
         </div>
-        <div class="col-md-6 mb-3">
+        <div class="col-md-1 mb-6">
             <label>Chart Color:</label>
             <input type="color" name="color" class="form-control form-control-color" value="#636EFA">
         </div>
     </div>
-    <button type="submit" class="btn btn-success">Generate Chart</button>
+    <button type="submit" class="btn btn-primary">Generate Chart</button>
 </form>
 {% endif %}
 
+</div>
 <!-- Generated Chart Display + Save -->
 {% if chart %}
 <hr class="my-4">
@@ -156,7 +160,7 @@
     <button type="submit" class="btn btn-warning mt-3">Save Chart</button>
 </form>
 
-<a href="/" class="btn btn-primary mt-2">Go Back</a>
+<a href="{{ url_for('dashboard.analytics') }}" class="btn btn-primary mt-2">Go Back</a>
 {% endif %}
 {% if saved_charts %}
 <h4 class="mt-4">Saved Charts ({{ selected_data.collection }})</h4>
