@@ -107,13 +107,13 @@ def create_app():
         if request.path.startswith("/dashboard"):
             return render_template("dashboard/error_404.html"), 404
         else:
-            return render_template("interface/error_404.html"), 404
+            return render_template("Interface/error_404.html"), 404
 
     @app.errorhandler(500)
     def internal_error(error):
         if request.path.startswith("/dashboard"):
             return render_template("dashboard/error_500.html"), 500
         else:
-            return render_template("interface/error_500.html"), 500
+            return render_template("Interface/error_500.html"), 500
         
     return app
