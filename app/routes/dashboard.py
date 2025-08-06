@@ -227,10 +227,17 @@ def dataset():
     userId = session["user_id"]
     return render_template("dashboard/dataset.html",user_id=userId)
 
-@dashboard_bp.route('/my_profile')
+@dashboard_bp.route('/personal_information')
 @login_required
-def my_profile():
-    return render_template('dashboard/my_profile.html')
+def personal_information():
+    user_id = session['user_id']
+    user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+
+    if not user:
+        flash("User not found", "danger")
+        return redirect(url_for('dashboard.update_profile'))
+
+    return render_template('dashboard/personal_information.html', user=user)
 
 @dashboard_bp.route('/change_password')
 @login_required
@@ -242,10 +249,17 @@ def change_password():
 def login_history():
     return render_template('dashboard/login_history.html')
 
-@dashboard_bp.route('/personal_information')
+@dashboard_bp.route('/my_profile')
 @login_required
-def personal_information():
-    return render_template('dashboard/personal_information.html')
+def my_profile():
+    user_id = session['user_id']
+    user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+
+    if not user:
+        flash("User not found", "danger")
+        return redirect(url_for('dashboard.update_profile'))
+
+    return render_template('dashboard/my_profile.html', user=user)
 
 
 @dashboard_bp.route('/all_notifications')
@@ -260,10 +274,57 @@ def all_notifications():
 def notification_settings():
     return render_template('dashboard/notification_settings.html') 
 
-@dashboard_bp.route('/update_profile')
+@dashboard_bp.route('/update_profile', methods=['GET', 'POST'])
+@login_required
 def update_profile():
-    return render_template('dashboard/update_profile.html')
+    if 'role' not in session:
+        return redirect(url_for('auth.login'))
 
+    role = session['role']
+    user_id = session['user_id']
+    user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+
+    if request.method == 'POST':
+        full_name = request.form.get('full_name')
+        dob = request.form.get('dob')
+        gender = request.form.get('gender'),
+        address = request.form.get('address')
+        phone = request.form.get('phone')
+
+        data = {
+            "full_name": full_name,
+            "dob": dob,
+            "gender": request.form.get('gender'),  
+            "address": address,
+            "phone": phone,
+            "role": role
+        }
+
+        if role == 'student':
+            data["grade"] = request.form.get('grade')
+            data["roll_number"] = request.form.get('roll_number')
+
+        elif role == 'teacher':
+            data["department"] = request.form.get('department')
+            data["qualification"] = request.form.get('qualification')
+
+        elif role == 'admin':
+            data["designation"] = request.form.get('designation')
+            data["admin_code"] = request.form.get('admin_code')
+
+        mongo.db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": data},
+            upsert=True 
+        )
+
+        flash("Profile updated successfully", "success")
+        return redirect(url_for('dashboard.my_profile'))
+
+    return render_template('dashboard/update_profile.html', role=role, user=user)
+
+
+       
 # ===================================
 # ANOMALY DETECTION ROUTE
 # ===================================
