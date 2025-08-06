@@ -61,9 +61,6 @@
 
                 <li><button onclick='openLogoutModal()'><i class="fas fa-sign-out-alt"></i> Logout</button></li>
 
-                <li><a href="{{ url_for('auth.logout') }}"
-                        class="{% if request.endpoint == 'auth.logout' %}active{% endif %}"><i {# CORRECTED: Changed
-                            from logout #} class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </div>
 
@@ -401,7 +398,24 @@
             });
         });
 
+        // Get all buttons with the class 'btn'
+        const buttons = document.querySelectorAll('.btn');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', function () {
+                buttons.forEach(b => b.classList.remove('clicked'));
+
+                this.classList.add('clicked');
+
+                setTimeout(() => {
+                    this.classList.remove('clicked');
+                }, 2000); // 2000 milliseconds = 2 seconds
+            });
+        });
+
+
     </script>
+
 </body>
 
 </html>
