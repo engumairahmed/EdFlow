@@ -69,7 +69,7 @@ def create_dummy_data(db):
         # Student 1: Low risk
         {
             "userId": student_user_ids[0], "studentID": "S001", "name": "Fatima Zahra", "dateOfBirth": datetime(2003, 5, 10),
-            "gender": "Male", "ethnicity": "Asian", "socioeconomicStatus": "Middle",
+            "gender": "Female", "ethnicity": "Asian", "socioeconomicStatus": "Middle",
             "highSchoolGPA": 3.8, "entranceExamScores": {"SAT": 1450}, "financialAidStatus": "Recipient",
             "currentGPA": 3.5,
             "study_hours": 15, "social_media_time": 2, "netflix_hours": 1, "part_time_job": "No",
