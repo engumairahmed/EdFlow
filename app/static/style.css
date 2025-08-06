@@ -74,6 +74,26 @@ p {
     z-index: 1000;
     transition: width 0.4s ease, min-width 0.4s ease, transform 0.4s ease;
 }
+.sidebar button {
+    display: flex;
+    align-items: center;
+    width: 280px;
+    padding: 20px 15px;
+    color: var(--white); /* Changed to white to match sidebar background */
+    text-decoration: none;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    transition: width 0.4s ease, min-width 0.4s ease, transform 0.4s ease;
+    cursor: pointer;
+    text-align: left;
+    white-space: nowrap;
+    
+
+
+}
+
+
 
 .sidebar.hidden {
     transform: translateX(-100%);
@@ -123,7 +143,8 @@ p {
     margin-bottom: 10px;
 }
 
-.sidebar-menu a {
+.sidebar-menu a ,
+.sidebar-menu button{
     color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
     padding: 12px 15px;
@@ -135,19 +156,22 @@ p {
     font-size: 0.95em;
 }
 
-.sidebar-menu a i {
+.sidebar-menu a i,
+.sidebar-menu button {
     margin-right: 12px;
     font-size: 1.1em;
 }
 
-.sidebar-menu a:hover {
+.sidebar-menu a:hover,
+.sidebar-menu button:hover {
     background-color: var(--accent-purple);
     color: var(--white);
     transform: translateX(5px);
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
 }
 
-.sidebar-menu a.active {
+.sidebar-menu a.active ,
+.sidebar-menu button.active{
     background-color: var(--accent-purple);
     color: var(--white);
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
@@ -284,8 +308,8 @@ p {
     margin-top: 25px;
 }
 
-/* --- Button Styles --- */
-.btn {
+/* /////////////buton style/////////////// */
+ .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -294,7 +318,8 @@ p {
     text-decoration: none;
     font-weight: 600;
     margin: 0 10px;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    /* Transition time kam kiya hai taake effect tez ho */
+    transition: background-color 0.1s ease, transform 0.1s ease, box-shadow 0.1s ease;
     box-shadow: var(--button-shadow);
     text-transform: uppercase;
     letter-spacing: 0.4px;
@@ -308,21 +333,28 @@ p {
     color: var(--white);
 }
 
-.btn-primary:hover {
-    background-color: var(--dark-purple);
-    transform: translateY(-2px);
-    box-shadow: var(--button-hover-shadow);
+/* Click karne par color change aur "pressed" effect */
+.btn-primary:active {
+    background-color: var(--accent-purple); /* Yeh woh accent color hai jo aap chahte hain */
+    transform: scale(0.98); /* Button ko thoda chota karta hai, jaise dab raha ho */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2); /* Andar ki taraf shadow banata hai */
 }
 
 .btn-secondary {
-    background-color: #7f8c8d;
+    background-color: #3a4040;
     color: var(--white);
 }
 
-.btn-secondary:hover {
-    background-color: #616a6b;
-    transform: translateY(-2px);
-    box-shadow: var(--button-hover-shadow);
+/* Click karne par color change aur "pressed" effect */
+.btn-secondary:active {
+    background-color: #7e8787; /* Dusra accent color */
+    transform: scale(0.98);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+/* Add this new class to your CSS file */
+.btn.clicked {
+    transform: scale(0.98);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .btn i {
@@ -2003,7 +2035,7 @@ a {
 }
 
 .responsive-table-container {
-    width: 100%;
+    width: 77%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     margin-bottom: 25px;
@@ -2022,7 +2054,7 @@ a {
     border: 1px solid var(--border-gray);
     /* Consistent borders */
     padding: 14px 18px;
-    text-align: left;
+    text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
