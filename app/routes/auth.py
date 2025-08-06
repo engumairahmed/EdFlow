@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone 
 import logging
 from flask import Blueprint, redirect, render_template, request, jsonify, session, flash, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 verification_codes = {}
 
 users=mongo.db['users']
+db=mongo.db
 
 # =============================
 # REGISTER ROUTE
@@ -37,28 +39,51 @@ def register():
                 return redirect(url_for('auth.register'))
 
             hashed = generate_password_hash(password)
-
-            users.insert_one({
+            try:
+                users.insert_one({
                 "username": username,
                 "email":email,
                 "password": hashed,
                 "role": role,
-                "is_verified": False
+                "is_verified": False,
+                "createdAt": datetime.now(timezone.utc),
+                "lastLogin": datetime.now(timezone.utc)
                 })
+            except Exception as e:
+                flash("Error occurred while registering user.", "danger")
+                logger.info(f"Error registering user: {e}")
+                return redirect(url_for('auth.register'))
             
             # Generate OTP and store temporarily
             code = str(random.randint(100000, 999999))
-            verification_codes[email] = code
+            expires_at = datetime.now(timezone.utc) + timedelta(minutes=60) # Code expires in 60 minutes
+            try:
+                db.otp_codes.insert_one({
+                "email": email,
+                "code": code,
+                "created_at": datetime.now(timezone.utc),
+                "expires_at": expires_at
+            })
+            except Exception as e:
+                flash("Error occurred while generating OTP.", "danger")
+                logger.info(f"Error generating OTP: {e}")
+                return redirect(url_for('auth.register'))
             session['email_to_verify'] = email  # store in session for verify-email page
 
             # Send code via email
-            msg = Message("Email Verification Code", recipients=[email])
-            msg.body = f"Your verification code is: {code}"
-            mail.send(msg)
+            try:
+                msg = Message("Email Verification Code", recipients=[email])
+                msg.body = f"Your verification code is: {code}"
+                mail.send(msg)
+            except Exception as e:
+                flash("Error occurred while sending verification code.", "danger")
+                logger.info(f"Error sending verification code: {e}")
+                return redirect(url_for('auth.register'))
 
             flash("Verification code sent to your email. Please verify to continue.", "info")
             logger.info(f"Verification code sent to {email}")
-            return render_template('auth/login.html')
+            return redirect(url_for('auth.verify_email'))
+
         return render_template('auth/register.html')
     return redirect(url_for('dashboard.dashboard_view'))
 # =============================
@@ -220,61 +245,128 @@ def reset_password(token):
 # =============================
 @auth_bp.route('/verify-email', methods=['GET', 'POST'])
 def verify_email():
-    if request.method == 'POST':
-        code = request.form['code']
-        email = session['email_to_verify']
-        user = users.find_one({'email': email})
-        if not user:
-            flash('Session expired or no email provided.', 'danger')
-            return redirect(url_for('auth.login'))
-        correct_code = verification_codes[email]
-        if code == correct_code:
-            mongo.db.users.update_one({'email': email}, {'$set': {'is_verified': True}})
+    email = session.get('email_to_verify')
 
-            verification_codes.pop(email, None)
+    # --- GET Request ---
+    # Redirect if there's no email to verify in the session.
+    if request.method == 'GET':
+        if not email:
+            flash('Please register or log in to verify your email.', 'info')
+            return redirect(url_for('auth.login'))
+        return render_template('auth/verify-email.html')
+
+    # --- POST Request ---
+    if request.method == 'POST':
+        code = request.form.get('code')
+
+        # Basic input and session validation
+        if not code or not email:
+            flash('Invalid request or session expired. Please try again.', 'danger')
+            return redirect(url_for('auth.login'))
+
+        # Find the verification code in the database
+        verification_entry = db.otp_codes.find_one({'email': email})
+
+        if not verification_entry:
+            flash('Invalid or expired verification code.', 'danger')
+            return render_template('auth/verify-email.html')
+
+        # Check for code expiration
+        if verification_entry['expires_at'].tzinfo is None:
+            expires_at = verification_entry['expires_at'].replace(tzinfo=timezone.utc)
+        else:
+            expires_at = verification_entry['expires_at']
+
+        if expires_at < datetime.now(timezone.utc):
+            # Code has expired, delete it and prompt for a new one
+            db.otp_codes.delete_one({'email': email})
+            flash('Verification code has expired. Please request a new one.', 'danger')
+            return redirect(url_for('auth.resend_code'))
+
+        # Check if the submitted code matches the stored code
+        if code == verification_entry['code']:
+            # Find the user and update their verification status
+            user = db.users.find_one({'email': email})
+            if user:
+                db.users.update_one({'email': email}, {'$set': {'is_verified': True}})
+            else:
+                logger.error(f"User with email {email} not found during verification.")
+                flash('User not found. Please register again.', 'danger')
+                return redirect(url_for('auth.register'))
+
+            # Clean up after successful verification
+            db.otp_codes.delete_one({'email': email})
             session.pop('email_to_verify', None)
-            flash('Email verified successfully!', 'success')
+            flash('Email verified successfully! You can now log in.', 'success')
             return redirect(url_for('auth.login'))
         else:
+            # Incorrect code
             flash('Invalid verification code.', 'danger')
-    return render_template('auth/verify-email.html')
-
+            return render_template('auth/verify-email.html')
 
 # =============================
 # RESEND CODE
 # =============================
-@auth_bp.route('/resend-code', methods=['GET','POST'])
+@auth_bp.route('/resend-code', methods=['GET', 'POST'])
 def resend_code():
-    email = session['email_to_verify']
+    # Safely get the email from the session.
+    # If the email is not in the session, the user is not in the verification flow.
+    email = session.get('email_to_verify')
     if not email:
-        flash('Email is required to resend code.', 'danger')
+        flash('Session expired. Please log in or register again.', 'danger')
         return redirect(url_for('auth.login'))
 
+    # Check if a user with this email actually exists and is unverified.
+    user = db.users.find_one({"email": email, "is_verified": False})
+    if not user:
+        # If the user is already verified or doesn't exist, we should redirect them.
+        flash('This email is already verified or does not exist.', 'warning')
+        session.pop('email_to_verify', None)
+        return redirect(url_for('auth.login'))
+
+    # Generate a new OTP
     code = str(random.randint(100000, 999999))
-    verification_codes[email] = code
-
-    # Send code via email
-    msg = Message(
-        subject="EdFlow: Verification Code",
-        sender=current_app.config['MAIL_DEFAULT_SENDER'],
-        recipients=[email]
-    )
-    msg.body = f"""
-
-    To verify your email use the code below:
-
-    {code}
     
-    This code will expires in 1 hour.
+    # Define a new expiration time (e.g., 60 minutes from now)
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=60)
 
-    If you did not submit this request, you can ignore this email.
+    try:
+        # Update or insert the new OTP in the database.
+        # This is more robust than a global dictionary.
+        db.otp_codes.update_one(
+            {"email": email},
+            {"$set": {"code": code, "expires_at": expires_at}},
+            upsert=True
+        )
+        
+        # Send the new verification code via email.
+        msg = Message(
+            subject="EdFlow: Your New Verification Code",
+            sender=current_app.config['MAIL_DEFAULT_SENDER'],
+            recipients=[email]
+        )
+        msg.body = f"""
+            To verify your email, please use the code below:
 
-    Best regards,
-    The EdFlow Team
-    """
-    mail.send(msg)
+            {code}
+            
+            This code will expire in 60 minutes.
 
-    flash('A new verification code has been sent to your email.', 'info')
+            If you did not request this, you can safely ignore this email.
+
+            Best regards,
+            The EdFlow Team
+            """
+        mail.send(msg)
+        
+        flash('A new verification code has been sent to your email.', 'info')
+        logging.info(f"New verification code sent to {email}")
+
+    except Exception as e:
+        flash('Failed to send a new verification code. Please try again.', 'danger')
+        logging.error(f"Failed to send resend email to {email}: {e}")
+    
+    # Redirect back to the verification page to enter the new code.
     return redirect(url_for('auth.verify_email'))
 
 # =============================

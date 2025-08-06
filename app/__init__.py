@@ -1,5 +1,5 @@
 from celery import Celery
-from flask import Flask, current_app, render_template, request
+from flask import Flask, current_app, render_template, request, session
 from flask_mail import Mail
 import os
 
@@ -104,9 +104,17 @@ def create_app():
 
     @app.errorhandler(404)
     def not_found_error(error):
-        if request.path.startswith("/dashboard"):
+        # Check if a user is authenticated by looking for 'user_id' in the session.
+        # Using session.get() prevents a KeyError if the key is not present.
+        is_authenticated = session.get('user_id') is not None
+        
+        # Check if the requested path starts with "/dashboard" AND the user is authenticated.
+        if request.path.startswith("/dashboard") and is_authenticated:
             return render_template("dashboard/error_404.html"), 404
         else:
+            # This will handle:
+            # 1. Any non-dashboard page (e.g., /about, /)
+            # 2. Any dashboard page if the user is not authenticated
             return render_template("i_interface/error_404.html"), 404
 
     @app.errorhandler(500)

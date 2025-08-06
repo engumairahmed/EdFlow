@@ -1,5 +1,5 @@
 from flask import current_app
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from bson.objectid import ObjectId
 import joblib
@@ -57,7 +57,7 @@ def save_model(model, model_name, metrics=None, model_type="Dropout Prediction",
             'model_name': model_name,
             'model_type': model_type,
             'file_path': model_path,
-            'trained_at': datetime.utcnow(),
+            'trained_at': datetime.now(timezone.utc),
             'metrics': metrics if metrics is not None else {},
             'trained_by_user_id': ObjectId(trained_by_user_id) if trained_by_user_id else None
         }

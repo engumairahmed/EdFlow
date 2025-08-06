@@ -8,7 +8,7 @@ import shap
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import f1_score, mean_squared_error, precision_score, r2_score, recall_score, roc_auc_score, accuracy_score
-from datetime import datetime
+from datetime import datetime, timezone
 import numpy as np
 from sklearn.model_selection import train_test_split
 
@@ -236,7 +236,7 @@ def train_all_models_and_save(df: pd.DataFrame, dataset_name: str, is_paid: bool
                 "userId": session["user_id"], # Ensure 'session' is accessible (from Flask context)
                 "username": session["username"]
             },
-            "created_at": datetime.now(),
+            "created_at": datetime.now(timezone.utc),
             "is_paid": is_paid,
             "details": all_models
         })

@@ -1,7 +1,7 @@
 
 # app/routes/dashboard.py
 
-import datetime
+from datetime import datetime, timezone
 import logging
 import os
 from flask import Blueprint, json, jsonify, render_template, request, session, redirect, url_for, flash
@@ -87,7 +87,7 @@ def upload_data():
                     "title": "📢 New Model Trained",
                     "body": f"The model '{model_name}' has been successfully trained.",
                     "role": "admin",
-                    "created_at": datetime.now(),
+                    "created_at": datetime.now(timezone.utc),
                     "created_by": ObjectId(session['user_id'])
                 })
             except Exception as e:

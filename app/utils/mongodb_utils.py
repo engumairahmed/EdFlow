@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import pandas as pd
 from bson.objectid import ObjectId
@@ -58,7 +58,7 @@ def save_dataset_to_mongodb(df, dataset_name, user_id, is_paid):
             "dataset_name": dataset_name,
             "user_id": user_id,
             "is_paid": is_paid,
-            "uploaded_at": datetime.now(),
+            "uploaded_at": datetime.now(timezone.utc),
             "record_count": len(records),
             "data": records
         }

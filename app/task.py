@@ -3,7 +3,7 @@ from flask import current_app
 import pandas as pd
 import os
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from bson.objectid import ObjectId
 import numpy as np
 
@@ -105,7 +105,7 @@ def process_uploaded_data_and_train_model(self, file_path, model_name, user_id_s
                 attendance = ml_features_doc.get('attendance', 80.0)
                 student_doc['dropout'] = (gpa is not None and gpa < 2.0) or (attendance is not None and attendance < 70.0)
 
-            student_doc['last_updated'] = datetime.utcnow()
+            student_doc['last_updated'] = datetime.now(timezone.utc)
 
             try:
                 result = students_col.update_one(
@@ -123,7 +123,7 @@ def process_uploaded_data_and_train_model(self, file_path, model_name, user_id_s
         db.uploaded_datasets.insert_one({
             'dataset_name': model_name,
             'uploaded_by': ObjectId(user_id_str) if user_id_str else None,
-            'uploaded_at': datetime.utcnow(),
+            'uploaded_at': datetime.now(timezone.utc),
             'original_file_name': os.path.basename(file_path),
             'is_paid': is_paid,
             'row_count': len(df_uploaded),

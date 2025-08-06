@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import re
 from app.models import get_feedbacks_collection
 
@@ -28,7 +28,7 @@ class Feedback:
             "rating": int(rating),
             "verified": False, 
             "verify_token": token,
-            "createdAt": datetime.now() - timedelta(days=10)
+            "createdAt": datetime.now(timezone.utc) - timedelta(days=10)
 
 
         }).inserted_id

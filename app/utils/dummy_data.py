@@ -1,6 +1,6 @@
 # app/utils/dummy_data.py
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from werkzeug.security import generate_password_hash
 from bson.objectid import ObjectId
 import random
@@ -46,8 +46,8 @@ def create_dummy_data(db):
         user_data["password"] = hashed_password
         user_data["is_verified"] = True
         user_data["plan"] = "free"
-        user_data["createdAt"] = datetime.now()
-        user_data["lastLogin"] = datetime.now()
+        user_data["createdAt"] = datetime.now(timezone.utc)
+        user_data["lastLogin"] = datetime.now(timezone.utc)
         dummy_users.append(user_data)
     
     users_col.insert_many(dummy_users)
@@ -135,7 +135,7 @@ def create_dummy_data(db):
             "entranceExamScores": student_config["entranceExamScores"],
             "enrollmentHistory": [], # Will be populated later
             "lmsActivitySummary": {
-                "lastLoginDate": datetime.now() - timedelta(days=random.randint(1, 30)),
+                "lastLoginDate": datetime.now(timezone.utc) - timedelta(days=random.randint(1, 30)),
                 "totalLogins": random.randint(20, 100),
                 "avgTimeOnLMSPerWeek": random.uniform(2, 15),
                 "assignmentsSubmittedCount": random.randint(5, 20),
@@ -243,10 +243,10 @@ def create_dummy_data(db):
                 "year": 2024,
                 "grade": random.choice(["A", "B+", "B", "C+", "C", "D", "F"]),
                 "creditsEarned": 3,
-                "enrollmentDate": datetime.now() - timedelta(days=random.randint(60, 90)),
+                "enrollmentDate": datetime.now(timezone.utc) - timedelta(days=random.randint(60, 90)),
                 "status": "completed",
                 "attendanceRecords": [
-                    {"date": datetime.now() - timedelta(days=d), "status": random.choice(["Present", "Absent", "Tardy"])}
+                    {"date": datetime.now(timezone.utc) - timedelta(days=d), "status": random.choice(["Present", "Absent", "Tardy"])}
                     for d in random.sample(range(1, 60), 10) # 10 random attendance records
                 ]
             }}}
@@ -259,10 +259,10 @@ def create_dummy_data(db):
                 "year": 2024,
                 "grade": random.choice(["A", "B+", "B", "C+", "C", "D", "F"]),
                 "creditsEarned": 4,
-                "enrollmentDate": datetime.now() - timedelta(days=random.randint(60, 90)),
+                "enrollmentDate": datetime.now(timezone.utc) - timedelta(days=random.randint(60, 90)),
                 "status": "in_progress", # Some current course
                 "attendanceRecords": [
-                    {"date": datetime.now() - timedelta(days=d), "status": random.choice(["Present", "Absent", "Tardy"])}
+                    {"date": datetime.now(timezone.utc) - timedelta(days=d), "status": random.choice(["Present", "Absent", "Tardy"])}
                     for d in random.sample(range(1, 60), 10) # 10 random attendance records
                 ]
             }}}
@@ -274,7 +274,7 @@ def create_dummy_data(db):
                 "studentId": s_id,
                 "courseId": random.choice([cs101_course_id, ma201_course_id]),
                 "activityType": random.choice(["page_view", "quiz_attempt", "assignment_view", "discussion_post", "video_watched"]),
-                "timestamp": datetime.now() - timedelta(hours=random.randint(1, 720)), # Up to 30 days ago
+                "timestamp": datetime.now(timezone.utc) - timedelta(hours=random.randint(1, 720)), # Up to 30 days ago
                 "details": {"score": random.uniform(50, 100)} if random.random() > 0.7 else {}
             })
 
@@ -296,7 +296,7 @@ def create_dummy_data(db):
             "targetEntityType": "student",
             "message": "Student S003 shows high risk of dropout due to low engagement and grades.",
             "severity": "high",
-            "generatedAt": datetime.now() - timedelta(days=5),
+            "generatedAt": datetime.now(timezone.utc) - timedelta(days=5),
             "status": "new",
             "acknowledgedBy": None,
             "acknowledgedAt": None
@@ -307,7 +307,7 @@ def create_dummy_data(db):
             "targetEntityType": "student",
             "message": "Student S002 has a failing grade in MA201.",
             "severity": "medium",
-            "generatedAt": datetime.now() - timedelta(days=2),
+            "generatedAt": datetime.now(timezone.utc) - timedelta(days=2),
             "status": "new",
             "acknowledgedBy": None,
             "acknowledgedAt": None
@@ -324,7 +324,7 @@ def create_dummy_data(db):
             "message": "The LMS interface is sometimes slow and confusing.",
             "rating": 3,
             "verified": True,
-            "createdAt": datetime.now() - timedelta(days=10)
+            "createdAt": datetime.now(timezone.utc) - timedelta(days=10)
         },
         {
             "userId": teacher_user_id,
@@ -332,7 +332,7 @@ def create_dummy_data(db):
             "message": "Consider adding more practical examples in CS101.",
             "rating": 4,
             "verified": True,
-            "createdAt": datetime.now() - timedelta(days=7)
+            "createdAt": datetime.now(timezone.utc) - timedelta(days=7)
         }
     ]
     feedbacks_col.insert_many(dummy_feedbacks)
@@ -345,7 +345,7 @@ def create_dummy_data(db):
             "email": "jane.public@example.com",
             "subject": "General Inquiry",
             "message": "I have a question about the EdFlow platform.",
-            "createdAt": datetime.now() - timedelta(days=15)
+            "createdAt": datetime.now(timezone.utc) - timedelta(days=15)
         }
     ]
     contacts_col.insert_many(dummy_contacts)
