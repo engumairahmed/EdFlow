@@ -71,11 +71,10 @@
                 </div>
                 <h1>{% block page_heading %}{% endblock %}</h1>
                 <div class="header-right">
-                    {# Notification Dropdown #}
                     <div class="notification-dropdown-container">
                         <span class="header-icon-wrapper notification-icon" id="notificationDropdownToggle">
                             <i class="fas fa-bell"></i>
-                            {# <span class="badge">3</span> -- Make sure this is removed if not needed #}
+                            <span class="badge">3</span>
                         </span>
 
                         <div class="notification-dropdown-menu" id="notificationDropdownMenu">
@@ -205,7 +204,7 @@
             }
         }
 
-        function displayToast(message, category = 'info', duration = 5000) {
+        function displayToast(message, category = 'info', duration = 3000) {
             const toastContainer = document.getElementById('toast-container');
 
             // Create the new toast element
@@ -214,11 +213,9 @@
 
             // Add the content
             toast.innerHTML = `
-                <div class="toast ${category}">                    
-                    <span>${message}</span>
-                    <button class="toast-close">&times;</button>
-                </div>
-                `;
+                <span>${message}</span>
+                <button class="toast-close">&times;</button>
+            `;
             // Append the toast to the container
             toastContainer.appendChild(toast);
 
