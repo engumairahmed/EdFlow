@@ -14,16 +14,16 @@ interface_bp = Blueprint("interface", __name__,)
 def home():
     feedbacks = get_feedbacks_collection().find({"verified": True}).sort('_id', -1)
     testimonials = [Feedback(f) for f in feedbacks]
-    return render_template('interface/home.html', feedbacks=testimonials)
+    return render_template('i_interface/home.html', feedbacks=testimonials)
 
 @interface_bp.route("/about")
 def about():
-    return render_template("interface/about.html")
+    return render_template("i_interface/about.html")
 
 
 @interface_bp.route("/team")
 def team():
-    return render_template("interface/team.html")
+    return render_template("i_interface/team.html")
 
 
 @interface_bp.route('/contact', methods=['POST', 'GET'])
@@ -38,7 +38,7 @@ def contact():
 
         if errors:
             return render_template(
-                "interface/contact.html",
+                "i_interface/contact.html",
                 errors=errors,
                 form_data={
                     'fullname': fullname,
@@ -59,7 +59,7 @@ def contact():
         flash("Your message has been sent!")
         return redirect(url_for("interface.contact"))
 
-    return render_template("interface/contact.html", errors={}, form_data={})
+    return render_template("i_interface/contact.html", errors={}, form_data={})
 @interface_bp.route('/feedback', methods=['GET', 'POST'])
 def feedback():
     if request.method == 'POST':
@@ -72,7 +72,7 @@ def feedback():
 
         if errors:
             return render_template(
-                "interface/feedback.html",
+                "i_interface/feedback.html",
                 errors=errors,
                 form_data={'name': name, 'email': email, 'message': message, 'rating': rating}
             )
@@ -108,7 +108,7 @@ def feedback():
         return redirect(url_for('interface.feedback'))  
 
     return render_template(
-    'interface/feedback.html',
+    'i_interface/feedback.html',
     errors={},  
     form_data={'name': '', 'email': '', 'message': '', 'rating': '0'}
 )
@@ -126,16 +126,16 @@ def verify_feedback(token):
 def testimonials():
     feedbacks = get_feedbacks_collection().find({"verified": True}).sort('_id', -1)
     testimonials = [Feedback(f) for f in feedbacks]
-    return render_template('interface/testimonials.html', testimonials=testimonials)
+    return render_template('i_interface/testimonials.html', testimonials=testimonials)
 
 @interface_bp.route("/faq")
 def faq():
-    return render_template("interface/faq.html")
+    return render_template("i_interface/faq.html")
 
 
 @interface_bp.route("/privacy")
 def privacy():
-    return render_template("interface/privacy.html")
+    return render_template("i_interface/privacy.html")
 
 
 
