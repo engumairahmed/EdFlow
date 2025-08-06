@@ -6,30 +6,30 @@
 
 {% block content %}
 <div class="dashboard-card content-section">
-    <h3 class="section-title">Your Private Details</h3>
+    <h3 class="section-title">Your Personal Details</h3>
     <p>This section contains sensitive personal information. Please keep it secure.</p>
     
     <div class="personal-details-grid">
-        <div class="detail-item">
-            <span class="detail-label"><i class="fas fa-user-tag icon-purple"></i> Full Name:</span>
-            <span class="detail-value">Palwasha Qasim</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label"><i class="fas fa-calendar-alt icon-purple"></i> Date of Birth:</span>
-            <span class="detail-value">January 15, </span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label"><i class="fas fa-venus-mars icon-purple"></i> Gender:</span>
-            <span class="detail-value">Female</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label"><i class="fas fa-phone icon-purple"></i> Phone Number:</span>
-            <span class="detail-value">+1 (555) 123-4567</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label"><i class="fas fa-map-marker-alt icon-purple"></i> Address:</span>
-            <span class="detail-value">123 EdFlow St, Learning City, L2P 7S5</span>
-        </div>
+<div class="detail-item">
+    <span class="detail-label"><i class="fas fa-user-tag icon-purple"></i> Full Name:</span>
+    <span class="detail-value">{{ user.full_name }}</span>
+</div>
+<div class="detail-item">
+    <span class="detail-label"><i class="fas fa-calendar-alt icon-purple"></i> Date of Birth:</span>
+    <span class="detail-value">{{ user.dob }}</span>
+</div>
+<div class="detail-item">
+    <span class="detail-label"><i class="fas fa-venus-mars icon-purple"></i> Gender:</span>
+    <span class="detail-value">{{ user.gender }}</span>
+</div>
+<div class="detail-item">
+    <span class="detail-label"><i class="fas fa-phone icon-purple"></i> Phone Number:</span>
+    <span class="detail-value">{{ user.phone }}</span>
+</div>
+<div class="detail-item">
+    <span class="detail-label"><i class="fas fa-map-marker-alt icon-purple"></i> Address:</span>
+    <span class="detail-value">{{ user.address }}</span>
+</div>
     </div>
 
     <a href="{{ url_for('dashboard.my_profile') }}" class="btn btn-secondary mt-4"><i class="fas fa-arrow-left"></i> Back to My Profile</a>

@@ -1,58 +1,79 @@
-{% extends "dashboard/base.html" %}
-
-{% block title %}Update Profile - EdFlow{% endblock %}
-
-{% block page_heading %}Update Profile{% endblock %}
-
-{% block content %}
+{% extends "dashboard/base.html" %} {% block title %}Update Profile - EdFlow{%
+endblock %} {% block page_heading %}Update Profile{% endblock %} {% block
+content %}
 <div class="dashboard-card content-section">
-    <h3 class="section-title">Edit Your Personal Information</h3>
-    <p>Please update your details below and save the changes.</p>
+  <h3 class="section-title">Edit Your Personal Information</h3>
+  <p>Please update your details below and save the changes.</p>
 
-    <form action="#" method="POST" class="mt-4">
-        {# Profile Picture Upload UI (purely visual) #}
-        <div class="form-group profile-picture-upload-group">
-            <label for="profilePicture">Profile Picture:</label>
-            <div class="profile-picture-preview">
-                <img src="{{ url_for('static', filename='images/default_profile.png') }}" alt="Default Profile Picture" class="profile-picture-lg">
-            </div>
-            <input type="file" id="profilePicture" name="profilePicture" accept="image/*" class="form-control-file">
-            <small class="form-text text-muted">Max file size 2MB. JPG, PNG, GIF allowed.</small>
+<form method="POST" action="{{ url_for('dashboard.update_profile') }}">
+    
+        <!-- Common Fields -->
+        <div class="mb-3">
+            <label>Full Name</label>
+            <input type="text" class="form-control" name="full_name" value="{{ user.full_name }}" required>
         </div>
+        <div class="mb-3">
+            <label>Date of Birth</label>
+            <input type="date" class="form-control" name="dob" value="{{ user.dob }}" required>
+        </div>
+        <div class="mb-3">
+    <label>Gender</label><br>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="gender" id="gender_male" value="Male"
+               {% if user.gender == 'Male' %}checked{% endif %}>
+        <label class="form-check-label" for="gender_male">Male</label>
+    </div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="gender" id="gender_female" value="Female"
+               {% if user.gender == 'Female' %}checked{% endif %}>
+        <label class="form-check-label" for="gender_female">Female</label>
+    </div>
+</div>
 
-        <div class="form-group">
-            <label for="fullName">Full Name:</label>
-            <input type="text" id="fullName" name="fullName" class="form-control" value="Palwasha Qasim" required>
+        <div class="mb-3">
+            <label>Address</label>
+            <textarea class="form-control" name="address" required>{{ user.address }}</textarea>
         </div>
-        <div class="form-group">
-            <label for="email">Email Address:</label>
-            <input type="email" id="email" name="email" class="form-control" value="palwasha@example.com" required disabled>
-            <small class="form-text text-muted">Email cannot be changed directly from here. Contact support.</small>
-        </div>
-        <div class="form-group">
-            <label for="dob">Date of Birth:</label>
-            <input type="date" id="dob" name="dob" class="form-control" value="2000-01-15">
-        </div>
-        <div class="form-group">
-            <label for="gender">Gender:</label>
-            <select id="gender" name="gender" class="form-control">
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female" selected>Female</option>
-                <option value="Other">Other</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="phone">Phone Number:</label>
-            <input type="tel" id="phone" name="phone" class="form-control" value="+1 (555) 123-4567">
-        </div>
-        <div class="form-group">
-            <label for="address">Address:</label>
-            <textarea id="address" name="address" class="form-control" rows="3">123 EdFlow St, Learning City, L2P 7S5</textarea>
+        <div class="mb-3">
+            <label>Phone</label>
+            <input type="text" class="form-control" name="phone" value="{{ user.phone }}" required>
         </div>
 
-        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
-        <a href="{{ url_for('dashboard.my_profile') }}" class="btn btn-secondary ml-3"><i class="fas fa-arrow-left"></i> Back to Profile</a>
-    </form>
+       
+<!-- Role-Specific Fields -->
+{% if role == 'student' %}
+    <div class="mb-3">
+        <label>Grade</label>
+        <input type="text" class="form-control" name="grade" value="{{ user.grade }}" required>
+    </div>
+    <div class="mb-3">
+        <label>Roll Number</label>
+        <input type="text" class="form-control" name="roll_number" value="{{ user.roll_number }}"  required>
+    </div>
+
+{% elif role == 'teacher' %}
+    <div class="mb-3">
+        <label>Department</label>
+        <input type="text" class="form-control" name="department" value="{{ user.department }}" required>
+    </div>
+    <div class="mb-3">
+        <label>Qualification</label>
+        <input type="text" class="form-control" name="qualification" value="{{ user.qualification }}" required>
+    </div>
+
+{% elif role == 'admin' %}
+    <div class="mb-3">
+        <label>Designation</label>
+        <input type="text" class="form-control" name="designation" value="{{ user.designation }}" required>
+    </div>
+    <div class="mb-3">
+        <label>Admin Code</label>
+        <input type="text" class="form-control" name="admin_code" value="{{ user.admin_code }}" required>
+    </div>
+{% endif %}
+    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+    <a href="{{ url_for('dashboard.my_profile') }}" class="btn btn-secondary ml-3"><i class="fas fa-arrow-left"></i> Back to Profile</a>
+  </form>
+
 </div>
 {% endblock %}

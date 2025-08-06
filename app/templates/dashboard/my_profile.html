@@ -9,26 +9,27 @@
     <div class="profile-main-info dashboard-card"> 
         
         <div class="profile-picture-section"> 
-            <img src="{{ url_for('static', filename='images/default_profile.png') }}" alt="Profile Picture" class="profile-picture">
-            <h3 class="profile-name">Palwasha </h3> 
-            <p class="profile-role">Administrator</p>
-        </div>
-        
-        <div class="profile-details-section"> 
-            <h3 class="section-title">Account Details</h3>
-            <div class="detail-item">
-                <span class="detail-label"><i class="fas fa-envelope icon-purple"></i> Email:</span>
-                <span class="detail-value">palwasha.com</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label"><i class="fas fa-id-badge icon-purple"></i> User ID:</span>
-                <span class="detail-value">EDP-001</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label"><i class="fas fa-calendar-alt icon-purple"></i> Member Since:</span>
-                <span class="detail-value">Jan 1, 2023</span>
-            </div>
-        </div>
+           
+  <h3 class="section-title">Your Profile Information</h3>
+
+    <ul class="list-group">
+        <li class="list-group-item"><strong>Full Name:</strong> {{ user.full_name }}</li>
+        <li class="list-group-item"><strong>Date of Birth:</strong> {{ user.dob }}</li>
+        <li class="list-group-item"><strong>Gender:</strong> {{ user.gender }}</li>
+        <li class="list-group-item"><strong>Address:</strong> {{ user.address }}</li>
+        <li class="list-group-item"><strong>Phone:</strong> {{ user.phone }}</li>
+
+        {% if user.role == 'student' %}
+            <li class="list-group-item"><strong>Grade:</strong> {{ user.grade }}</li>
+            <li class="list-group-item"><strong>Roll Number:</strong> {{ user.roll_number }}</li>
+        {% elif user.role == 'teacher' %}
+            <li class="list-group-item"><strong>Department:</strong> {{ user.department }}</li>
+            <li class="list-group-item"><strong>Qualification:</strong> {{ user.qualification }}</li>
+        {% elif user.role == 'admin' %}
+            <li class="list-group-item"><strong>Designation:</strong> {{ user.designation }}</li>
+            <li class="list-group-item"><strong>Admin Code:</strong> {{ user.admin_code }}</li>
+        {% endif %}
+    </ul>
     </div>
 <div class="profile-actions dashboard-card">
     <h3 class="section-title">Quick Actions</h3>

@@ -103,9 +103,19 @@
                                 <i class="fas fa-user"></i> My Profile
                             </a>
 
-                            <a href="{{ url_for('dashboard.update_profile') }}">
-                                <i class="fas fa-edit"></i> Update Profile
-                            </a>
+                 {% if role == 'admin' %}
+               <a href="{{ url_for('dashboard.update_profile') }}">
+                 <i class="fas fa-user-edit"></i> Admin Profile
+              </a>
+                 {% elif role == 'teacher' %}
+            <a href="{{ url_for('dashboard.update_profile') }}">
+             <i class="fas fa-user-edit"></i> Teacher Profile
+           </a>
+              {% elif role == 'student' %}
+          <a href="{{ url_for('dashboard.update_profile') }}">
+            <i class="fas fa-user-edit"></i> Student Profile
+         </a>
+             {% endif %}
                             <a href="{{ url_for('dashboard.change_password') }}">
                                 <i class="fas fa-key"></i> Change Password
                             </a>
