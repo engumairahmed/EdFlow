@@ -35,8 +35,8 @@
                         <td>{{student.studentID}}</td>
                         <td>{{student.name}}</td>
                         <td>
-                            <button class="btn btn-primary"><i class="fas fa-eye"></i> View</button>
-                            <a href="{{ url_for('teacher.update_student', id=student._id) }}"class="btn btn-secondary"><i class="fas fa-pen-to-square"></i>{{student._id}} Update</a>
+                            <!-- <button class="btn btn-primary"><i class="fas fa-eye"></i> View</button> -->
+                            <a href="{{ url_for('teacher.update_student', id=student._id) }}"class="btn btn-primary"><i class="fas fa-eye"></i>View</a>
                         </td>
                     </tr>
                     {%endfor%}

@@ -1,0 +1,170 @@
+{% extends "dashboard/base.html" %}
+
+{% block page_heading %}Student Dropout Prediction Dashboard{% endblock %}
+
+{% block content %}
+<div class="main-card">
+    <h3>Bulk Prediction</h3>
+    <div class="form-group">
+        <label for="modelSelect">Select Prediction Model:</label>
+        <select id="modelSelect" class="form-control">
+            <option value="">Select a model</option>
+            {% if models %}
+            {% for model in models %}
+            <option value="{{ model.model_path }}">{{ model.combined_name }}</option>
+            {% endfor %}
+            {% else %}
+            <option value="">No models available</option>
+            {%endif%}
+        </select>
+    </div>
+
+    <button id="runPredictionBtn" class="btn btn-primary mt-2">Run Predictions for All Students</button>
+</div>
+
+<div class="main-card">
+    <h3>Dropout Risk Breakdown</h3>
+    <canvas id="dropoutChart" width="400" height="200"></canvas>
+</div>
+
+<div class="main-card">
+    <h3>Student Predictions</h3>
+    <table id="predictionTable" class="data-table">
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Prediction</th>
+                <th>Probability</th>
+                <th>Recommendations</th>
+                <th>Model Used</th>
+                <th>Last Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const runPredictionBtn = document.getElementById('runPredictionBtn');
+        const modelSelect = document.getElementById('modelSelect');
+        const tableBody = document.querySelector('#predictionTable tbody');
+        const dropoutChartCanvas = document.getElementById('dropoutChart');
+        let myChart = null;
+
+        // Function to fetch and display the prediction data
+        async function fetchAndDisplayPredictions() {
+            try {
+                const response = await fetch('/dashboard/api/get-all-predictions');
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayTable(data.predictions);
+                    displayChart(data.predictions);
+                } else {
+                    displayToast(data.message, 'error');
+                }
+            } catch (error) {
+                displayToast(error.message, 'error');
+
+            }
+        }
+
+        // Function to display data in the table
+        function displayTable(predictions) {
+            tableBody.innerHTML = '';
+            predictions.forEach(student => {
+                const row = `
+                        <tr>
+                            <td>${student.student_name}</td>
+                            <td class="${student.prediction_class === 1 ? 'high-risk' : 'low-risk'}">
+                                ${student.prediction_class === 1 ? 'High Risk' : 'Low Risk'}
+                            </td>
+                            <td>${(student.prediction_probability * 100).toFixed(2)}%</td>
+                            <td>
+                                <ul class="recommendations-list">
+                                    ${student.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                                </ul>
+                            </td>
+                            <td>${student.model_used}</td>
+                            <td>${new Date(student.prediction_timestamp).toLocaleString()}</td>
+                        </tr>
+                    `;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        // Function to display data in the chart
+        function displayChart(predictions) {
+            const riskBreakdown = predictions.reduce((acc, student) => {
+                if (student.prediction_class === 1) {
+                    acc.highRisk++;
+                } else {
+                    acc.lowRisk++;
+                }
+                return acc;
+            }, { highRisk: 0, lowRisk: 0 });
+
+            const chartData = {
+                labels: ['High Risk', 'Low Risk'],
+                datasets: [{
+                    label: 'Student Dropout Risk',
+                    data: [riskBreakdown.highRisk, riskBreakdown.lowRisk],
+                    backgroundColor: ['#e74c3c', '#2ecc71']
+                }]
+            };
+
+            if (myChart) {
+                myChart.destroy();
+            }
+            myChart = new Chart(dropoutChartCanvas, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Number of Students' } }
+                    }
+                }
+            });
+        }
+
+        runPredictionBtn.addEventListener('click', async () => {
+            const selectedModelName = modelSelect.value;
+            if (!selectedModelName) {
+                displayToast('Please select a prediction model', 'error');
+
+                return;
+            }
+            displayToast('Running predictions... Please wait.', 'info');
+            runPredictionBtn.disabled = true;
+
+            try {
+                const response = await fetch('/dashboard/predict-all-students', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model_path: selectedModelName })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    displayToast(result.message, result.status);
+                    await fetchAndDisplayPredictions();
+                } else {
+                    displayToast(result.message, 'danger');
+
+                }
+            } catch (error) {
+                displayToast(error.message,'error');
+
+            } finally {
+                runPredictionBtn.disabled = false;
+            }
+        });
+
+        fetchAndDisplayPredictions();
+    });
+</script>
+{% endblock %}
