@@ -270,26 +270,24 @@ def update_profile():
 
 @dashboard_bp.route('/anomaly-results', methods=['GET', 'POST'])
 @login_required
-@role_required(['admin', 'analyst']) # Only admins and analysts can view anomalies
+@role_required(['admin', 'analyst'])
 def anomaly_results_view():
     all_files = []
-    # Check if the uploads directory exists
     if os.path.exists(UPLOADS_DIR):
         for f in os.listdir(UPLOADS_DIR):
-            if f.endswith('.csv') or f.endswith('.xlsx'): # CSV aur XLSX files ko list karein
+            if f.endswith('.csv') or f.endswith('.xlsx'):
                 all_files.append(f)
-        all_files.sort() # Files ko alphabetical order mein sort karein
+        all_files.sort()
     
     anomalous_students = []
     anomaly_insights = {}
     total_students = 0
     selected_file = request.args.get('selected_file')
-    results_source = "file" # Default source file hai
+    results_source = "file"
 
     if request.method == 'POST':
         if request.form.get('run_db_scan'):
             results_source = "database"
-            # Ab 3 values ko sahi se unpack kiya ja raha hai
             anomalous_students, anomaly_insights, total_students = detect_anomalies_from_db()
             if not anomalous_students:
                 flash("No anomalies found in the database.", "info")
@@ -300,55 +298,46 @@ def anomaly_results_view():
             if selected_file:
                 flash(f"Running anomaly detection on: {selected_file}", "info")
                 try:
-                    # Ab 3 values ko sahi se unpack kiya ja raha hai
                     anomalous_df, anomaly_insights, total_students = detect_anomalies_from_df(selected_file)
                     anomalous_students = anomalous_df.to_dict('records')
                 except FileNotFoundError:
                     flash(f"Error: The file '{selected_file}' was not found.", "danger")
                 except KeyError as e:
-                    # Agar file mein koi column missing ho to is error ko catch karein
                     flash(f"Error: Missing columns in the uploaded file: {e}. Please ensure the file has columns like 'age', 'total_score', or 'attendance'.", "danger")
                 except Exception as e:
                     flash(f"An unexpected error occurred: {e}", "danger")
             else:
                 flash("Please select a file or choose to run a database scan.", "warning")
 
-    # Chart data JSON ke liye prepare karna
-    gender_anomaly_data = {}
-    score_distribution_data = {}
 
-    if anomalous_students:
-        # Gender Chart data
-        genders = [s.get('gender') for s in anomalous_students if s.get('gender') is not None]
-        if genders:
-            gender_counts = pd.Series(genders).value_counts().to_dict()
-            gender_anomaly_data = {
-                'data': [{'labels': list(gender_counts.keys()), 'values': list(gender_counts.values()), 'type': 'pie'}],
-                'layout': {'title': 'Anomalies by Gender'}
-            }
-        
-        # Anomaly Score Chart data
-        scores = pd.Series([s.get('anomaly_score') for s in anomalous_students if s.get('anomaly_score') is not None])
-        if not scores.empty:
-            bins = [-float('inf'), -0.2, 0, float('inf')] # You can adjust these bins
-            labels = ['<-0.2', '-0.2 to 0', '>0']
-            score_bins = pd.cut(scores, bins=bins, labels=labels)
-            score_counts = score_bins.value_counts().sort_index().to_dict()
-            score_distribution_data = {
-                'data': [{'x': list(score_counts.keys()), 'y': list(score_counts.values()), 'type': 'bar'}],
-                'layout': {'title': 'Anomaly Score Distribution'}
-            }
+
+    chart_data = {
+                            'student_ids': [],
+                            'anomaly_scores': [],
+                            'feature_counts': {}
+                    }
+
+    if anomalous_students:  # Ensure it's not empty or None
+        for student in anomalous_students:
+              student_id = student.get('studentID') or student.get('student_id') or "Unknown"
+        chart_data['student_ids'].append(student_id)
+        chart_data['anomaly_scores'].append(student.get('anomaly_score', 0))
+
+        # Count extreme features only if source is file
+        if results_source == "file":
+            extreme_features = student.get('extreme_features', {})
+            for feature in extreme_features:
+                chart_data['feature_counts'][feature] = chart_data['feature_counts'].get(feature, 0) + 1
 
     return render_template(
-        'dashboard/anomaly_results.html',
-        all_files=all_files,
-        selected_file=selected_file,
-        anomalous_students=anomalous_students,
-        anomaly_insights=anomaly_insights, # Naya 'insights' variable pass kiya gaya hai
-        total_students=total_students, # Total students ki sankhya pass ki gai hai
-        results_source=results_source,
-        gender_chart_json=json.dumps(gender_anomaly_data),
-        score_chart_json=json.dumps(score_distribution_data)
+    'dashboard/anomaly_results.html',
+    all_files=all_files,
+    selected_file=selected_file,
+    anomalous_students=anomalous_students,
+    anomaly_insights=anomaly_insights,
+    total_students=total_students,
+    results_source=results_source,
+    chart_data=chart_data  # Pass chart data to HTML
     )
 
 # ===================================

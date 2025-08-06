@@ -157,7 +157,7 @@ p {
 }
 
 .sidebar-menu a i,
-.sidebar-menu button {
+.sidebar-menu button i{
     margin-right: 12px;
     font-size: 1.1em;
 }

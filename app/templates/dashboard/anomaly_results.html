@@ -15,110 +15,233 @@
                 <label for="file_select">Select a Data File:</label>
                 <select name="file_select" id="file_select" class="form-control">
                     {% if all_files %}
-                        <option value="">-- Choose a file --</option>
-                        {% for file in all_files %}
-                            <option value="{{ file }}" {% if selected_file == file %}selected{% endif %}>{{ file }}</option>
-                        {% endfor %}
+                    <option value="">-- Choose a file --</option>
+                    {% for file in all_files %}
+                    <option value="{{ file }}" {% if selected_file==file %}selected{% endif %}>{{ file }}</option>
+                    {% endfor %}
                     {% else %}
-                        <option value="">No CSV/XLSX files found in 'uploads' folder.</option>
+                    <option value="">No CSV/XLSX files found in 'uploads' folder.</option>
                     {% endif %}
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary mt-3"><i class="fas fa-play-circle"></i> Run Anomaly Detection on File</button>
+            <button type="submit" class="btn btn-primary mt-3"><i class="fas fa-play-circle"></i> Run Anomaly Detection
+                on File</button>
+            <button type="submit" name="run_db_scan" value="true" class="btn btn-secondary mt-3"><i
+                    class="fas fa-database"></i> Run on Database</button>
         </form>
     </div>
 
+    {% if anomalous_students %}
     <div class="dashboard-card animated-fade-in delay-1">
-        <h3 class="card-title"><i class="fas fa-database icon-purple"></i> Run Anomaly Detection on Live Database</h3>
-        <p class="card-description">Perform anomaly analysis on the live student data from your MongoDB database.</p>
-        <form method="POST" action="{{ url_for('dashboard.anomaly_results_view') }}">
-            <input type="hidden" name="run_db_scan" value="true">
-            <button type="submit" class="btn btn-secondary mt-3"><i class="fas fa-database"></i> Run Anomaly Detection on Database</button>
-        </form>
-    </div>
-
-    {% if results_source %}
-        <div class="dashboard-card animated-fade-in delay-2">
-            <h3 class="card-title"><i class="fas fa-chart-pie icon-purple"></i> Anomaly Overview Visualizations</h3>
-            <p class="card-description">Visual representation of anomalies. (Source: {{ results_source | title }})</p>
-            <div class="charts-grid">
-                <div class="chart-container-small">
-                    <h4>Anomalies by Gender</h4>
-                    <canvas id="genderAnomalyChart"></canvas>
-                </div>
-                <div class="chart-container-small">
-                    <h4>Anomaly Score Distribution</h4>
-                    <canvas id="scoreDistributionChart"></canvas>
-                </div>
-            </div>
-            <div class="insights mt-3">
-                <h5>Key Anomaly Insights:</h5>
-                <ul>
-                    <li>{{ anomaly_insights.gender_insight | default("No specific gender-based anomaly insights.") }}</li>
-                    <li>{{ anomaly_insights.score_insight | default("Anomaly scores show a concentration around the detection threshold.") }}</li>
-                </ul>
-            </div>
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-chart-pie icon-purple"></i> Anomaly Summary ({{ results_source |
+                capitalize }} Data)</h3>
+            <span class="badge badge-success">Total Students: {{ total_students }}</span>
+            <span class="badge badge-danger">Anomalies Found: {{ anomalous_students|length }}</span>
         </div>
-
-        {% if anomalous_students %}
-        <div class="dashboard-card animated-fade-in delay-3">
-            <h3 class="card-title">
-                <i class="fas fa-exclamation-triangle icon-purple"></i>
-                Anomalous Students (Total: {{ anomalous_students | length }} out of {{ total_students }})
-            </h3>
-            <p class="card-description">Detected students with unusual patterns from the {{ results_source }} data.</p>
-            <div class="table-responsive">
-                <table id="anomalyDataTable" class="display data-table" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>Student ID</th>
-                            <th>Student Name</th>
-                            <th>Anomaly Score</th>
-                            <th>Extreme Features</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for student in anomalous_students %}
-                        <tr>
-                            <td>{{ student.studentID | default(student.student_id) }}</td>
-                            <td>{{ student.student_name | default("N/A") }}</td>
-                            <td>{{ student.anomaly_score }}</td>
-                            <td>
-                                {% if results_source == "file" %}
-                                    <ul>
-                                    {% for feature, data in student.extreme_features.items() %}
-                                        <li><strong>{{ feature | replace('_', ' ') | title }}:</strong> {{ data.value }} ({{ data.description }})</li>
-                                    {% endfor %}
-                                    </ul>
-                                {% else %}
-                                    <pre>{{ student.ml_features | tojson(indent=2) }}</pre>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        {% else %}
-        <div class="dashboard-card animated-fade-in delay-2">
-            <h3 class="card-title"><i class="fas fa-check-circle icon-green"></i> No Anomalies Detected</h3>
-            <p class="card-description">The system did not find any significant anomalies in the {{ results_source }} data.</p>
+        {% if anomaly_insights %}
+        <div class="anomaly-insights mt-4">
+            <h4 class="insights-title"><i class="fas fa-lightbulb icon-purple"></i> Key Insights:</h4>
+            <ul>
+                {% for key, insight in anomaly_insights.items() %}
+                <li><strong>{{ key.replace('_', ' ').title() }}:</strong> {{ insight }}</li>
+                {% endfor %}
+            </ul>
         </div>
         {% endif %}
-    {% endif %}
 
+            {% if anomalous_students %}
+<div class="dashboard-card animated-fade-in delay-3">
+    <h3 class="card-title"><i class="fas fa-chart-bar icon-purple"></i> Anomaly Visualizations</h3>
+    <div id="anomalyBarChart" style="width: 100%; height: 400px;"></div>
+    <div id="featurePieChart" style="width: 100%; height: 400px; margin-top: 30px;"></div>
 </div>
 
-{% endblock %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<!-- <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Data from backend
+        const studentIds = {{ chart_data.student_ids | tojson }};
+        const anomalyScores = {{ chart_data.anomaly_scores | tojson }};
+        const featureCounts = {{ chart_data.feature_counts | tojson }};
 
-{% block scripts %}
-{{ super() }}
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        // Bar Chart: Anomaly Scores per Student
+        const barData = [{
+            x: studentIds,
+            y: anomalyScores,
+            type: 'bar',
+            marker: { color: 'rgba(222,45,38,0.8)' }
+        }];
+
+        const barLayout = {
+            title: 'Anomaly Scores of Students',
+            xaxis: { title: 'Student ID' },
+            yaxis: { title: 'Anomaly Score' }
+        };
+
+        Plotly.newPlot('anomalyBarChart', barData, barLayout);
+
+        // Pie Chart: Extreme Features Distribution
+        const pieLabels = Object.keys(featureCounts);
+        const pieValues = Object.values(featureCounts);
+
+        const pieData = [{
+            labels: pieLabels,
+            values: pieValues,
+            type: 'pie',
+            textinfo: 'label+percent',
+            insidetextorientation: 'radial'
+        }];
+
+        const pieLayout = {
+            title: 'Extreme Features Distribution'
+        };
+
+        Plotly.newPlot('featurePieChart', pieData, pieLayout);
+    });
+</script> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Data from backend safely injected using | tojson
+        const studentIds = JSON.parse('{{ chart_data.student_ids | tojson | safe }}');
+        const anomalyScores = JSON.parse('{{ chart_data.anomaly_scores | tojson | safe }}');
+        const featureCounts = JSON.parse('{{ chart_data.feature_counts | tojson | safe }}');
+
+        // Bar Chart: Anomaly Scores per Student
+        const barData = [{
+            x: studentIds,
+            y: anomalyScores,
+            type: 'bar',
+            marker: { color: 'rgba(222,45,38,0.8)' }
+        }];
+
+        const barLayout = {
+            title: 'Anomaly Scores of Students',
+            xaxis: { title: 'Student ID' },
+            yaxis: { title: 'Anomaly Score' }
+        };
+
+        Plotly.newPlot('anomalyBarChart', barData, barLayout);
+
+        // Pie Chart: Extreme Features Distribution
+        const pieLabels = Object.keys(featureCounts);
+        const pieValues = Object.values(featureCounts);
+
+        const pieData = [{
+            labels: pieLabels,
+            values: pieValues,
+            type: 'pie',
+            textinfo: 'label+percent',
+            insidetextorientation: 'radial'
+        }];
+
+        const pieLayout = {
+            title: 'Extreme Features Distribution'
+        };
+
+        Plotly.newPlot('featurePieChart', pieData, pieLayout);
+    });
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% endif %}
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+    <div class="dashboard-card animated-fade-in delay-2">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-user-times icon-purple"></i> List of Anomalous Students</h3>
+        </div>
+        <div class="table-responsive">
+            <table id="anomalyDataTable" class="display data-table" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Student Name</th>
+                        <th>Anomaly Score</th>
+                        <th>Extreme Features</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in anomalous_students %}
+                    <tr>
+                        <td>{{ student.studentID | default(student.student_id) }}</td>
+                        <td>{{ student.student_name | default("N/A") }}</td>
+                        <td>{{ student.anomaly_score }}</td>
+                        <td>
+                            {% if results_source == "file" %}
+                            <ul>
+                                {% for feature, data in student.extreme_features.items() %}
+                                <li><strong>{{ feature | replace('_', ' ') | title }}:</strong> {{ data.value }} ({{
+                                    data.description }})</li>
+                                {% endfor %}
+                            </ul>
+                            {% else %}
+                            <pre>{{ student.ml_features | tojson(indent=2) }}</pre>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    {% else %}
+    <div class="dashboard-card animated-fade-in delay-1">
+        <h3 class="text-center text-muted">No anomaly detection results to display.</h3>
+        <p class="text-center text-muted">Please select a file from the list above or run a scan on the database.</p>
+    </div>
+    {% endif %}
+
+    <div id="studentDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h4 id="modalStudentId"></h4>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         if (typeof jQuery != 'undefined') {
@@ -128,64 +251,42 @@
                 responsive: true
             });
         }
-        const anomalyChartDataElement = document.getElementById('anomaly_chart_data_json');
-        let anomalyChartData = {};
-        if (anomalyChartDataElement && anomalyChartDataElement.textContent) {
-            try {
-                anomalyChartData = JSON.parse(anomalyChartDataElement.textContent);
-            } catch (e) {
-                console.error("Error parsing anomalyChartData:", e);
-                anomalyChartData = {};
-            }
-        }
-        const genderAnomalyData = {
-            labels: Object.keys(anomalyChartData.gender || {}),
-            datasets: [{
-                data: Object.values(anomalyChartData.gender || {}),
-                backgroundColor: ['#800080', '#1f9ba5', '#cccccc'],
-            }]
-        };
-        const scoreDistributionData = {
-            labels: ['<-0.5', '-0.5 to -0.2', '-0.2 to 0', '>0'],
-            datasets: [{
-                label: 'Number of Anomalies',
-                data: [
-                    (anomalyChartData.scores && anomalyChartData.scores['<-0.5']) || 0,
-                    (anomalyChartData.scores && anomalyChartData.scores['-0.5 to -0.2']) || 0,
-                    (anomalyChartData.scores && anomalyChartData.scores['-0.2 to 0']) || 0,
-                    (anomalyChartData.scores && anomalyChartData.scores['>0']) || 0
-                ],
-                backgroundColor: ['#e74c3c', '#f39c12', '#3498db', '#2ecc71'],
-                borderColor: '#fff',
-                borderWidth: 1
-            }]
-        };
 
-        if (document.getElementById('genderAnomalyChart')) {
-            const hasGenderData = genderAnomalyData.datasets[0].data.some(val => val > 0);
-            if (hasGenderData) {
-                new Chart(document.getElementById('genderAnomalyChart').getContext('2d'), {
-                    type: 'pie', data: genderAnomalyData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, title: { display: false } } }
-                });
-            } else {
-                document.getElementById('genderAnomalyChart').style.display = 'none';
-                const chartParent = document.getElementById('genderAnomalyChart').closest('.chart-container-small');
-                if (chartParent) { chartParent.innerHTML += '<p class="text-muted text-center">No gender data for anomalies.</p>'; }
+        // --- Student Details Modal ---
+        const modal = document.getElementById("studentDetailsModal");
+        const closeButton = document.querySelector(".close-button");
+        const modalContentDiv = document.getElementById("modalContent");
+        const modalStudentId = document.getElementById("modalStudentId");
+
+        window.showStudentDetails = function (student) {
+            modalStudentId.textContent = `Student Details: ${student.student_id}`;
+            let detailsHtml = '<ul>';
+            for (const key in student) {
+                if (key === 'anomaly_score' || key === 'extreme_features' || key === 'is_anomaly') {
+                    continue;
+                }
+                let value = student[key];
+                if (typeof value === 'object' && value !== null) {
+                    value = JSON.stringify(value);
+                }
+                detailsHtml += `<li><strong>${key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}:</strong> ${value}</li>`;
+            }
+            detailsHtml += '</ul>';
+            modalContentDiv.innerHTML = detailsHtml;
+            modal.style.display = "block";
+        }
+
+        if (closeButton) {
+            closeButton.onclick = function () {
+                modal.style.display = "none";
             }
         }
-        if (document.getElementById('scoreDistributionChart')) {
-            const hasScoreData = scoreDistributionData.datasets[0].data.some(val => val > 0);
-            if (hasScoreData) {
-                new Chart(document.getElementById('scoreDistributionChart').getContext('2d'), {
-                    type: 'bar', data: scoreDistributionData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: false } }, scales: { y: { beginAtZero: true } } }
-                });
-            } else {
-                document.getElementById('scoreDistributionChart').style.display = 'none';
-                const chartParent = document.getElementById('scoreDistributionChart').closest('.chart-container-small');
-                if (chartParent) { chartParent.innerHTML += '<p class="text-muted text-center">No score distribution data for anomalies.</p>'; }
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
             }
         }
     });
 </script>
-<div id="anomaly_chart_data_json" style="display:none;">{{ anomaly_chart_data | tojson | safe }}</div>
-{% endblock %}
+{% endblock %}

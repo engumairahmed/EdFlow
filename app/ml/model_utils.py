@@ -93,3 +93,50 @@ def get_trained_models_summary():
         logger.info(f"Error retrieving trained models summary: {e}")
         logger.error(f"Error retrieving trained models summary: {e}", exc_info=True)
     return models_summary
+
+def get_classification_models_summary():
+    """
+    Retrieves a summary of the first three classification models from the
+    latest trained model document, with a combined and formatted model name.
+    """
+    db = current_app.db
+    models_summary = []
+
+    try:
+        # Find the latest document (most recent training run)
+        latest_model_group = db.trained_models.find_one(
+            {},
+            sort=[('created_at', -1)]
+        )
+
+        if latest_model_group and 'details' in latest_model_group:
+            dataset_name = latest_model_group.get('dataset', 'Unknown Dataset')
+            
+            for detail in latest_model_group['details']:
+                if detail.get('type') == 'classification':
+                    
+                    # Get the raw model names
+                    model_type = detail.get('type', 'Unknown Type').title() # Capitalize the type
+                    model_name_raw = detail.get('model_name', 'Unknown Model')
+
+                    # Format the model name
+                    formatted_model_name = model_name_raw.replace('_', ' ').title()
+                    
+                    # Create the combined name string using the formatted names
+                    combined_name = f"{dataset_name} | {model_type} | {formatted_model_name}"
+                    
+                    models_summary.append({
+                        'id': str(latest_model_group.get('_id')),
+                        'dataset': dataset_name,
+                        'model_name': formatted_model_name, # Use the formatted name here
+                        'combined_name': combined_name,
+                        'model_type': model_type,
+                        'metrics': detail.get('metrics', {}),
+                        'model_path': detail.get('model_path'),
+                        'trained_at': latest_model_group.get('created_at', datetime.min.replace(tzinfo=timezone.utc))
+                    })
+
+    except Exception as e:
+        current_app.logger.error(f"Error retrieving trained models summary: {e}", exc_info=True)
+
+    return models_summary
