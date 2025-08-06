@@ -51,9 +51,9 @@ coverage.xml
 .pytest_cache/
 cover/
 
-app/ml/models/
-logs/
-uploads/
+app/ml/models/*
+logs/*
+uploads/*
 logs/edflow_logs.txt
 
 
