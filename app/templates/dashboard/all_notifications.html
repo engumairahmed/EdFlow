@@ -21,12 +21,14 @@
 
     <div class="notifications-list">
         {# Example Notification Item #}
+        {%if notifications%}
+        {%for notification in notifications%}
         <div class="notification-item unread">
             <div class="notification-icon-wrapper">
                 <i class="fas fa-exclamation-circle icon-purple"></i>
             </div>
             <div class="notification-content">
-                <p class="notification-message"><strong>New Assignment Due:</strong> "Algebra II Homework" is due tomorrow!</p>
+                <p class="notification-message"><strong>New Assignment Due:</strong>{{notification.body}}</p>
                 <span class="notification-time">2 hours ago</span>
             </div>
             <div class="notification-actions">
@@ -34,6 +36,8 @@
                 <button class="btn-icon delete-btn" title="Delete"><i class="fas fa-times"></i></button>
             </div>
         </div>
+        {%endfor%}
+        {%endif%}
 
         <div class="notification-item read">
             <div class="notification-icon-wrapper">

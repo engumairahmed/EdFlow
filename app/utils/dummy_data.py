@@ -64,10 +64,11 @@ def create_dummy_data(db):
     # Incorporating features from the image and adding 'is_dropout'
     dummy_students = []
     
+    
     student_data_configs = [
         # Student 1: Low risk
         {
-            "userId": student_user_ids[0], "studentID": "S001", "dateOfBirth": datetime(2003, 5, 10),
+            "userId": student_user_ids[0], "studentID": "S001", "name": "Fatima Zahra", "dateOfBirth": datetime(2003, 5, 10),
             "gender": "Male", "ethnicity": "Asian", "socioeconomicStatus": "Middle",
             "highSchoolGPA": 3.8, "entranceExamScores": {"SAT": 1450}, "financialAidStatus": "Recipient",
             "currentGPA": 3.5,
@@ -78,7 +79,7 @@ def create_dummy_data(db):
         },
         # Student 2: Medium risk (lower GPA, higher social/netflix, average attendance)
         {
-            "userId": student_user_ids[1], "studentID": "S002", "dateOfBirth": datetime(2002, 8, 20),
+            "userId": student_user_ids[1], "studentID": "S002", "name": "Emily Chen", "dateOfBirth": datetime(2002, 8, 20),
             "gender": "Female", "ethnicity": "Caucasian", "socioeconomicStatus": "Middle",
             "highSchoolGPA": 3.2, "entranceExamScores": {"SAT": 1300}, "financialAidStatus": "None",
             "currentGPA": 2.8,
@@ -89,7 +90,7 @@ def create_dummy_data(db):
         },
         # Student 3: High risk (low GPA, high time-wasters, low attendance) -> Labeled as dropout for training
         {
-            "userId": student_user_ids[2], "studentID": "S003", "dateOfBirth": datetime(2004, 2, 1),
+            "userId": student_user_ids[2], "studentID": "S003", "name": "Liam Jones", "dateOfBirth": datetime(2004, 2, 1),
             "gender": "Male", "ethnicity": "Hispanic", "socioeconomicStatus": "Low",
             "highSchoolGPA": 2.5, "entranceExamScores": {"SAT": 1050}, "financialAidStatus": "Recipient",
             "currentGPA": 1.9, # Low GPA
@@ -101,7 +102,7 @@ def create_dummy_data(db):
         },
         # Student 4: Medium-High risk (struggling, but not dropout yet)
         {
-            "userId": student_user_ids[3], "studentID": "S004", "dateOfBirth": datetime(2003, 11, 25),
+            "userId": student_user_ids[3], "studentID": "S004", "name": "Olivia Davis", "dateOfBirth": datetime(2003, 11, 25),
             "gender": "Female", "ethnicity": "African American", "socioeconomicStatus": "Middle",
             "highSchoolGPA": 3.0, "entranceExamScores": {"ACT": 25}, "financialAidStatus": "None",
             "currentGPA": 2.2,
@@ -112,7 +113,7 @@ def create_dummy_data(db):
         },
         # Student 5: Low risk (good overall)
         {
-            "userId": student_user_ids[4], "studentID": "S005", "dateOfBirth": datetime(2005, 3, 15),
+            "userId": student_user_ids[4], "studentID": "S005", "name": "Noah Williams", "dateOfBirth": datetime(2005, 3, 15),
             "gender": "Female", "ethnicity": "Asian", "socioeconomicStatus": "High",
             "highSchoolGPA": 4.0, "entranceExamScores": {"SAT": 1550}, "financialAidStatus": "None",
             "currentGPA": 3.9,
@@ -127,11 +128,10 @@ def create_dummy_data(db):
         student_doc = {
             "userId": student_config["userId"],
             "studentID": student_config["studentID"],
+            "name": student_config["name"],  # Added student name
             "dateOfBirth": student_config["dateOfBirth"],
-            "gender": student_config["gender"],
             "ethnicity": student_config["ethnicity"],
             "socioeconomicStatus": student_config["socioeconomicStatus"],
-            "highSchoolGPA": student_config["highSchoolGPA"],
             "entranceExamScores": student_config["entranceExamScores"],
             "enrollmentHistory": [], # Will be populated later
             "lmsActivitySummary": {
@@ -142,11 +142,13 @@ def create_dummy_data(db):
                 "quizAverageScore": random.uniform(60, 95)
             },
             "financialAidStatus": student_config["financialAidStatus"],
-            "currentGPA": student_config["currentGPA"],
             "riskFactors": [],
             "notes": [],
             # New fields from exemplary data
-             "ml_features":{
+            "ml_features":{
+                "gender": student_config["gender"],
+                "highSchoolGPA": student_config["highSchoolGPA"],
+                "currentGPA": student_config["currentGPA"],
                 "study_hours": student_config["study_hours"],
                 "social_media_time": student_config["social_media_time"],
                 "netflix_hours": student_config["netflix_hours"],
@@ -160,9 +162,9 @@ def create_dummy_data(db):
                 "mental_health_score": student_config["mental_health_score"],
                 "extracurricular_activities": student_config["extracurricular_activities"],
                 "exam_score": student_config["exam_score"],
-             },
+                "dropout": True if (student_config["currentGPA"] < 2.0 or student_config["attendance"] < 70) else False,
+            },
             # Define 'is_dropout' based on conditions
-            "is_dropout": True if (student_config["currentGPA"] < 2.0 or student_config["attendance"] < 70) else False,
             "dropoutPredictionScore": None # Reset this, as we'll predict it
         }
         dummy_students.append(student_doc)

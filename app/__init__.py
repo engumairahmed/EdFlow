@@ -87,7 +87,7 @@ def create_app():
     from app.routes.auth import auth_bp
     from app.routes.dashboard import dashboard_bp
     # from app.routes.student import student_bp
-    # from app.routes.teacher import teacher_bp
+    from app.routes.teacher import teacher_bp
     
     from app.routes.interface import interface_bp
     from app.routes.notifications import notifications_bp
@@ -98,7 +98,7 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(dashboard_bp, url_prefix="/dashboard")
     # app.register_blueprint(student_bp, url_prefix="/student")
-    # app.register_blueprint(teacher_bp, url_prefix="/teacher")
+    app.register_blueprint(teacher_bp, url_prefix="/dashboard")
     app.register_blueprint(interface_bp) 
     app.register_blueprint(notifications_bp)
 

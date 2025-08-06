@@ -1,6 +1,7 @@
 
 # app/routes/dashboard.py
 
+import datetime
 import logging
 import os
 from flask import Blueprint, json, jsonify, render_template, request, session, redirect, url_for, flash
@@ -82,6 +83,13 @@ def upload_data():
                     role="admin",
                     url="/my-models"
                 )
+                db.alerts.insert_one({
+                    "title": "📢 New Model Trained",
+                    "body": f"The model '{model_name}' has been successfully trained.",
+                    "role": "admin",
+                    "created_at": datetime.now(),
+                    "created_by": ObjectId(session['user_id'])
+                })
             except Exception as e:
                 logger.exception("Error sending notifications")
                 flash(f"Error: {e}", "danger")
@@ -133,7 +141,6 @@ def my_models():
             model_doc['details'] = filtered_details
         
         models_list.append(model_doc)
-        print(models_list)
     return render_template("dashboard/my_models.html", models=models_list)
 
 # ===================================
@@ -216,7 +223,9 @@ def predict_form():
 @dashboard_bp.route('/dataset')
 @login_required
 def dataset():
-    return render_template("dashboard/dataset.html")
+    # user = db.users.find_one({"_id": session["user_id"]})
+    userId = session["user_id"]
+    return render_template("dashboard/dataset.html",user_id=userId)
 
 @dashboard_bp.route('/my_profile')
 @login_required
@@ -242,7 +251,9 @@ def personal_information():
 @dashboard_bp.route('/all_notifications')
 @login_required
 def all_notifications():
-    return render_template('dashboard/all_notifications.html') 
+    notifications=db.notifications.find({"user_id": ObjectId(session["user_id"])})
+    
+    return render_template('dashboard/all_notifications.html', notifications=notifications) 
 
 @dashboard_bp.route('/notification_settings')
 @login_required
@@ -626,3 +637,23 @@ def delete_chart():
     except Exception as e:
         flash(f"Error deleting chart: {str(e)}", "danger")
         return redirect(url_for("dashboard.analytics"))
+
+@dashboard_bp.route('/delete-data/',methods=['POST'])
+@login_required
+@role_required(["admin"])
+def delete_data(item_id):
+    user_id = item_id
+    admin_user=db.users.find_one({
+        "_id": ObjectId(user_id),
+        "role": "admin"
+        })   
+    if admin_user is None:
+        flash('You are not authorized to delete data.', 'danger')
+        return redirect(url_for('dashboard.dataset'))
+    try:
+        # db.drop_collection('dataset')
+        flash('Data deleted successfully.', 'success')
+        return redirect(url_for('dashboard.upload_data'))
+    except Exception as e:
+        flash(f'Error deleting data: {str(e)}', 'danger')
+        return redirect(url_for('dashboard.dataset'))
