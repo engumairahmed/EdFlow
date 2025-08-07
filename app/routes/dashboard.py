@@ -4,19 +4,21 @@
 from datetime import datetime, timezone
 import logging
 import os
-from flask import Blueprint, json, jsonify, render_template, request, session, redirect, url_for, flash
 import numpy as np
 import pandas as pd
+import subprocess
+from config import Config
+from flask import Blueprint, json, jsonify, render_template, request, session, redirect, url_for, flash
 from app.ml.dataset_manager import TARGET_FEATURE, validate_columns
 from app.ml.predictors import predict, predict_missing_fields
 from app.ml.trainer import train_all_models_and_save
+from app.ml.anomaly_detector import detect_anomalies_from_db, detect_anomalies_from_df, get_insights
 from app.utils.auth_decorators import login_required
-from app import mongo
 from app.utils.mongodb_utils import save_dataset_to_mongodb
 from app.utils.notifications import send_role_notification
+from app.utils.hdfs import upload_file_to_hdfs_temp, test_hdfs_connection
 from app.utils.role_required import role_required
-from app.ml.anomaly_detector import detect_anomalies_from_db, detect_anomalies_from_df, get_insights
-from config import Config
+from app import mongo
 import plotly.express as px
 
 MODEL_DIR = os.path.join(os.getcwd(), "app", "ml", "models")
@@ -113,9 +115,7 @@ def upload_data():
 @role_required(["admin", "analyst"])
 def my_models():
     user = db.users.find_one({"username": session['username']})
-    models_cursor = db.trained_models.find({
-        "trained_by.userId": str(user["_id"])
-    })
+    models_cursor = db.trained_models.find()
     models_list = []
     for model_doc in models_cursor:
         
@@ -246,6 +246,7 @@ def change_password():
 
 
 @dashboard_bp.route('/login-history')
+@login_required
 def login_history():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
@@ -367,6 +368,7 @@ def anomaly_results_view():
         if request.form.get('run_db_scan'):
             results_source = "database"
             anomalous_students, anomaly_insights, total_students = detect_anomalies_from_db()
+            
             if not anomalous_students:
                 flash("No anomalies found in the database.", "info")
             else:
@@ -379,11 +381,14 @@ def anomaly_results_view():
                     anomalous_df, anomaly_insights, total_students = detect_anomalies_from_df(selected_file)
                     anomalous_students = anomalous_df.to_dict('records')
                 except FileNotFoundError:
-                    flash(f"Error: The file '{selected_file}' was not found.", "danger")
+                    logger.error(f"Error: The file '{selected_file}' was not found.")
+                    flash(f"Error in dashboard: The file '{selected_file}' was not found.", "danger")
                 except KeyError as e:
-                    flash(f"Error: Missing columns in the uploaded file: {e}. Please ensure the file has columns like 'age', 'total_score', or 'attendance'.", "danger")
+                    logger.error(f"Error: Missing columns in the uploaded file: {e}")
+                    flash(f"Error in dashboard: Missing columns in the uploaded file: {e}. Please ensure the file has columns like 'age', 'total_score', or 'attendance'.", "danger")
                 except Exception as e:
-                    flash(f"An unexpected error occurred: {e}", "danger")
+                    logger.error(f"An unexpected error occurred: {e}", exc_info=True)
+                    flash(f"An unexpected Error in dashboard: {e}", "danger")
             else:
                 flash("Please select a file or choose to run a database scan.", "warning")
 
@@ -724,3 +729,59 @@ def delete_data(item_id):
     except Exception as e:
         flash(f'Error deleting data: {str(e)}', 'danger')
         return redirect(url_for('dashboard.dataset'))
+
+# # ==========================
+# # HDFS functions
+# # ==========================
+@dashboard_bp.route('/upload-data', methods=['GET', 'POST'])
+def upload_data_hdfs():
+    if request.method == 'POST':
+        file = request.files.get('dataset')
+        if not file or file.filename == '':
+            flash('No file selected.', 'danger')
+            return redirect(request.url)
+
+        if file and file.filename.endswith('.csv'):
+            local_filepath = os.path.join(UPLOADS_DIR, file.filename)
+            file.save(local_filepath)
+
+            hdfs_temp_path = f'/user/hdfs/temp/{file.filename}'
+            hdfs_final_path = f'/user/hdfs/student_data.csv'
+
+            try:
+                # Step 1: Upload to HDFS
+                upload_file_to_hdfs_temp(local_filepath, hdfs_temp_path)
+
+                # Uncomment below code is spark is installed in local machine or docker 
+                # else move spark_deduplication.py file to spark VM
+
+                # Step 2: Trigger Spark Job
+                # spark_script_path = os.path.join(os.getcwd(), 'spark_deduplicate.py')
+                # spark_submit_command = [
+                #     'spark-submit',
+                #     '--master', 'local[*]',  # or 'yarn'
+                #     spark_script_path,
+                #     hdfs_temp_path,
+                #     hdfs_final_path
+                # ]
+
+                # result = subprocess.run(
+                #     spark_submit_command,
+                #     check=True,
+                #     capture_output=True,
+                #     text=True
+                # )
+
+                # logger.info(result.stdout)
+                logger.info('File uploaded successfully!')
+                flash(f'File uploaded successfully!', 'success')
+            except Exception as e:
+                logger.error(f'Error during Spark processing: {e}')
+                flash(f'Error during Spark processing: {e}', 'danger')
+            finally:
+                if os.path.exists(local_filepath):
+                    os.remove(local_filepath)
+
+            return redirect(url_for('dashboard.analytics'))
+
+    return render_template('dashboard/upload-hdfs.html')

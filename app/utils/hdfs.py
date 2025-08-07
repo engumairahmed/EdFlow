@@ -1,11 +1,58 @@
-from hdfs import InsecureClient
-import pandas as pd
 
-HDFS_URL = "http://localhost:9870"  # Replace if different
+from hdfs import InsecureClient
+
+# Updated constants
+HDFS_IP = "192.168.100.23"
+HDFS_WEBHDFS_PORT = "50070"
+HDFS_URL = f"http://{HDFS_IP}:{HDFS_WEBHDFS_PORT}"
 HDFS_USER = "hdfs"
 
+# Global HDFS client
 client = InsecureClient(HDFS_URL, user=HDFS_USER)
 
-def write_to_hdfs(df: pd.DataFrame, hdfs_path: str):
-    with client.write(hdfs_path, encoding='utf-8', overwrite=True) as writer:
-        df.to_csv(writer, index=False)
+def hdfs_client_connect():
+    try:
+        print("Attempting to connect to HDFS...")
+        hdfs_client = InsecureClient(HDFS_URL, user=HDFS_USER)
+        print("HDFS client connection successful.")
+        return hdfs_client
+    except Exception as e:
+        print(f"HDFS connection failed with error: {e}")
+        return None
+
+def upload_file_to_hdfs_temp(local_filepath, hdfs_path):
+    """
+    Uploads a local file to HDFS at the given path.
+    """
+    hdfs_client = hdfs_client_connect()
+    if not hdfs_client:
+        raise Exception("HDFS connection not available.")
+
+    try:
+        hdfs_client.upload(hdfs_path, local_filepath, overwrite=True)
+        print(f"File uploaded to HDFS at {hdfs_path}")
+    except Exception as e:
+        raise Exception(f"Failed to upload file to HDFS: {e}")
+
+def test_hdfs_connection():
+    try:
+        hdfs_client = InsecureClient(HDFS_URL, user=HDFS_USER)
+        print("HDFS client connection successful.")
+        return hdfs_client
+    except Exception as e:
+        print(f"Failed to connect to HDFS: {e}")
+        return None
+
+def list_hdfs_root():
+    try:
+        files = client.list('/')
+        print(files)
+    except Exception as e:
+        print({"status": "error", "message": str(e)}), 500
+
+def hdfs_test():
+    try:
+        files = client.list('/')
+        return {'status': 'success', 'files': files}
+    except Exception as e:
+        return {'status': 'error', 'message': str(e)}

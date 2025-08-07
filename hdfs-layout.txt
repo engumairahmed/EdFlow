@@ -1,0 +1,251 @@
+Folder PATH listing
+D:.
+|   .env
+|   .gitattributes
+|   .gitignore
+|   config.py
+|   CONTRIBUTING.md
+|   hdfs-layout.txt
+|   layout.txt
+|   README.md
+|   requirements.txt
+|   run.py
+|   spark_deduplicate.py
+|   vapid_keys.py
+|   wsgi.py
+|   
++---app
+|   |   task.py
+|   |   __init__.py
+|   |   
+|   +---ml
+|   |   |   anomaly_detector.py
+|   |   |   dataset_manager.py
+|   |   |   model_utils.py
+|   |   |   predictors.py
+|   |   |   trainer.py
+|   |   |   __init__.py
+|   |   |   
+|   |   +---models
+|   |   |   |   preprocessor.pkl
+|   |   |   |   processed_feature_names.pkl
+|   |   |   |   shap_background_data.pkl
+|   |   |   |   
+|   |   |   \---Student_performance_v1
+|   |   |       |   features_age.pkl
+|   |   |       |   features_attendance.pkl
+|   |   |       |   features_currentGPA.pkl
+|   |   |       |   features_exam_score.pkl
+|   |   |       |   features_highSchoolGPA.pkl
+|   |   |       |   features_mental_health_score.pkl
+|   |   |       |   features_netflix_hours.pkl
+|   |   |       |   features_sleep_hours.pkl
+|   |   |       |   features_social_media_hours.pkl
+|   |   |       |   features_study_hours.pkl
+|   |   |       |   preprocessor_age.pkl
+|   |   |       |   preprocessor_attendance.pkl
+|   |   |       |   preprocessor_currentGPA.pkl
+|   |   |       |   preprocessor_exam_score.pkl
+|   |   |       |   preprocessor_highSchoolGPA.pkl
+|   |   |       |   preprocessor_mental_health_score.pkl
+|   |   |       |   preprocessor_netflix_hours.pkl
+|   |   |       |   preprocessor_sleep_hours.pkl
+|   |   |       |   preprocessor_social_media_hours.pkl
+|   |   |       |   preprocessor_study_hours.pkl
+|   |   |       |   
+|   |   |       +---gradient_boosting
+|   |   |       |       dropout_gradient_boosting.pkl
+|   |   |       |       
+|   |   |       +---logistic_regression
+|   |   |       |       dropout_logistic_regression.pkl
+|   |   |       |       
+|   |   |       +---lr
+|   |   |       |       age.pkl
+|   |   |       |       attendance.pkl
+|   |   |       |       currentGPA.pkl
+|   |   |       |       exam_score.pkl
+|   |   |       |       highSchoolGPA.pkl
+|   |   |       |       mental_health_score.pkl
+|   |   |       |       netflix_hours.pkl
+|   |   |       |       sleep_hours.pkl
+|   |   |       |       social_media_hours.pkl
+|   |   |       |       study_hours.pkl
+|   |   |       |       
+|   |   |       +---random_forest
+|   |   |       |       dropout_random_forest.pkl
+|   |   |       |       
+|   |   |       \---rf
+|   |   |               age.pkl
+|   |   |               attendance.pkl
+|   |   |               currentGPA.pkl
+|   |   |               exam_score.pkl
+|   |   |               highSchoolGPA.pkl
+|   |   |               mental_health_score.pkl
+|   |   |               netflix_hours.pkl
+|   |   |               sleep_hours.pkl
+|   |   |               social_media_hours.pkl
+|   |   |               study_hours.pkl
+|   |   |               
+|   |   +---services
+|   |   \---__pycache__
+|   |           anomaly_detector.cpython-313.pyc
+|   |           dataset_manager.cpython-313.pyc
+|   |           model_utils.cpython-313.pyc
+|   |           predictors.cpython-313.pyc
+|   |           trainer.cpython-313.pyc
+|   |           train_model.cpython-313.pyc
+|   |           __init__.cpython-313.pyc
+|   |           
+|   +---models
+|   |   |   contact.py
+|   |   |   feedback.py
+|   |   |   user.py
+|   |   |   __init__.py
+|   |   |   
+|   |   \---__pycache__
+|   |           contact.cpython-313.pyc
+|   |           feedback.cpython-313.pyc
+|   |           __init__.cpython-313.pyc
+|   |           
+|   +---routes
+|   |   |   auth.py
+|   |   |   dashboard.py
+|   |   |   home.py
+|   |   |   interface.py
+|   |   |   notifications.py
+|   |   |   student.py
+|   |   |   teacher.py
+|   |   |   __init__.py
+|   |   |   
+|   |   \---__pycache__
+|   |           auth.cpython-313.pyc
+|   |           dashboard.cpython-313.pyc
+|   |           home.cpython-313.pyc
+|   |           ingestion.cpython-313.pyc
+|   |           interface.cpython-313.pyc
+|   |           notifications.cpython-313.pyc
+|   |           student.cpython-313.pyc
+|   |           teacher.cpython-313.pyc
+|   |           __init__.cpython-313.pyc
+|   |           
+|   +---static
+|   |   |   3805758.webp
+|   |   |   forgot-password-Image .png
+|   |   |   login-image.png
+|   |   |   service-worker.js
+|   |   |   signup-image.png
+|   |   |   style.css
+|   |   |   transparent_image.png
+|   |   |   verify-email.png
+|   |   |   
+|   |   +---css
+|   |   |       about.css
+|   |   |       faq.css
+|   |   |       features.css
+|   |   |       feedback.css
+|   |   |       home.css
+|   |   |       navbar.css
+|   |   |       privacy.css
+|   |   |       team.css
+|   |   |       
+|   |   +---Images
+|   |   |       Aboutus.png
+|   |   |       EdFlow Logo.png
+|   |   |       EdFlow White Logo.png
+|   |   |       EdFlow_icon.png
+|   |   |       FAQs-unscreen.gif
+|   |   |       FAQs.gif
+|   |   |       Feedback.gif
+|   |   |       
+|   |   \---js
+|   |           datatables-demo.js
+|   |           datatables-simple-demo.js
+|   |           
+|   +---templates
+|   |   +---auth
+|   |   |       forgot.html
+|   |   |       login.html
+|   |   |       register.html
+|   |   |       reset_password.html
+|   |   |       verify-email.html
+|   |   |       
+|   |   +---dashboard
+|   |   |       all_notifications.html
+|   |   |       analytics.html
+|   |   |       anomaly_results.html
+|   |   |       base.html
+|   |   |       change_password.html
+|   |   |       dataSet.html
+|   |   |       error_404.html
+|   |   |       error_500.html
+|   |   |       home.html
+|   |   |       login_history.html
+|   |   |       my_models.html
+|   |   |       my_profile.html
+|   |   |       notification_settings.html
+|   |   |       personal_information.html
+|   |   |       predict.html
+|   |   |       students_prediction.html
+|   |   |       update_profile.html
+|   |   |       update_student_data.html
+|   |   |       upload-hdfs.html
+|   |   |       upload.html
+|   |   |       view_all_students.html
+|   |   |       
+|   |   \---i_interface
+|   |           about.html
+|   |           base.html
+|   |           contact.html
+|   |           error_404.html
+|   |           error_500.html
+|   |           faq.html
+|   |           feedback.html
+|   |           home.html
+|   |           privacy.html
+|   |           team.html
+|   |           testimonials.html
+|   |           
+|   +---utils
+|   |   |   auth_decorators.py
+|   |   |   db.py
+|   |   |   dummy_data.py
+|   |   |   hdfs.py
+|   |   |   mongodb_utils.py
+|   |   |   notifications.py
+|   |   |   role_required.py
+|   |   |   
+|   |   \---__pycache__
+|   |           auth_decorators.cpython-313.pyc
+|   |           db.cpython-313.pyc
+|   |           dummy_data.cpython-313.pyc
+|   |           hdfs.cpython-313.pyc
+|   |           mongodb_utils.cpython-313.pyc
+|   |           notifications.cpython-313.pyc
+|   |           role_required.cpython-313.pyc
+|   |           
+|   \---__pycache__
+|           __init__.cpython-313.pyc
+|           
++---data
++---logs
+|       edflow_logs.txt
+|       edflow_logs.txt.1
+|       edflow_logs.txt.10
+|       edflow_logs.txt.2
+|       edflow_logs.txt.3
+|       edflow_logs.txt.4
+|       edflow_logs.txt.5
+|       edflow_logs.txt.6
+|       edflow_logs.txt.7
+|       edflow_logs.txt.8
+|       edflow_logs.txt.9
+|       logs.txt.txt
+|       
++---uploads
+|       Student_performance_v1.csv
+|       test-init.csv
+|       
+\---__pycache__
+        config.cpython-313.pyc
+        vapid_keys.cpython-313.pyc
+        

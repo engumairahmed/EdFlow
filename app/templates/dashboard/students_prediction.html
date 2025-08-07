@@ -29,10 +29,12 @@
 
 <div class="main-card">
     <h3>Student Predictions</h3>
-    <table id="predictionTable" class="data-table">
+    <div class="responsive-table-container">
+        <table id="predictionTable" class="data-table">
         <thead>
             <tr>
                 <th>Student Name</th>
+                <th>Student ID</th>
                 <th>Prediction</th>
                 <th>Probability</th>
                 <th>Recommendations</th>
@@ -43,6 +45,7 @@
         <tbody>
         </tbody>
     </table>
+    </div>
 </div>
 
 <script>
@@ -78,6 +81,7 @@
                 const row = `
                         <tr>
                             <td>${student.student_name}</td>
+                            <td>${student.student_id}</td>
                             <td class="${student.prediction_class === 1 ? 'high-risk' : 'low-risk'}">
                                 ${student.prediction_class === 1 ? 'High Risk' : 'Low Risk'}
                             </td>

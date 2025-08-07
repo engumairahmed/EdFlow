@@ -71,8 +71,10 @@ content %}
         <input type="text" class="form-control" name="admin_code" value="{{ user.admin_code }}" required>
     </div>
 {% endif %}
-    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
-    <a href="{{ url_for('dashboard.my_profile') }}" class="btn btn-secondary ml-3"><i class="fas fa-arrow-left"></i> Back to Profile</a>
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+        <a href="{{ url_for('dashboard.my_profile') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Profile</a>
+    </div>
   </form>
 
 </div>

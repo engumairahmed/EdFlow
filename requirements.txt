@@ -16,3 +16,4 @@ celery
 shap
 plotly
 gunicorn
+pyspark

@@ -56,7 +56,7 @@
                         {% if detail.type == 'Classification' %}
                             <div class="metrics-block">
                                 <h5>Metrics:</h5>
-                                <p><strong>Accuracy:</strong> {{ '%.4f' | format(detail.metrics.accuracy) }}</p>
+                                <p><strong>Accuracy:</strong> {{ '%.2f' | format(detail.metrics.accuracy * 100) }}%</p>
                                 <p><strong>Precision:</strong> {{ '%.4f' | format(detail.metrics.precision) }}</p>
                                 <p><strong>Recall:</strong> {{ '%.4f' | format(detail.metrics.recall) }}</p>
                                 <p><strong>F1 Score:</strong> {{ '%.4f' | format(detail.metrics.f1_score) }}</p>
@@ -66,15 +66,16 @@
                             <div class="metrics-block">
                                 <h5>Metrics:</h5>
                                 <p><strong>MSE:</strong> {{ '%.4f' | format(detail.metrics.mse) }}</p>
-                                <p><strong>R2 Score:</strong> {{ '%.4f' | format(detail.metrics.r2_score) }}</p>
+                                <p><strong>R² Score:</strong> {{ '%.4f' | format(detail.metrics.r2_score) }}</p>
+
                             </div>
                         {% endif %}
 
-                        <div class="model-actions">
+                        <!-- <div class="model-actions">
                             <button class="action-btn">Edit</button>
                             <button class="action-btn">View</button>
                             <button class="action-btn">Delete</button>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             {% endfor %}

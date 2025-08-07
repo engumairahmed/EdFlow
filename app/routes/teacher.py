@@ -157,10 +157,10 @@ def get_all_predictions():
         predictions = []
         for student in all_students:
             student['_id'] = str(student['_id'])
-            
             # Ensure the structure is what the frontend expects
             predictions.append({
-                "student_name": student.get("student_name", "N/A"),
+                "student_name": student.get("name", "N/A"),
+                "student_id": student.get("studentID", "N/A"),
                 "prediction_class": student["prediction"]["class"],
                 "prediction_probability": student["prediction"]["probability"],
                 "recommendations": student["prediction"]["recommendations"],
