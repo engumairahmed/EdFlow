@@ -124,6 +124,13 @@ def login():
             session['plan'] = user.get('plan', 'free')
 
             session.permanent = remember_me
+            
+            mongo.db.login_logs.insert_one({
+                'user_id': str(user['_id']),
+                'username': user['username'],
+                'role': user['role'],
+                'timestamp': datetime.now()
+            })
 
             return redirect(url_for('dashboard.dashboard_view'))
 

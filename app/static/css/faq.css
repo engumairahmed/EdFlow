@@ -3,6 +3,7 @@
     min-height: 100vh;
     padding: 140px 0 80px;
     position: relative;
+    overflow-x: hidden;
   }
   .faq-section::before {
     content: "";

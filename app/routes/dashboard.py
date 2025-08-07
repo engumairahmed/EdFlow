@@ -244,11 +244,28 @@ def personal_information():
 def change_password():
     return render_template('dashboard/change_password.html')
 
-@dashboard_bp.route('/login_history')
-@login_required
-def login_history():
-    return render_template('dashboard/login_history.html')
 
+@dashboard_bp.route('/login-history')
+def login_history():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
+    user_id = session['user_id']
+    logs = mongo.db.login_logs.find({'user_id': user_id}).sort('timestamp', -1)
+
+    formatted_logs = []
+    for log in logs:
+        dt = log['timestamp']
+        formatted_logs.append({
+            'date': dt.strftime('%Y-%m-%d'),
+            'day': dt.strftime('%A'),
+            'time': dt.strftime('%I:%M %p'),
+            'username': log.get('username', 'N/A'),
+            'role': log.get('role', 'N/A')
+        })
+
+    return render_template('dashboard/login_history.html', login_logs=formatted_logs)
+   
 @dashboard_bp.route('/my_profile')
 @login_required
 def my_profile():
