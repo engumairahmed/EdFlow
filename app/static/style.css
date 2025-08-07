@@ -3275,3 +3275,67 @@ input:checked+.slider:before {
   cursor: pointer;
 }
 
+/* Container Styling */
+.login-history-container {
+  margin-top: 20px;
+}
+
+/* Table Styling */
+.login-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #fff;
+  color: #333;
+  font-size: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Table Header */
+.login-history-table th {
+  background-color: #8004d9;
+  color: white;
+  text-align: center;
+  padding: 12px 10px;
+  font-weight: 600;
+}
+
+/* Table Cells */
+.login-history-table td {
+  padding: 10px 12px;
+  text-align: center;
+  border-top: 1px solid #eee;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .login-history-table thead {
+    display: none;
+  }
+
+  .login-history-table tr {
+    display: block;
+    margin-bottom: 15px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+    padding: 10px;
+  }
+
+  .login-history-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border: none;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 14px;
+  }
+
+  .login-history-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #8004d9;
+    flex: 1;
+  }
+}
