@@ -1,10 +1,9 @@
-{% extends "i_interface/base.html" %} {% block title %}EdFlow - Team{% endblock %}
+{% extends "i_interface/base.html" %}
+{% block title %}EdFlow - Team{% endblock %}
 {% block head %}
-<link
-  rel="stylesheet"
-  href="{{ url_for('static', filename='css/team.css') }}"
-/>
-{% endblock %} {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}" />
+{% endblock %}
+{% block content %}
 
 <section class="team-section py-5">
   <div class="container">
@@ -12,172 +11,101 @@
       <div class="col-12">
         <h2 class="section-title">Meet EdFlow Team</h2>
         <p class="lead text-muted">
-          The professionals behind EdFlow’s growth and success
+          The real contributions behind EdFlow’s development
         </p>
       </div>
     </div>
 
-    <!-- Team Members -->
     <div class="row g-4">
+
       <div class="col-lg-3 col-md-6">
         <div class="team-member text-center p-4">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-            alt="Umair Ahmed"
-            class="mb-4 shadow"
-          />
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Umair Ahmed" class="mb-4 shadow" />
           <h5 class="mb-1">Umair Ahmed</h5>
-          <p class="text-muted mb-3">Team Lead</p>
+          <p class="text-muted mb-3">Project Architect & Lead Developer</p>
           <p class="big mb-3">
-            Guides the team with vision, planning, and timely delivery.
+            Led the entire project — built core logic, database design, HDFS & MongoDB integration, model training & predictions, visualizations, task distribution, and guided the team to completion.
           </p>
-          <div class="social-links">
-            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-          </div>
         </div>
       </div>
 
       <div class="col-lg-3 col-md-6">
         <div class="team-member text-center p-4">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-            alt="Laiba Waqar"
-            class="mb-4 shadow"
-          />
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Laiba Waqar" class="mb-4 shadow" />
           <h5 class="mb-1">Laiba Waqar</h5>
-          <p class="text-muted mb-3">Frontend Developer</p>
-          <p class="big mb-3">
-            Creates engaging, responsive user interfaces for the platform.
+          <p class="text-muted mb-3">Full Stack Developer</p>
+           <p class="big mb-3">
+            Delivered complete landing pages, feedback submission with validation, contact-us and profile update logic, and prepared the full project documentation. Worked consistently and beyond expectations.
           </p>
-          <div class="social-links">
-            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-          </div>
         </div>
       </div>
 
       <div class="col-lg-3 col-md-6">
         <div class="team-member text-center p-4">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-            alt="Syeda Maryam"
-            class="mb-4 shadow"
-          />
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Syeda Maryam" class="mb-4 shadow" />
           <h5 class="mb-1">Syeda Maryam</h5>
-          <p class="text-muted mb-3">Authentication Developer</p>
+          <p class="text-muted mb-3">Frontend Auth Pages</p>
           <p class="big mb-3">
-            Handles complete authentication flows and secure integrations.
+            Provided UI pages for authentication but no backend logic; UI was not fully responsive.
           </p>
-          <div class="social-links">
-            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-          </div>
         </div>
       </div>
 
       <div class="col-lg-3 col-md-6">
         <div class="team-member text-center p-4">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-            alt="Palwasha Qasim"
-            class="mb-4 shadow"
-          />
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Palwasha Qasim" class="mb-4 shadow" />
           <h5 class="mb-1">Palwasha Qasim</h5>
-          <p class="text-muted mb-3">UI/UX Designer</p>
+          <p class="text-muted mb-3">Dashboard UI Developer</p>
           <p class="big mb-3">
-            Designs smooth and intuitive experiences for users.
+            Delivered good and responsive dashboard UI.
           </p>
-          <div class="social-links">
-            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-          </div>
         </div>
       </div>
 
       <div class="col-lg-3 col-md-6">
         <div class="team-member text-center p-4">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-            alt="Neha"
-            class="mb-4 shadow"
-          />
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Neha" class="mb-4 shadow" />
           <h5 class="mb-1">Neha</h5>
-          <p class="text-muted mb-3">Content Writer</p>
+          <p class="text-muted mb-3">Basic Data Visualization</p>
           <p class="big mb-3">
-            Crafts clear documentation and engaging content.
+            Built a simple chart plotting tool with selectable X/Y axes.
           </p>
-          <div class="social-links">
-            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-          </div>
         </div>
       </div>
 
       <div class="col-lg-3 col-md-6">
         <div class="team-member text-center p-4">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-            alt="Huzaifa"
-            class="mb-4 shadow"
-          />
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Huzaifa" class="mb-4 shadow" />
           <h5 class="mb-1">Huzaifa</h5>
-          <p class="text-muted mb-3">QA Engineer</p>
+          <p class="text-muted mb-3">Non-Contributor</p>
           <p class="big mb-3">
-            Tests features rigorously to ensure top-notch quality.
+            No meaningful contribution; failed to provide basic Tableau charts.
           </p>
-          <div class="social-links">
-            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-          </div>
         </div>
       </div>
 
       <div class="col-lg-3 col-md-6">
         <div class="team-member text-center p-4">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-            alt="Hamza Ali"
-            class="mb-4 shadow"
-          />
-          <h5 class="mb-1">Hamza Ali</h5>
-          <p class="text-muted mb-3">DevOps</p>
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Hamza Adnan" class="mb-4 shadow" />
+          <h5 class="mb-1">Hamza Adnan</h5>
+          <p class="text-muted mb-3">Anomaly Detection Attempt</p>
           <p class="big mb-3">
-            Manages deployment pipelines and server uptime.
+            Tried to add anomaly detection but the module was incomplete.
           </p>
-          <div class="social-links">
-            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-          </div>
         </div>
       </div>
 
       <div class="col-lg-3 col-md-6">
         <div class="team-member text-center p-4">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-            alt="Sakina"
-            class="mb-4 shadow"
-          />
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Sakina" class="mb-4 shadow" />
           <h5 class="mb-1">Sakina</h5>
-          <p class="text-muted mb-3">Support Manager</p>
+          <p class="text-muted mb-3">Absent Member</p>
           <p class="big mb-3">
-            Handles client queries, support tickets, and feedback.
+            No participation, no meetings attended, no contact with the team.
           </p>
-          <div class="social-links">
-            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-          </div>
         </div>
       </div>
+
     </div>
   </div>
 </section>
