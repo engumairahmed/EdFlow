@@ -802,3 +802,9 @@ def upload_data_hdfs():
             return redirect(url_for('dashboard.analytics'))
 
     return render_template('dashboard/upload-hdfs.html')
+
+@dashboard_bp.route('/contact-queries', methods=['GET', 'POST'])
+@login_required
+@role_required(["admin", "analyst"])
+def contact_queries():
+    return render_template('dashboard/contact-queries.html')
