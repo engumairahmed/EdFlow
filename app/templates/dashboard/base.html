@@ -34,7 +34,7 @@
                 <li><a href="{{ url_for('dashboard.upload_data') }}"
                         class="{% if request.endpoint == 'dashboard.upload_data' %}active{% endif %}"><i
                             class="fas fa-upload"></i> Upload Data</a>
-                </li>                <li><a href="{{ url_for('dashboard.upload_data') }}"
+                </li>                <li><a href="{{ url_for('dashboard.upload_data_hdfs') }}"
                         class="{% if request.endpoint == 'dashboard.upload_data_hdfs' %}active{% endif %}"><i
                             class="fas fa-upload"></i> Upload Data to HDFS</a>
                 </li>
@@ -58,15 +58,18 @@
                 <li><a href="{{ url_for('dashboard.analytics') }}"
                         class="{% if request.endpoint == 'dashboard.analytics' %}active{% endif %}"><i
                             class="fas fa-chart-line"></i> Analytics</a></li>
-                <li><a href="{{ url_for('dashboard.dataset') }}"
-                        class="{% if request.endpoint == 'dashboard.dataset' %}active{% endif %}"><i
-                            class="fas fa-database"></i>
-                        Dataset</a></li>
                 <li><a href="{{ url_for('dashboard.my_models') }}"
                         class="{% if request.endpoint == 'dashboard.my_models' %}active{% endif %}"><i
                             class="fas fa-database"></i>
                         Trained Models</a></li>
-
+                <li><a href="{{ url_for('dashboard.dataset') }}"
+                        class="{% if request.endpoint == 'dashboard.dataset' %}active{% endif %}"><i
+                            class="fas fa-database"></i>
+                        Dataset</a></li>
+                <li><a href="{{ url_for('dashboard.dataset') }}"
+                        class="{% if request.endpoint == 'dashboard.dataset' %}active{% endif %}"><i
+                            class="fas fa-database"></i>
+                        Dataset</a></li>
                 <li><button onclick='openLogoutModal()'><i class="fas fa-sign-out-alt"></i> Logout</button></li>
 
             </ul>

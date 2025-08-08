@@ -16,7 +16,7 @@ from app.ml.anomaly_detector import detect_anomalies_from_db, detect_anomalies_f
 from app.utils.auth_decorators import login_required
 from app.utils.mongodb_utils import save_dataset_to_mongodb
 from app.utils.notifications import send_role_notification
-from app.utils.hdfs import upload_file_to_hdfs_temp, test_hdfs_connection
+from app.utils.hdfs import hdfs_test, upload_file_to_hdfs_temp
 from app.utils.role_required import role_required
 from app import mongo
 import plotly.express as px
@@ -52,8 +52,9 @@ def dashboard_view():
 @login_required
 @role_required(["admin", "analyst"])
 def upload_data():
+    print('Route accessed')
     if request.method == "POST":
-        
+        print('Route accessed by POST')
         file = request.files.get("dataset")
         model_name = request.form.get("model_name").strip()
         is_paid = True if request.form.get("is_paid") == "on" else False
@@ -77,7 +78,7 @@ def upload_data():
             train_all_models_and_save(df, dataset_name=model_name, is_paid=is_paid)
 
             save_dataset_to_mongodb(df, model_name, session['user_id'], is_paid)
-            flash(f"✅ Model '{model_name}' trained and saved!", "success")
+            # flash(f"✅ Model '{model_name}' trained and saved!", "success")
             try:
                 send_role_notification(
                     title="📢 New Model Trained",
@@ -96,7 +97,8 @@ def upload_data():
                 logger.exception("Error sending notifications")
                 flash(f"Error: {e}", "danger")
 
-            return redirect(url_for("dashboard.dashboard_view"))
+            # return redirect(url_for("dashboard.upload_data"))
+            return jsonify({"success": True, "message": f"Model '{model_name}' trained successfully."})
 
         except Exception as e:
             logger.exception("Error during upload:")
@@ -283,7 +285,16 @@ def my_profile():
 @dashboard_bp.route('/all_notifications')
 @login_required
 def all_notifications():
-    notifications=db.notifications.find({"user_id": ObjectId(session["user_id"])})
+    notifications=[]
+
+    user_notifications = db.notifications.find({"user_id": ObjectId(session["user_id"])})
+    notifications.extend(user_notifications)
+
+
+    role = session.get("role")
+    if role:
+        role_alerts = db.alerts.find({"targetEntityType": {"$in": [role]}})
+        notifications.extend(role_alerts)
     
     return render_template('dashboard/all_notifications.html', notifications=notifications) 
 
@@ -734,8 +745,14 @@ def delete_data(item_id):
 # # HDFS functions
 # # ==========================
 @dashboard_bp.route('/upload-data', methods=['GET', 'POST'])
+@login_required
+@role_required(["admin", "analyst"])
 def upload_data_hdfs():
     if request.method == 'POST':
+        status=hdfs_test()
+        if status['status'] == 'error':
+            flash('Failed to connect HDFS please configure HDFS connection', 'error')
+            return redirect(url_for('dashboard.upload_data_hdfs'))
         file = request.files.get('dataset')
         if not file or file.filename == '':
             flash('No file selected.', 'danger')

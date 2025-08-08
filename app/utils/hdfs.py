@@ -1,11 +1,13 @@
 
 from hdfs import InsecureClient
+from config import Config
 
-# Updated constants
+
 HDFS_IP = "192.168.100.23"
 HDFS_WEBHDFS_PORT = "50070"
-HDFS_URL = f"http://{HDFS_IP}:{HDFS_WEBHDFS_PORT}"
-HDFS_USER = "hdfs"
+# HDFS_URL = f"http://{HDFS_IP}:{HDFS_WEBHDFS_PORT}"
+HDFS_URL = Config.HDFS_URL
+HDFS_USER = Config.HDFS_USER
 
 # Global HDFS client
 client = InsecureClient(HDFS_URL, user=HDFS_USER)

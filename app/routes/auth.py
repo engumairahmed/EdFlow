@@ -41,20 +41,31 @@ def register():
             hashed = generate_password_hash(password)
             try:
                 users.insert_one({
-                "username": username,
-                "email":email,
-                "password": hashed,
-                "role": role,
-                "is_verified": False,
-                "createdAt": datetime.now(timezone.utc),
-                "lastLogin": datetime.now(timezone.utc)
-                })
+                    "username": username,
+                    "email":email,
+                    "password": hashed,
+                    "role": role,
+                    "is_verified": False,
+                    "createdAt": datetime.now(timezone.utc),
+                    "lastLogin": datetime.now(timezone.utc)
+                    })
+                if role == "student":
+                    target_entity = ["teacher","admin","analyst"]
+                else:
+                    target_entity = ["admin","analyst"]
+                db.alerts.insert_one({
+                    "alertType": "new_registration",
+                    "userType":role,
+                    "targetEntityType":target_entity,
+                    "message": f"New user registered: {role}",
+                    "deneratedAt": datetime.now(timezone.utc)
+                    })
             except Exception as e:
                 flash("Error occurred while registering user.", "danger")
                 logger.info(f"Error registering user: {e}")
                 return redirect(url_for('auth.register'))
             
-            # Generate OTP and store temporarily
+            # Generate OTP and store in database
             code = str(random.randint(100000, 999999))
             expires_at = datetime.now(timezone.utc) + timedelta(minutes=60) # Code expires in 60 minutes
             try:
@@ -254,19 +265,15 @@ def reset_password(token):
 def verify_email():
     email = session.get('email_to_verify')
 
-    # --- GET Request ---
-    # Redirect if there's no email to verify in the session.
     if request.method == 'GET':
         if not email:
             flash('Please register or log in to verify your email.', 'info')
             return redirect(url_for('auth.login'))
         return render_template('auth/verify-email.html')
 
-    # --- POST Request ---
     if request.method == 'POST':
         code = request.form.get('code')
 
-        # Basic input and session validation
         if not code or not email:
             flash('Invalid request or session expired. Please try again.', 'danger')
             return redirect(url_for('auth.login'))
