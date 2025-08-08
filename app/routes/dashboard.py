@@ -807,4 +807,21 @@ def upload_data_hdfs():
 @login_required
 @role_required(["admin", "analyst"])
 def contact_queries():
-    return render_template('dashboard/contact-queries.html')
+    contacts = list(db.contacts.find())
+
+    total_contacts = len(contacts)
+    read_count = db.contacts.count_documents({'is_read': True})
+    unread_count = db.contacts.count_documents({'is_read': False})
+    unread_percentage = (unread_count / total_contacts) * 100 if total_contacts else 0
+
+    # Get most recent contact (based on creation time)
+    last_contact = db.contacts.find_one({}, sort=[('created_at', -1)])
+    last_created_at = last_contact.get('created_at').strftime('%Y-%m-%d') if last_contact and last_contact.get('created_at') else None
+    return render_template(
+        'dashboard/contact-queries.html',
+        queries=contacts,
+        total_contacts=total_contacts,
+        read_count=read_count,
+        unread_count=unread_percentage,
+        last_created_at=last_created_at
+    )

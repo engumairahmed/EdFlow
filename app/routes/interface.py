@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from app.models import get_feedbacks_collection
 from app.models.contact import ContactMessage
 from app.models.feedback import Feedback
@@ -50,10 +51,12 @@ def contact():
 
 
         mongo.db.contacts.insert_one({
-            "fullname": fullname,
+            "name": fullname,
             "email": email,
             "subject": subject,
-            "message": message
+            "message": message,
+            "created_at": datetime.now(timezone.utc),
+            'is_read': False
         })
 
         flash("Your message has been sent!")

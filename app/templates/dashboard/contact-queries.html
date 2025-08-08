@@ -12,19 +12,19 @@
         <h3 class="card-title"><i class="fas fa-database icon-purple"></i> Dataset Overview</h3>
         <div class="summary-stats-grid">
             <div class="stat-box">
-                <span class="stat-value">50</span>
+                <span class="stat-value">{%if total_contacts %}{{ total_contacts }}{% else %}0{%endif%}</span>
                 <span class="stat-label">Total Queries</span>
             </div>
             <div class="stat-box">
-                <span class="stat-value">25</span>
+                <span class="stat-value">{% if read_count %}{{ read_count }}{% else %}0{% endif %}</span>
                 <span class="stat-label">Responded</span>
             </div>
             <div class="stat-box">
-                <span class="stat-value">July 14, 2025</span>
+                <span class="stat-value">{% if last_created_at %}{{ last_created_at }}{% else %}N/A{% endif %}</span>
                 <span class="stat-label">Last Updated</span>
             </div>
             <div class="stat-box">
-                <span class="stat-value">50<small>%</small></span>
+                <span class="stat-value">{% if unread_count %}{{ unread_count }}{% else %}0{% endif %}<small>%</small></span>
                 <span class="stat-label">Remaining</span>
             </div>
         </div>
@@ -54,13 +54,21 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% if queries %}
+                    {% for contact in queries %}
                     <tr>
-                        <td>Ahmed</td>
-                        <td>Premium Subsciprtion</td>
-                        <td></td>
-                        <td></td>
+                        <td>{{ contact.name }}</td>
+                        <td>{{ contact.email }}</td>
+                        <td>{{ contact.subject }}</td>
+                        <td>{{ contact.message }}</td>
                         <td><button class="btn btn-primary">View</button></td>
                     </tr>
+                    {% endfor %}
+                    {%else%}
+                    <tr>
+                        <td colspan="5">No contacts found.</td>
+                    </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>

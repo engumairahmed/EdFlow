@@ -3,6 +3,19 @@
 {% block page_heading %}Student Dropout Prediction Dashboard{% endblock %}
 
 {% block content %}
+
+<style>
+    .high-risk {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .low-risk {
+        background-color: #d4edda;
+        color: #155724;
+    }
+</style>
+
 <div class="main-card">
     <h3>Bulk Prediction</h3>
     <div class="form-group">
@@ -22,29 +35,38 @@
     <button id="runPredictionBtn" class="btn btn-primary mt-2">Run Predictions for All Students</button>
 </div>
 
-<div class="main-card">
-    <h3>Dropout Risk Breakdown</h3>
-    <canvas id="dropoutChart" width="400" height="200"></canvas>
+<h3>Dropout Risk Breakdown</h3>
+<div class="form-grid">
+    <canvas id="dropoutChart" width="400" height="400"></canvas>
+    <div class="form-group">
+        <!-- Chart Type Selector -->
+        <label for="chartTypeSelect">Select Chart Type:</label>
+        <select id="chartTypeSelect">
+            <option value="pie">Pie</option>
+            <option value="doughnut">Doughnut</option>
+            <option value="bar">Bar</option>
+        </select>
+
+    </div>
 </div>
 
 <div class="main-card">
     <h3>Student Predictions</h3>
     <div class="responsive-table-container">
         <table id="predictionTable" class="data-table">
-        <thead>
-            <tr>
-                <th>Student Name</th>
-                <th>Student ID</th>
-                <th>Prediction</th>
-                <th>Probability</th>
-                <th>Recommendations</th>
-                <th>Model Used</th>
-                <th>Last Updated</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Student ID</th>
+                    <th>Prediction</th>
+                    <th>Probability</th>
+                    <th>Recommendations</th>
+                    <th>Model Used</th>
+                    <th>Last Updated</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
 </div>
 
@@ -54,53 +76,51 @@
         const modelSelect = document.getElementById('modelSelect');
         const tableBody = document.querySelector('#predictionTable tbody');
         const dropoutChartCanvas = document.getElementById('dropoutChart');
+        const chartTypeSelect = document.getElementById('chartTypeSelect');
         let myChart = null;
+        let cachedPredictions = [];
 
-        // Function to fetch and display the prediction data
         async function fetchAndDisplayPredictions() {
             try {
                 const response = await fetch('/dashboard/api/get-all-predictions');
                 const data = await response.json();
-
                 if (response.ok) {
-                    displayTable(data.predictions);
-                    displayChart(data.predictions);
+                    cachedPredictions = data.predictions;
+                    displayTable(cachedPredictions);
+                    displayChart(cachedPredictions, chartTypeSelect.value);
                 } else {
                     displayToast(data.message, 'error');
                 }
             } catch (error) {
                 displayToast(error.message, 'error');
-
             }
         }
 
-        // Function to display data in the table
         function displayTable(predictions) {
             tableBody.innerHTML = '';
             predictions.forEach(student => {
                 const row = `
-                        <tr>
-                            <td>${student.student_name}</td>
-                            <td>${student.student_id}</td>
-                            <td class="${student.prediction_class === 1 ? 'high-risk' : 'low-risk'}">
-                                ${student.prediction_class === 1 ? 'High Risk' : 'Low Risk'}
-                            </td>
-                            <td>${(student.prediction_probability * 100).toFixed(2)}%</td>
-                            <td>
-                                <ul class="recommendations-list">
-                                    ${student.recommendations.map(rec => `<li>${rec}</li>`).join('')}
-                                </ul>
-                            </td>
-                            <td>${student.model_used}</td>
-                            <td>${new Date(student.prediction_timestamp).toLocaleString()}</td>
-                        </tr>
-                    `;
+                    <tr>
+                        <td>${student.student_name}</td>
+                        <td>${student.student_id}</td>
+                        <td class="${student.prediction_class === 1 ? 'high-risk' : 'low-risk'}">
+                            ${student.prediction_class === 1 ? 'High Risk' : 'Low Risk'}
+                        </td>
+                        <td>${(student.prediction_probability * 100).toFixed(2)}%</td>
+                        <td>
+                            <ul class="recommendations-list">
+                                ${student.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        </td>
+                        <td>${student.model_used}</td>
+                        <td>${new Date(student.prediction_timestamp).toLocaleString()}</td>
+                    </tr>
+                `;
                 tableBody.insertAdjacentHTML('beforeend', row);
             });
         }
 
-        // Function to display data in the chart
-        function displayChart(predictions) {
+        function displayChart(predictions, chartType = 'pie') {
             const riskBreakdown = predictions.reduce((acc, student) => {
                 if (student.prediction_class === 1) {
                     acc.highRisk++;
@@ -122,14 +142,24 @@
             if (myChart) {
                 myChart.destroy();
             }
+
             myChart = new Chart(dropoutChartCanvas, {
-                type: 'bar',
+                type: chartType,
                 data: chartData,
                 options: {
                     responsive: false,
-                    scales: {
-                        y: { beginAtZero: true, title: { display: true, text: 'Number of Students' } }
-                    }
+                    maintainsAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: chartType !== 'bar'
+                        }
+                    },
+                    scales: chartType === 'bar' ? {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Number of Students' }
+                        }
+                    } : {}
                 }
             });
         }
@@ -138,9 +168,9 @@
             const selectedModelName = modelSelect.value;
             if (!selectedModelName) {
                 displayToast('Please select a prediction model', 'error');
-
                 return;
             }
+
             displayToast('Running predictions... Please wait.', 'info');
             runPredictionBtn.disabled = true;
 
@@ -158,14 +188,16 @@
                     await fetchAndDisplayPredictions();
                 } else {
                     displayToast(result.message, 'danger');
-
                 }
             } catch (error) {
-                displayToast(error.message,'error');
-
+                displayToast(error.message, 'error');
             } finally {
                 runPredictionBtn.disabled = false;
             }
+        });
+
+        chartTypeSelect.addEventListener('change', () => {
+            displayChart(cachedPredictions, chartTypeSelect.value);
         });
 
         fetchAndDisplayPredictions();

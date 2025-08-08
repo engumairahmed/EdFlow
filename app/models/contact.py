@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import re
 from bson.objectid import ObjectId
 from app.models import get_contact_collection
@@ -17,7 +18,9 @@ class ContactMessage:
             "fullname": fullname,
             "email": email,
             "subject": subject,
-            "message": message
+            "message": message,
+            "created_at": datetime.now(timezone.utc),
+            "is_read": False
         }).inserted_id
         return str(contact_id)
     
