@@ -131,9 +131,8 @@
         method: 'POST',
         body: formData
       });
-
       const result = await response.json();
-      displayToast(result.message, 'success');
+      displayToast(`${modelName} trained and saved successfully`, 'success');
     } catch (err) {
       displayToast('Upload failed. Please try again.', 'error');
     } finally {
