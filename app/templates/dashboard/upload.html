@@ -9,7 +9,7 @@
   <h2>Upload Data File</h2>
   <p>Please upload your student data in <strong>CSV</strong> or <strong>Excel (.xlsx)</strong> format. Max file size: 100MB.</p>
 
-  <form method="POST" enctype="multipart/form-data">
+  <form id="upload-form" enctype="multipart/form-data">
     <!-- Drag & Drop Area -->
     <div id="drop-area" class="upload-drop-area">
       <i class="fas fa-cloud-upload-alt upload-icon"></i>
@@ -39,11 +39,16 @@
       </label>
     </div>
 
+    <!-- Spinner during submission -->
+    <div id="progress-container" style="display:none; margin-top: 15px; text-align: center;">
+      <i class="fas fa-spinner fa-spin fa-2x" style="color: #4A148C;"></i>
+      <div style="margin-top: 8px;">Processing...</div>
+    </div>
+
     <!-- Submit Button -->
     <button type="submit" id="submit-btn" class="btn btn-success" style="display:none; margin-top: 15px;">
       <i class="fas fa-upload"></i> Train & Save Model
     </button>
-
   </form>
 </div>
 
@@ -55,6 +60,8 @@
   const modelNameInput = document.getElementById('model-name-input');
   const isPaidOption = document.getElementById('is-paid-option');
   const submitBtn = document.getElementById('submit-btn');
+  const form = document.getElementById('upload-form');
+  const progressContainer = document.getElementById('progress-container');
 
   // Click to Browse fallback
   dropArea.addEventListener('click', () => fileInput.click());
@@ -86,7 +93,6 @@
       fileName.innerText = `Selected: ${file.name}`;
       spinner.style.display = 'inline-block';
 
-      // Simulate preparing file on browser side
       setTimeout(() => {
         spinner.style.display = 'none';
         modelNameInput.style.display = 'block';
@@ -95,6 +101,45 @@
       }, 1500);
     }
   }
+
+  // Handle form submit using fetch
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const dataset = fileInput.files[0];
+    const modelName = document.getElementById('model_name').value;
+    const isPaid = document.querySelector('input[name="is_paid"]').checked;
+
+    if (!dataset || !modelName) {
+      displayToast('Please fill all required fields.', 'error');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('dataset', dataset);
+    formData.append('model_name', modelName);
+    formData.append('is_paid', isPaid);
+
+    // Show spinner and hide inputs
+    progressContainer.style.display = 'block';
+    modelNameInput.style.display = 'none';
+    isPaidOption.style.display = 'none';
+    submitBtn.style.display = 'none';
+
+    try {
+      const response = await fetch('/dashboard/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+      displayToast(result.message, 'success');
+    } catch (err) {
+      displayToast('Upload failed. Please try again.', 'error');
+    } finally {
+      progressContainer.style.display = 'none';
+    }
+  });
 </script>
 
 <style>
@@ -106,7 +151,7 @@
     transition: border 0.3s;
   }
   .upload-drop-area.dragover {
-    border-color: #1f9ba5;
+    border-color: #4A148C;
     background-color: #f8f8f8;
   }
   .selected-file-name {
