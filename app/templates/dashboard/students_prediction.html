@@ -79,7 +79,6 @@
         const chartTypeSelect = document.getElementById('chartTypeSelect');
         let myChart = null;
         let cachedPredictions = [];
-
         async function fetchAndDisplayPredictions() {
             try {
                 const response = await fetch('/dashboard/api/get-all-predictions');

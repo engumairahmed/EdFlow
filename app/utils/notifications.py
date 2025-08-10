@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import json
 import logging
 from pywebpush import webpush, WebPushException
@@ -34,7 +35,8 @@ def send_role_notification(title, body, role, url):
             "user_id": user["_id"],
             "title": title,
             "body": body,
-            "url": url
+            "url": url,
+            "createdAt": datetime.now(timezone.utc)
         })
         # Send web push
         send_push(user["push_subscription"], payload)

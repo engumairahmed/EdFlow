@@ -28,8 +28,8 @@
                 <i class="fas fa-exclamation-circle icon-purple"></i>
             </div>
             <div class="notification-content">
-                <p class="notification-message"><strong>New Assignment Due:</strong>{{notification.body}}</p>
-                <span class="notification-time">2 hours ago</span>
+                <p class="notification-message"><strong>New Notification:</strong>{{notification.body}}</p>
+                <span class="notification-time">{{notification.createdAt}}</span>
             </div>
             <div class="notification-actions">
                 <button class="btn-icon mark-read-btn" title="Mark as Read"><i class="fas fa-envelope-open"></i></button>

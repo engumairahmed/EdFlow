@@ -107,7 +107,9 @@ def get_classification_models_summary():
                     model_type = detail.get('type', 'Unknown Type').title()
                     model_name_raw = detail.get('model_name', 'Unknown Model')
                     formatted_model_name = model_name_raw.replace('_', ' ').title()
-                    combined_name = f"{dataset_name} | {model_type} | {formatted_model_name}"
+                    accuracy = detail['metrics'].get('accuracy')
+                    accuracy_str = f"{accuracy * 100:.2f}%"
+                    combined_name = f"{dataset_name} | {model_type} | {formatted_model_name} | Acc: {accuracy_str}"
 
                     models_summary.append({
                         'id': str(group.get('_id')),

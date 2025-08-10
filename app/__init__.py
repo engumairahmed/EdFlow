@@ -58,7 +58,7 @@ def create_app():
 
         required_collections = [
             "users", "students", "teachers", "courses", "alerts",
-            "feedbacks", "contacts", "otp_codes", "lms_logs"
+            "feedbacks", "contacts", "otp_codes", "lms_logs","trained_models","uploaded_datasets","login_logs"
         ]
         existing_collections = db.list_collection_names()
         for col_name in required_collections:
@@ -72,7 +72,7 @@ def create_app():
             try:
                 indexes = list(db.otp_codes.list_indexes())
                 if not any(idx['name'] == 'expires_at_1' for idx in indexes):
-                    db.otp_codes.create_index("expires_at", expireAfterSeconds=0)
+                    db.otp_codes.create_index("expires_at", expireAfterSeconds=3600)
                     app.logger.info("Created TTL index on 'otp_codes.expires_at'")
                 else:
                     app.logger.debug("TTL index on 'otp_codes.expires_at' already exists.")

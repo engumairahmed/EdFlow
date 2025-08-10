@@ -78,6 +78,7 @@ def students_prediction_dashboard():
 @login_required
 @role_required(["admin", "analyst"])
 def predict_all_students():
+    print('Route for Mass Predictions Accessed')
     try:
         data = request.get_json()
         model_path = data.get('model_path')

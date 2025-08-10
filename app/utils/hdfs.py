@@ -58,3 +58,23 @@ def hdfs_test():
         return {'status': 'success', 'files': files}
     except Exception as e:
         return {'status': 'error', 'message': str(e)}
+
+def hdfs_file_count(path='/user/hdfs/temp/'):
+    try:
+        # Check if HDFS client is configured
+        if 'client' not in globals() or client is None:
+            return {'status': 'error', 'message': 'HDFS is not configured'}
+
+        files = client.list(path)  # Attempt to list files in the path
+        
+        if not files:  # If list is empty
+            return {'status': 'success', 'count': 0}
+        
+        return {'status': 'success', 'count': len(files)}
+
+    except Exception as e:
+        # Handle config-related errors
+        if "Connection refused" in str(e) or "No such host" in str(e):
+            return {'status': 'error', 'message': 'HDFS is not configured'}
+        
+        return {'status': 'error', 'message': str(e)}

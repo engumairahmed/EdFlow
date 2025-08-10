@@ -5,11 +5,109 @@
 {% block page_heading %}Upload Your Data to HDFS{% endblock %}
 
 {% block content %}
-<div class="dashboard-card upload-card ">
+<style>
+  .upload-drop-area {
+    border: 2px dashed #ccc;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: border 0.3s;
+  }
+
+  .upload-drop-area.dragover {
+    border-color: #4A148C;
+    background-color: #f8f8f8;
+  }
+
+  .selected-file-name {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+
+  .browse-btn.disabled {
+    background-color: #ccc !important;
+    cursor: not-allowed;
+  }
+
+  .custom-spinner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    font-weight: 500;
+    color: #4A148C;
+  }
+
+  /* Dual Ring Loader */
+  .lds-dual-ring {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+  }
+
+  .lds-dual-ring:after {
+    content: " ";
+    display: block;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    border-radius: 50%;
+    border: 3px solid #4A148C;
+    border-color: #4A148C transparent #4A148C transparent;
+    animation: lds-dual-ring 1.2s linear infinite;
+  }
+
+  @keyframes lds-dual-ring {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .ripple-loader {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 80px;
+  }
+
+  .ripple-loader div {
+    position: absolute;
+    border: 4px solid #6A0DAD; /* Vibrant purple */
+    border-radius: 50%;
+    animation: ripple 1.5s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+  }
+
+  .ripple-loader div:nth-child(2) {
+    animation-delay: -0.75s;
+  }
+
+  @keyframes ripple {
+    0% {
+      top: 36px;
+      left: 36px;
+      width: 0;
+      height: 0;
+      opacity: 1;
+    }
+    100% {
+      top: 0px;
+      left: 0px;
+      width: 72px;
+      height: 72px;
+      opacity: 0;
+    }
+  }
+</style>
+
+<div class="dashboard-card upload-card">
   <h2>Upload Data File to HDFS</h2>
   <p>Please upload your data in <strong>CSV</strong> or <strong>Excel (.xlsx)</strong> format. Max file size: 100MB.</p>
 
-  <form method="POST" enctype="multipart/form-data" action="/dashboard/upload-data">
+  <form id="upload-form" method="POST" enctype="multipart/form-data" action="/dashboard/upload-data">
     <!-- Drag & Drop Area -->
     <div id="drop-area" class="upload-drop-area">
       <i class="fas fa-cloud-upload-alt upload-icon"></i>
@@ -21,17 +119,25 @@
     <!-- File Name -->
     <div id="file-name" class="selected-file-name"></div>
 
-    <!-- Spinner -->
-    <div id="upload-spinner" style="display:none; margin-top: 10px;">
-      <i class="fas fa-spinner fa-spin"></i> Preparing file...
+    <!-- Preparing Spinner -->
+    <div id="upload-spinner" class="custom-spinner" style="display:none; margin-top: 10px;">
+      <div class="lds-dual-ring"></div>
+      <span>Preparing file...</span>
     </div>
 
+    <!-- Submission Spinner -->
+    <div id="progress-container" style="display:none; margin-top: 15px; text-align: center;">
+      <div class="ripple-loader">
+        <div></div>
+        <div></div>
+      </div>
+      <div style="margin-top: 8px;">Processing...</div>
+    </div>
 
     <!-- Submit Button -->
     <button type="submit" id="submit-btn" class="btn btn-success" style="display:none; margin-top: 15px;">
       <i class="fas fa-upload"></i> Upload Data
     </button>
-
   </form>
 </div>
 
@@ -41,6 +147,9 @@
   const fileName = document.getElementById('file-name');
   const spinner = document.getElementById('upload-spinner');
   const submitBtn = document.getElementById('submit-btn');
+  const progressContainer = document.getElementById('progress-container');
+  const browseBtn = document.querySelector('.browse-btn');
+  const form = document.getElementById('upload-form');
 
   // Click to Browse fallback
   dropArea.addEventListener('click', () => fileInput.click());
@@ -70,32 +179,24 @@
     const file = fileInput.files[0];
     if (file) {
       fileName.innerText = `Selected: ${file.name}`;
-      spinner.style.display = 'inline-block';
+      spinner.style.display = 'inline-flex';
 
-      // Simulate preparing file on browser side
       setTimeout(() => {
         spinner.style.display = 'none';
         submitBtn.style.display = 'inline-block';
       }, 1500);
     }
   }
-</script>
 
-<style>
-  .upload-drop-area {
-    border: 2px dashed #ccc;
-    padding: 30px;
-    text-align: center;
-    cursor: pointer;
-    transition: border 0.3s;
-  }
-  .upload-drop-area.dragover {
-    border-color: #1f9ba5;
-    background-color: #f8f8f8;
-  }
-  .selected-file-name {
-    margin-top: 10px;
-    font-weight: bold;
-  }
-</style>
+  // On submit: disable UI, show processing ripple spinner
+  form.addEventListener('submit', function (e) {
+    progressContainer.style.display = 'block';
+    browseBtn.classList.add('disabled');
+    dropArea.style.pointerEvents = 'none';
+    dropArea.style.opacity = '0.6';
+    document.getElementById('submit-btn').style.display = 'none';
+
+    
+  });
+</script>
 {% endblock %}

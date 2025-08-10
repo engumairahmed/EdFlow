@@ -184,25 +184,25 @@ def train_regression_models(df: pd.DataFrame, dataset_name: str):
             })
 
             # Random Forest Regressor
-            rf = RandomForestRegressor(n_estimators=100, random_state=42)
-            rf.fit(X_train, y_train)
-            y_pred_rf = rf.predict(X_test)
-            rf_model_dir = os.path.join(dataset_dir, "rf")
-            os.makedirs(rf_model_dir, exist_ok=True)
-            rf_model_path = os.path.join(rf_model_dir, f"{target}.pkl").replace("\\", "/")
-            joblib.dump(rf, rf_model_path)
-            logger.info(f"Trained and saved Random Forest Regressor model for {target} to {rf_model_path}")
+            # rf = RandomForestRegressor(n_estimators=100, random_state=42)
+            # rf.fit(X_train, y_train)
+            # y_pred_rf = rf.predict(X_test)
+            # rf_model_dir = os.path.join(dataset_dir, "rf")
+            # os.makedirs(rf_model_dir, exist_ok=True)
+            # rf_model_path = os.path.join(rf_model_dir, f"{target}.pkl").replace("\\", "/")
+            # joblib.dump(rf, rf_model_path)
+            # logger.info(f"Trained and saved Random Forest Regressor model for {target} to {rf_model_path}")
 
-            model_results.append({
-                "type": "regression",
-                "target": target,
-                "model_name": "random_forest",
-                "metrics": {
-                    "mse": mean_squared_error(y_test, y_pred_rf),
-                    "r2_score": r2_score(y_test, y_pred_rf)
-                },
-                "model_path": rf_model_path
-            })
+            # model_results.append({
+            #     "type": "regression",
+            #     "target": target,
+            #     "model_name": "random_forest",
+            #     "metrics": {
+            #         "mse": mean_squared_error(y_test, y_pred_rf),
+            #         "r2_score": r2_score(y_test, y_pred_rf)
+            #     },
+            #     "model_path": rf_model_path
+            # })
 
         except Exception as e:
             logger.error(f"Regression failed for {target}: {e}")

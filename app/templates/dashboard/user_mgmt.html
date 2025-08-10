@@ -1,70 +1,56 @@
 {% extends 'dashboard/base.html' %}
 
-{% block title %}Dataset - EdFlow{% endblock %}
+{% block title %}Users - EdFlow{% endblock %}
 
-{% block page_heading %}Dataset Management & Overview{% endblock %}
+{% block page_heading %}User Management{% endblock %}
 
 {% block content %}
 <div class="dataset-grid-container">
 
-    <!-- Card 1: Dataset Summary & Statistics -->
-    <div class="dashboard-card dataset-summary-card animated-fade-in">
-        <h3 class="card-title"><i class="fas fa-database icon-purple"></i> Dataset Overview</h3>
-        <div class="summary-stats-grid">
-            <div class="stat-box">
-                {% if records_count %}
-                <span class="stat-value">{{records_count}}</span>
-                {% else %}
-                <span class="stat-value">N/A</span>
-                {% endif %}
-                <span class="stat-label">Total Records</span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-value">6</span>
-                <span class="stat-label">Total Features</span>
-            </div>
-            <div class="stat-box">
-                {% if last_updated %}
-                <span class="stat-value">{{ last_updated }}</span>
-                {% else %}
-                <span class="stat-value">N/A</span>
-                {% endif %}
-                <span class="stat-label">Last Updated</span>
-            </div>
-        </div>
-        <p class="card-description">A quick summary of your loaded student dataset.</p>
-    </div>
 
     <!-- Card 2: Data Table Preview -->
     <div class="dashboard-card dataset-table-card animated-fade-in delay-1">
-        <h3 class="card-title"><i class="fas fa-table icon-purple"></i> Data Sample Preview</h3>
+        <h3 class="card-title"><i class="fas fa-table icon-purple"></i> Users Preview</h3>
+        <div class="table-controls">
+            <input type="text" id="tableSearch" placeholder="Search in table..." class="form-control">
+            <select id="rowsPerPage" class="form-control">
+                <option value="10">10 Rows</option>
+                <option value="20">20 Rows</option>
+                <option value="50">50 Rows</option>
+            </select>
+        </div>
         <div class="responsive-table-container">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Age</th>
-                        <th>Gender</th>
-                        <th>Current GPA</th>
-                        <th>Attendance (%)</th>
-                        <th>Study Time (hrs/day)</th>
+                        <th>Username</th>
+                        <th>Full name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% if dataset %}
-                    {% for row in dataset %}
+                     {%if users%}
+                     {%for user in users%}
                     <tr>
-                        <td>{{ row['age'] }}</td>
-                        <td>{{ row['gender'] }}</td>
-                        <td>{{ row['currentGPA'] }}</td>
-                        <td>{{ row['attendance'] }}</td>
-                        <td>{{ row['study_hours'] }}</td>
+                        <td>{{user.username}}</td>
+                        <td>{{user.name}}</td>
+                        <td>{{user.email}}</td>
+                        <td>{{user.role}}</td>
+                        <td>{{user.status}}</td>
+                        <td>
+                            <!-- <button class="btn btn-primary"><i class="fas fa-eye"></i> View</button> -->
+                            <a href="{{ url_for('admin.update_user', id=user._id) }}"class="btn btn-primary"><i class="fas fa-eye"></i>View</a>
+                        </td>
                     </tr>
-                    {% endfor %}
-                    {% else %}
+                    {%endfor%}
+                    {%else%}
                     <tr>
-                        <td colspan="8">No data available.</td>
+                        <td colspan="3">No data available</td>
                     </tr>
-                    {% endif %}
+                     {%endif%}
                 </tbody>
             </table>
         </div>

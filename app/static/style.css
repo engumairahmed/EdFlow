@@ -140,7 +140,7 @@ p {
 }
 
 .sidebar-menu li {
-    margin-bottom: 10px;
+    margin-bottom: 3px;
 }
 
 .sidebar-menu a ,
@@ -3214,11 +3214,11 @@ input:checked+.slider:before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  opacity: 0.95;
+  opacity: 0.80;
   font-size: larger;
 }
 .toast.success {
-  background: #28a745;
+  background: #9236cb;
 }
 .toast.error {
   background: #dc3545;

@@ -16,7 +16,7 @@ from app.ml.anomaly_detector import detect_anomalies_from_db, detect_anomalies_f
 from app.utils.auth_decorators import login_required
 from app.utils.mongodb_utils import save_dataset_to_mongodb
 from app.utils.notifications import send_role_notification
-from app.utils.hdfs import hdfs_test, upload_file_to_hdfs_temp
+from app.utils.hdfs import hdfs_file_count, hdfs_test, upload_file_to_hdfs_temp
 from app.utils.role_required import role_required
 from app import mongo
 import plotly.express as px
@@ -35,14 +35,76 @@ logger = logging.getLogger(__name__)
 
 # ===================================
 # DASHBOARD HOME ROUTE
-# =================================== 
+# ===================================
 
 @dashboard_bp.route("", methods=["GET"], strict_slashes=False)
 @login_required
 def dashboard_view():
+    # HDFS file count (safe handling)
+    try:
+        hdfs_result = hdfs_file_count()
+        if isinstance(hdfs_result, dict):
+            if hdfs_result.get("status") == "success":
+                hdfs_files = hdfs_result.get("count", 0)
+            else:
+                hdfs_files = "N/A"
+        elif isinstance(hdfs_result, int):
+            hdfs_files = hdfs_result
+        else:
+            hdfs_files = "N/A"
+    except Exception:
+        hdfs_files = "N/A"
+
     username = session.get('username')
     role = session.get('role')
-    return render_template("dashboard/home.html", username=username, role=role, VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY)
+
+    # Count students with predictions
+    try:
+        analyzed_students = db.students.count_documents({
+            "$or": [
+                {"prediction.probability": {"$exists": True, "$ne": None}},
+                {"predictions": {"$exists": True, "$ne": None}}
+            ]
+        })
+
+    except Exception:
+        analyzed_students = "N/A"
+
+    # Total trained models count
+    try:
+        total_trained_models = mongo.db.trained_models.count_documents({})
+    except Exception:
+        total_trained_models = "N/A"
+
+    # Average accuracy (or "N/A")
+    try:
+        pipeline = [
+            {"$unwind": "$details"},
+            {"$match": {"details.metrics.accuracy": {"$exists": True, "$ne": None}}},
+            {"$group": {"_id": None, "avgAccuracy": {"$avg": "$details.metrics.accuracy"}}}
+        ]
+        res = list(mongo.db.trained_models.aggregate(pipeline))
+        if res and res[0].get("avgAccuracy") is not None:
+            avg_accuracy = round(float(res[0]["avgAccuracy"]) * 100.0, 2)
+        else:
+            avg_accuracy = "N/A"
+    except Exception:
+        avg_accuracy = "N/A"
+
+    # Single ordered array (no icons)
+    quick_stats = [
+        {"name": "analyzed_students", "label": "Total Students Analyzed", "value": analyzed_students},
+        {"name": "avg_accuracy", "label": "Average Accuracy", "value": avg_accuracy},
+        {"name": "hdfs_files", "label": "Files in HDFS", "value": hdfs_files},
+        {"name": "trained_models", "label": "Active Models", "value": total_trained_models}
+    ]
+
+    return render_template(
+        "dashboard/home.html",
+        username=username,
+        role=role,
+        quick_stats=quick_stats
+    )
 
 # ===================================
 # DATA UPLOAD & MODEL TRAINING ROUTE
@@ -227,7 +289,34 @@ def predict_form():
 def dataset():
     # user = db.users.find_one({"_id": session["user_id"]})
     userId = session["user_id"]
-    return render_template("dashboard/dataset.html",user_id=userId)
+    total_records = list(db.uploaded_datasets.aggregate([
+        {
+            "$group": {
+                "_id": None,
+                "total_records": {"$sum": "$record_count"}
+            }
+        }
+    ]))
+
+    if total_records:
+        total_records_count = total_records[0]["total_records"]
+    else:
+        total_records_count = 0
+        # Last updated date
+    last_updated_doc = db.uploaded_datasets.find_one(
+        {}, 
+        sort=[("uploaded_at", -1)],  # sort by uploaded_at descending
+        projection={"uploaded_at": 1, "_id": 0}
+    )
+    last_updated = last_updated_doc["uploaded_at"].strftime('%Y-%m-%d') if last_updated_doc else None
+    # First 10 rows
+    first_10_rows = list(db.uploaded_datasets.aggregate([
+        {"$unwind": "$data"},
+        {"$replaceRoot": {"newRoot": "$data"}},
+        {"$limit": 10}
+    ]))
+
+    return render_template("dashboard/dataset.html",user_id=userId, records_count=total_records_count,last_updated=last_updated,dataset=first_10_rows)
 
 @dashboard_bp.route('/personal_information')
 @login_required
@@ -742,7 +831,7 @@ def delete_data(item_id):
         return redirect(url_for('dashboard.dataset'))
 
 # # ==========================
-# # HDFS functions
+# # HDFS Route
 # # ==========================
 @dashboard_bp.route('/upload-data', methods=['GET', 'POST'])
 @login_required
@@ -799,7 +888,7 @@ def upload_data_hdfs():
                 if os.path.exists(local_filepath):
                     os.remove(local_filepath)
 
-            return redirect(url_for('dashboard.analytics'))
+            return redirect(url_for('dashboard.dashboard_view'))
 
     return render_template('dashboard/upload-hdfs.html')
 

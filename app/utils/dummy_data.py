@@ -19,6 +19,10 @@ def create_dummy_data(db):
     contacts_col = db.contacts
     lms_logs_col = db.lms_logs
     otp_codes_col = db.otp_codes
+    trained_models_col = db.trained_models
+    upload_datasets_col = db.uploaded_datasets
+    login_logs_col = db.login_logs
+
 
     if users_col.count_documents({}) > 0:
         print("Dummy data already exists. Skipping dummy data creation.")
@@ -27,21 +31,23 @@ def create_dummy_data(db):
     print("Creating dummy data...")
 
     # --- 1. Create Users for Each Role ---
-    hashed_password = generate_password_hash("password123", method='pbkdf2:sha256', salt_length=16)
 
     dummy_users_data = [
-        {"username": "adminuser", "email": "admin@edflow.com", "role": "admin"},
-        {"username": "analystuser", "email": "analyst@edflow.com", "role": "analyst"},
-        {"username": "teacheruser", "email": "teacher@edflow.com", "role": "teacher"},
-        {"username": "studentuser1", "email": "student1@edflow.com", "role": "student"},
-        {"username": "studentuser2", "email": "student2@edflow.com", "role": "student"},
-        {"username": "studentuser3", "email": "student3@edflow.com", "role": "student"},
-        {"username": "studentuser4", "email": "student4@edflow.com", "role": "student"},
-        {"username": "studentuser5", "email": "student5@edflow.com", "role": "student"},
+        {"username": "admin", "email": "admin@edflow.com", "role": "admin"},
+        {"username": "analyst", "email": "analyst@edflow.com", "role": "analyst"},
+        {"username": "teacher", "email": "teacher@edflow.com", "role": "teacher"},
+        {"username": "student1", "email": "student1@edflow.com", "role": "student"},
+        {"username": "student2", "email": "student2@edflow.com", "role": "student"},
+        {"username": "student3", "email": "student3@edflow.com", "role": "student"},
+        {"username": "student4", "email": "student4@edflow.com", "role": "student"},
+        {"username": "student5", "email": "student5@edflow.com", "role": "student"},
     ]
 
     dummy_users = []
     for user_data in dummy_users_data:
+        user_pass=user_data["username"]+"123"
+        hashed_password = generate_password_hash(user_pass, method='pbkdf2:sha256', salt_length=16)
+
         user_data["_id"] = ObjectId()
         user_data["password"] = hashed_password
         user_data["is_verified"] = True
@@ -55,10 +61,10 @@ def create_dummy_data(db):
 
     user_ids = {user["username"]: user["_id"] for user in dummy_users}
 
-    admin_user_id = user_ids["adminuser"]
-    analyst_user_id = user_ids["analystuser"]
-    teacher_user_id = user_ids["teacheruser"]
-    student_user_ids = [user_ids[f"studentuser{i}"] for i in range(1, 6)]
+    admin_user_id = user_ids["admin"]
+    analyst_user_id = user_ids["analyst"]
+    teacher_user_id = user_ids["teacher"]
+    student_user_ids = [user_ids[f"student{i}"] for i in range(1, 6)]
 
     # --- 2. Create Dummy Students ---
     # Incorporating features from the image and adding 'is_dropout'
